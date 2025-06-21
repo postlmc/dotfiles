@@ -1,0 +1,9 @@
+{
+    "autoupdate:channel": "latest",
+    "telemetry:enabled": false,
+    "term:fontFamily": "FiraCode Nerd Font",
+    "term:fontSize": 14,
+    "term:theme": "dracula",
+    "window:bgcolor": "#282a36"
+}
+
