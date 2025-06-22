@@ -1,0 +1,297 @@
+# Last validated 2022-06-21 with version 1.8.0
+
+# Hex colors pulled from the Dracule color pallete:
+# https://draculatheme.com/contribute
+
+add_newline = true
+command_timeout = 1000
+
+format = """
+$azure\
+$kubernetes\
+$python\
+$golang\
+$rust\
+$helm\
+$package\
+$username\
+$hostname\
+$shlvl\
+$cmake\
+$directory\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$docker_context\
+$cmd_duration\
+$line_break\
+${custom.proxy}\
+$jobs\
+$status\
+$shell\
+$character"""
+
+[azure]
+disabled = false
+format = "az:[($subscription)]($style)|"
+style = "#51bfff"
+
+[kubernetes]
+style = "blue"
+format = 'k8s:[$context(\($namespace\))]($style)|'
+disabled = false
+
+[kubernetes.context_aliases]
+# "dev.local.cluster.k8s" = "dev"
+# ".*/openshift-cluster/.*" = "openshift"
+# "gke_.*_(?P<cluster>[\\w-]+)" = "gke-$cluster"
+
+[helm]
+style = "blue"
+format = "helm:[($version)]($style)|"
+
+# [docker.context]
+# style = "blue"
+# format = "docker:[$context]($style)|"
+
+[python]
+style = "#50fa7b"
+format = 'py:[($virtualenv)(\(${version}\))]($style)|'
+
+[conda]
+style = "#50fa7b"
+ignore_base = false
+format = '[$environment]($style)|'
+
+[golang]
+style = "#50fa7b"
+format = "go:[($version)]($style)|"
+
+[rust]
+style = "#50fa7b"
+format = "rs:[($version)]($style)|"
+
+# [java]
+# style = "#9dcbff"
+# format = "j:[(${version})]($style)|"
+
+[package]
+style = "#ff79c6"
+format = 'pkg:[$version]($style)|'
+
+[username]
+style_user = "#ffb86c"
+format = '[$user]($style)@'
+disabled = false
+show_always = true
+
+[hostname]
+ssh_only = false
+style = "#8be9fd"
+format = '[$hostname]($style):'
+trim_at = ".internal.gicsm.org"
+disabled = false
+
+# [shlvl]
+# [package]
+# [cmake]
+
+[directory]
+style = "#f1fa8c"
+truncation_length = 5
+truncation_symbol = ".../"
+format = '[$path]($style) '
+
+[git_branch]
+format = "on [$branch]($style) "
+style = "purple"
+
+[git_commit]
+style = "green"
+
+[git_state]
+style = "yellow"
+
+[git_metrics]
+added_style = "green"
+deleted_style = "red"
+
+[git_status]
+style = "red"
+
+# [docker_context]
+
+[cmd_duration]
+style = "#ff5555"
+
+# [line_break]
+
+# [custom.proxy]
+# style = "green"
+# format = "[pxy]($style)|"
+# when = "[[ -n ${http_proxy+x} || -n ${https_proxy+x} ]]"
+# shell = ["bash", "--norc", "--noprofile"]
+
+# [jobs]
+# [status]
+
+# [custom.arch]
+# command = "/usr/bin/uname -m"
+# format = '\([$output]($style)\) '
+# style = "bold red"
+# when = '[ "$(sysctl -in sysctl.proc_translated)" = "1" ]'
+
+[shell]
+style = "red"
+format = "[$indicator]($style)"
+bash_indicator = "b "
+powershell_indicator = "💩 "
+zsh_indicator = ""
+nu_indicator = "🔥 "
+disabled = false
+
+[character]
+success_symbol = "[∴](bold green)"
+error_symbol = "[!](bold red)"
+vicmd_symbol = "[:](bold blue)"
+
+# ---
+
+# [localip]
+# disabled = true
+
+# [singularity]
+# disabled = true
+
+# [vcsh]
+# disabled = true
+
+# [hg_branch]
+# disabled = true
+
+# [buf]
+# disabled = true
+
+# [package]
+# disabled = true
+
+# [cobol]
+# disabled = true
+
+# [container]
+# disabled = true
+
+# [dart]
+# disabled = true
+
+# [deno]
+# disabled = true
+
+# [dotnet]
+# disabled = true
+
+# [elixir]
+# disabled = true
+
+# [elm]
+# disabled = true
+
+# [erlang]
+# disabled = true
+
+# [haskell]
+# disabled = true
+
+# [julia]
+# disabled = true
+
+# [kotlin]
+# disabled = true
+
+# [lua]
+# disabled = true
+
+# [nim]
+# disabled = true
+
+# [nodejs]
+# disabled = true
+
+# [ocaml]
+# disabled = true
+
+# [perl]
+# disabled = true
+
+# [php]
+# disabled = true
+
+# [pulumi]
+# disabled = true
+
+# [purescript]
+# disabled = true
+
+# [rlang]
+# disabled = true
+
+# [red]
+# disabled = true
+
+# [ruby]
+# disabled = true
+
+# [scala]
+# disabled = true
+
+# [swift]
+# disabled = true
+
+# [terraform]
+# disabled = true
+# # style = "#bd93f9"
+# # symbol = "tf:"
+
+# [vlang]
+# disabled = true
+
+# [vagrant]
+# disabled = true
+
+# [zig]
+# disabled = true
+
+# [nix_shell]
+# disabled = true
+
+# [memory_usage]
+# disabled = true
+
+# [aws]
+# disabled = true
+
+# [gcloud]
+# disabled = true
+
+# [openstack]
+# disabled = true
+
+# [env_var]
+# disabled = true
+
+# [crystal]
+# disabled = true
+
+# [custom]
+# disabled = true
+
+# [sudo]
+# disabled = true
+
+# [battery]
+# disabled = true
+
+# [time]
+# disabled = true
