@@ -77,3 +77,13 @@ layout_uv() {
     export UV_ACTIVE=1 # or VENV_ACTIVE=1
     export VIRTUAL_ENV
 }
+
+# Devbox integration with direnv:
+#
+# To use Devbox with direnv, you do NOT need to add a function here.
+# Instead, in each project where you want Devbox integration, run:
+#   devbox generate direnv
+# This will create a .envrc file containing:
+#   eval "$(devbox generate direnv --print-envrc)"
+#
+# See: https://www.jetify.com/devbox/docs/ide_configuration/direnv/
