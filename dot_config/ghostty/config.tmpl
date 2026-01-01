@@ -1,0 +1,50 @@
+auto-update-channel = tip
+
+{{- if eq .chezmoi.os "darwin" }}
+# Font settings for macOS
+font-family = FiraCode Nerd Font Mono
+font-size = 14.5
+font-feature = +liga,+dlig,+calt
+{{- else if eq .chezmoi.os "linux" }}
+# Font settings for Linux
+font-family = FiraCode Nerd Font Mono
+font-size = 14.5
+font-feature = +liga,+dlig,+calt
+{{- end }}
+
+# To preview, use: ghostty +list-themes
+theme = dracula
+background-opacity = 0.9
+background-blur = 10
+
+window-width = 132
+window-height = 40
+
+window-padding-x = 10
+window-padding-y = 10
+window-padding-balance = true
+window-padding-color = background
+
+selection-clear-on-copy = true
+
+# 128MB should be enough for anybody ;)
+scrollback-limit = 134217728
+
+shell-integration = detect
+shell-integration-features = cursor,sudo,title,path
+
+{{- if eq .chezmoi.os "darwin" }}
+# macOS-specific settings
+macos-titlebar-style = native
+macos-icon = glass
+macos-icon-frame = chrome
+
+keybind = cmd+plus=increase_font_size:1
+keybind = cmd+minus=decrease_font_size:1
+keybind = cmd+0=reset_font_size
+{{- else if eq .chezmoi.os "linux" }}
+# Linux-specific keybinds
+keybind = ctrl+plus=increase_font_size:1
+keybind = ctrl+minus=decrease_font_size:1
+keybind = ctrl+0=reset_font_size
+{{- end }}
