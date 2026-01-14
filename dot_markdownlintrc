@@ -1,0 +1,15 @@
+{
+  "default": true,
+  "MD007": {
+    "indent": 4
+  },
+  "MD013": {
+    "line_length": 132,
+    "heading_line_length": 132,
+    "code_block_line_length": 132
+  },
+  "MD024": {
+    "siblings_only": true
+  }
+}
+
