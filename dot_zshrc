@@ -1,10 +1,5 @@
 #!/bin/zsh
 
-# Load a host-specific config (if any) to establish locations of key binaries
-HOST=$(hostname -s | sed 's/-.gbe$//g' | tr "[:upper:]" "[:lower:]")
-[[ -r ${HOME}/.dotfiles.local/${HOST}-bootstrap ]] &&
-    . ${HOME}/.dotfiles.local/${HOST}-bootstrap
-
 # First, set up all completion paths (fpath and FPATH)
 # Then, configure completion styles (zstyle)
 # Finally, initialize the completion system (compinit) once
