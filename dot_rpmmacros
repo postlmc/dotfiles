@@ -1,0 +1,3 @@
+%_topdir    %{getenv:HOME}/Documents/RPMBUILD
+%_tmpdir    %{getenv:HOME}/Documents/RPMBUILD/tmp
+%_query_all_fmt    %%{name}-%%{version}-%%{release}.%%{arch}
