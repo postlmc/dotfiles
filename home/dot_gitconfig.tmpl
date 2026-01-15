@@ -1,0 +1,70 @@
+{{- $hostname := .chezmoi.hostname | lower }}
+{{- $hostnameParts := splitList "." $hostname }}
+{{- $shortHostname := index $hostnameParts 0 }}
+[include]
+path = ~/.dotfiles.local/{{ $shortHostname }}-gitconfig
+
+[core]
+filemode = false
+excludesfile = ~/.gitignore
+
+[init]
+defaultBranch = main
+
+[pager]
+branch = false
+
+[alias]
+a = add
+br = branch
+c = commit -m
+co = checkout
+d = diff
+f = fetch --all
+l = log --graph --pretty=format:'%C(yellow)%h%Creset -%Cred%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --all
+ll = log --graph --pretty=format:'%C(yellow)%h%Creset -%Cred%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+m = merge
+p = pull --ff-only
+ps = push
+r = remote
+rv = remote -v
+ra = remote add
+rb = rebase
+s = status -s
+tc = rev-list -n 1
+sh = show
+serve = daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/
+
+[color]
+ui = true
+
+[diffs]
+renames = true
+
+[push]
+default = simple
+
+[pull]
+rebase = false
+
+[fetch]
+prune = true
+
+[rerere]
+enabled = 1
+
+[filter "media"]
+required = true
+clean = git media clean %f
+smudge = git media smudge %f
+
+[filter "hawser"]
+required = true
+clean = git hawser clean %f
+smudge = git hawser smudge %f
+
+[filter "lfs"]
+clean = git-lfs clean -- %f
+smudge = git-lfs smudge -- %f
+process = git-lfs filter-process
+required = true
