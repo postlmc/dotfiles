@@ -1,4 +1,4 @@
-# Dotfiles Management with Chezmoi
+# New and Improved Dotfiles
 
 ## The Problem: Config Files Have Sprawled Out
 
@@ -94,7 +94,7 @@ pattern allows you to:
 
 ---
 
-*Until something better comes along.*
+*Until something better comes along...* <span title="@worthyl expects this to happen sooner rather than later">☠️</span>
 
 [czm]: https://www.chezmoi.io/
 [dotfiles-OLD]: https://github.com/PostlMC/dotfiles.OLD
