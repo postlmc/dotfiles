@@ -26,10 +26,11 @@ autoload -U +X bashcompinit && bashcompinit # Needed for bash-style 'complete' b
 [[ -f ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh ]] && source ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh
 [[ -f ${HOME}/.fzf.zsh ]] && source ${HOME}/.fzf.zsh
 
-# Symlink additional configs in .dotfiles/enabled to have them sourced, numbering for order
+# Symlink additional configs in chezmoi/enabled to have them sourced, numbering for order
 # (these may have additional completions)
-for CFG in ${HOME}/.dotfiles/enabled/??-*; do
-    . ${CFG}
+CHEZMOI_SOURCE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
+for CFG in ${CHEZMOI_SOURCE_DIR}/enabled/??-*; do
+    [[ -f "$CFG" ]] && . ${CFG}
 done
 
 # Ref: https://zsh.sourceforge.io/Doc/Release/User-Contributions.html#Accessing-On_002dLine-Help
