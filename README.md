@@ -16,12 +16,12 @@ well do it with style, which means adding things like templates, logic, and prop
 This is where [Chezmoi][czm] enters the chat. It's not the first dotfile manager I've tried, and it probably won't be the last.
 *Cloners beware*.
 
-So, what's `chezmoi` got that my [old pile of shell scripts][dotfiles-OLD] doesn't?
+So, what's Chezmoi got that my [old pile of shell scripts][dotfiles-OLD] doesn't?
 
 - **It Manages More Than Just Files**: It handles files, directories, symlinks, and still runs scripts for those extra setup tasks
   that I just can't escape.
 - **Real Templating**: I love me some `awk` and a good shell script hack here and there, but it's time to move past all that.
-  `chezmoi` uses Go's template syntax to manage variations between machines (e.g., home vs. work, macOS vs. Linux).
+  Chezmoi uses Go's template syntax to manage variations between machines (e.g., home vs. work, macOS vs. Linux).
 - **Secrets Management**: Integrates with actual password managers (1Password, Bitwarden, etc.) and encryption tools.
 - **Declarative & Idempotent**: Define the target state, and let the tool `chezmoi` make it happen **once**.
 - **No Dependencies**: Single, statically-linked binaries are the best. A true lifesaver on a new machine.
@@ -66,15 +66,15 @@ machine = "work-laptop"
 ## Repository Layout
 
 This repository uses `.chezmoiroot` to relocate the source directory structure. The actual dotfiles are stored in `home/`, while
-repository-level files (like this README) live at the root. This keeps the source tree clean and organized.
+repository-level files (like this README) live at the root. This keeps the source tree clean and organized and allows for...
 
 ### Modular Shell Configuration
 
-The `available/` and `enabled/` directories provide a modular approach to shell configuration, similar to how Apache and Nginx
+The `available` and `enabled` directories provide a modular approach to shell configuration, similar to how Apache and Nginx
 manage their config:
 
-- **`available/`**: Contains all available shell configuration modules (aliases, functions, environment variables, completions)
-- **`enabled/`**: Symlinks to configs from `available/` that should be sourced, prefixed with numbers (e.g., `10-git.sh`,
+- **`available`**: Contains all available shell configuration modules (aliases, functions, environment variables, completions)
+- **`enabled`**: Symlinks to configs from `available` that should be sourced, prefixed with numbers (e.g., `10-git.sh`,
   `20-docker.sh`) to control load order
 
 To enable a config module:
