@@ -63,6 +63,35 @@ email = "your.email@example.com"
 machine = "work-laptop"
 ```
 
+## Repository Layout
+
+This repository uses `.chezmoiroot` to relocate the source directory structure. The actual dotfiles are stored in `home/`, while
+repository-level files (like this README) live at the root. This keeps the source tree clean and organized.
+
+### Modular Shell Configuration
+
+The `available/` and `enabled/` directories provide a modular approach to shell configuration, similar to how Apache and Nginx
+manage their config:
+
+- **`available/`**: Contains all available shell configuration modules (aliases, functions, environment variables, completions)
+- **`enabled/`**: Symlinks to configs from `available/` that should be sourced, prefixed with numbers (e.g., `10-git.sh`,
+  `20-docker.sh`) to control load order
+
+To enable a config module:
+
+```bash
+cd ~/.local/share/chezmoi/enabled  # Or $XDG_DATA_HOME/chezmoi/enabled
+ln -s ../available/git.sh 10-git.sh
+```
+
+The shell configuration (`dot_zshrc`) automatically sources all files matching `enabled/??-*` during shell initialization. This
+pattern allows you to:
+
+- Enable only the tools you use on each machine
+- Control load order through number prefixes
+- Share a common set of configs across machines without duplication
+- Keep your main shell config clean and focused
+
 ---
 
 *Until something better comes along.*

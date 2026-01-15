@@ -1,0 +1,5 @@
+# Since the choice of what to enable is machine-specific, we'll ignore everything that eventually
+# gets created in enabled except for the default bootstrap and a starer script to make symlinks
+enabled/*
+!enabled/00-bootstrap
+!enabled/mklinks.sh
