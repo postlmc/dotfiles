@@ -16,7 +16,7 @@ well do it with style, which means adding things like templates, logic, and prop
 This is where [Chezmoi][czm] enters the chat. It's not the first dotfile manager I've tried, and it probably won't be the last.
 *Cloners beware*.
 
-So, what's `chezmoi` got that my [old pile of shell scripts][dotfiles] doesn't?
+So, what's `chezmoi` got that my [old pile of shell scripts][dotfiles-OLD] doesn't?
 
 - **It Manages More Than Just Files**: It handles files, directories, symlinks, and still runs scripts for those extra setup tasks
   that I just can't escape.
@@ -97,5 +97,5 @@ pattern allows you to:
 *Until something better comes along.*
 
 [czm]: https://www.chezmoi.io/
-[dotfiles]: https://github.com/PostlMC/dotfiles
+[dotfiles-OLD]: https://github.com/PostlMC/dotfiles.OLD
 [czm-install]: https://www.chezmoi.io/install/
