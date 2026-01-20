@@ -5,51 +5,93 @@ if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 
-# Load a host-specific config (if any) to establish locations of key binaries
-HOST=$(hostname -s | sed 's/-.gbe$//g' | tr "[:upper:]" "[:lower:]")
-[[ -r ${HOME}/.dotfiles.local/${HOST}-bootstrap ]] &&
-    . ${HOME}/.dotfiles.local/${HOST}-bootstrap
-
-# History configuration
-export HISTFILE=~/.bash_history
-export HISTSIZE=1000000
-export HISTFILESIZE=1000000
-export HISTCONTROL=ignoreboth:erasedups
-export HISTIGNORE="&:ls:[bf]g:exit"
-
-# Essential shell behavior for consistent history and command editing
-shopt -s histappend
-shopt -s checkwinsize
-
-# Function to manage shell options
-shopt-alias() {
-    for OPT in $(shopt | awk '{print $1}'); do
-        # Don't stomp on any existing stuff
-        if ! command -v $OPT >/dev/null 2>&1 && ! alias $OPT 2>/dev/null && ! declare -f $OPT; then
-            alias $OPT="if shopt -q $OPT; then shopt -u $OPT && echo \"$OPT off\"; \
-                else shopt -s $OPT && echo \"$OPT on\"; fi"
-        fi
-    done
-}
-shopt-alias
-
-# Source additional configs in .dotfiles/enabled, numbering for order
-for CFG in ${HOME}/.dotfiles/enabled/??-*; do
-    [[ -r "${CFG}" ]] && . "${CFG}"
+# Source all enabled modules (aliases, env vars, functions only)
+CHEZMOI_SOURCE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
+for CFG in ${CHEZMOI_SOURCE_DIR}/enabled/??-*; do
+    [[ -f "$CFG" ]] && . ${CFG}
 done
 
-# Helps with uv default python installed with: `uv python install 3.12 --default --preview`
+# Home PATH additions
 [[ -d "${HOME}/.local/bin" ]] && prepend_path PATH ${HOME}/.local/bin
 [[ -d "${HOME}/bin" ]] && prepend_path PATH ${HOME}/bin
 
-[[ -f /usr/local/etc/bash_completion ]] &&
-    . /usr/local/etc/bash_completion
-
-if command -v kubectl &>/dev/null 2>&1; then
-    source <(kubectl completion bash)
+# GNU utilities PATH setup (darwin only)
+if [[ -n "${HOMEBREW_PREFIX}" ]] && [[ "$OSTYPE" == darwin* ]]; then
+    for gnu_tool in coreutils findutils gnu-tar gnu-sed grep make; do
+        [[ -d "${HOMEBREW_PREFIX}/opt/${gnu_tool}/libexec/gnubin" ]] && \
+            prepend_path PATH "${HOMEBREW_PREFIX}/opt/${gnu_tool}/libexec/gnubin"
+    done
+    [[ -d "${HOMEBREW_PREFIX}/opt/openssl/bin" ]] && prepend_path PATH "${HOMEBREW_PREFIX}/opt/openssl/bin"
+    [[ -d "${HOMEBREW_PREFIX}/opt/curl/bin" ]] && prepend_path PATH "${HOMEBREW_PREFIX}/opt/curl/bin"
+    prepend_path PATH "${HOMEBREW_PREFIX}/sbin"
+    prepend_path PATH "${HOMEBREW_PREFIX}/bin"
+    prepend_path MANPATH "${HOMEBREW_PREFIX}/share/man"
 fi
-if command -v kubelogin &>/dev/null 2>&1; then
-    source <(kubelogin completion bash)
-fi
 
-command -v fzf >/dev/null 2>&1 && eval "$(fzf --bash)"
+
+if [[ -z "${ACTIVE_AGENT}" ]]; then
+    # This is a regular interactive shell, so load full configuration
+
+    # Completion System
+
+    # Source bash completion
+    if [[ -n "${HOMEBREW_PREFIX}" ]] && [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
+        . "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
+    elif [[ -f /usr/local/etc/bash_completion ]]; then
+        . /usr/local/etc/bash_completion
+    elif [[ -f /etc/bash_completion ]]; then
+        . /etc/bash_completion
+    fi
+
+    # Tool-specific completions
+
+    # Azure CLI
+    if [[ -n "$HOMEBREW_PREFIX" ]] && [[ -f ${HOMEBREW_PREFIX}/etc/bash_completion.d/az ]]; then
+        . ${HOMEBREW_PREFIX}/etc/bash_completion.d/az
+    elif [[ -f /usr/local/etc/bash_completion.d/az ]]; then
+        . /usr/local/etc/bash_completion.d/az
+    fi
+
+    # Kubernetes
+    command -v kubectl &>/dev/null && source <(kubectl completion bash 2>/dev/null)
+    command -v kubelogin &>/dev/null && source <(kubelogin completion bash 2>/dev/null)
+
+    # Everything else preferred in interactive shells
+
+    [[ -f ${HOME}/.fzf.bash ]] && source ${HOME}/.fzf.bash
+    command -v fzf &>/dev/null && eval "$(fzf --bash)"
+
+    export HISTFILE=~/.bash_history
+    export HISTSIZE=1200000
+    export HISTFILESIZE=1200000
+    export HISTCONTROL=ignoreboth:erasedups
+    export HISTIGNORE="&:ls:[bf]g:exit"
+    shopt -s histappend
+
+    shopt -s checkwinsize
+
+    # Function to toggle shell options via aliases
+    shopt-alias() {
+        for OPT in $(shopt | awk '{print $1}'); do
+            if ! command -v $OPT >/dev/null 2>&1 && ! alias $OPT 2>/dev/null && ! declare -f $OPT >/dev/null 2>&1; then
+                alias $OPT="if shopt -q $OPT; then shopt -u $OPT && echo \"$OPT off\"; \
+                    else shopt -s $OPT && echo \"$OPT on\"; fi"
+            fi
+        done
+    }
+    shopt-alias
+
+    set -o vi
+
+    if [[ -n "${HOMEBREW_PREFIX}" ]] && command -v ${HOMEBREW_PREFIX}/bin/starship &>/dev/null; then
+        export STARSHIP_CONFIG=${HOME}/.config/starship/starship.toml
+        eval "$(${HOMEBREW_PREFIX}/bin/starship init bash)"
+    fi
+
+else
+    # This is an agent shell so load a minimal configuration
+    export HISTFILE=/dev/null
+    export HISTSIZE=0
+    export HISTFILESIZE=0
+    unset HISTCONTROL HISTIGNORE
+fi

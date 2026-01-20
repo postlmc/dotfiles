@@ -108,24 +108,3 @@ kcfg() {
     fi
 }
 export KUBECONFIG=$(kcfg)
-
-# whence -w minikube >/dev/null 2>&1 &&
-#     # minikube config set vm-driver hyperkit && \
-#     alias mk='KUBECONFIG=${HOME}/.kube/minikube.yml minikube' &&
-#     export MINIKUBE_IN_STYLE=false
-
-# Shell completion setup
-if command -v kubelogin >/dev/null 2>&1; then
-    if [[ -n "$ZSH_VERSION" ]]; then
-        source <(kubelogin completion zsh 2>/dev/null) 2>/dev/null || true
-    elif [[ -n "$BASH_VERSION" ]]; then
-        source <(kubelogin completion bash 2>/dev/null) 2>/dev/null || true
-    fi
-fi
-
-# Kubectl completion
-if [[ -n "$ZSH_VERSION" ]]; then
-    source <(kubectl completion zsh 2>/dev/null) 2>/dev/null || true
-elif [[ -n "$BASH_VERSION" ]]; then
-    source <(kubectl completion bash 2>/dev/null) 2>/dev/null || true
-fi

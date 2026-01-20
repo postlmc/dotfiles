@@ -92,6 +92,25 @@ pattern allows you to:
 - Share a common set of configs across machines without duplication
 - Keep your main shell config clean and focused
 
+### Bash vs Zsh: Agent-Aware Configuration
+
+Both bash and zsh now share a similar structure optimized for both interactive use and LLM agent contexts:
+
+- **Shared features**: Both shells source all `enabled/??-*` modules, set up PATH (including GNU utilities on macOS), and handle
+  Homebrew integration consistently
+- **Agent detection**: When `ACTIVE_AGENT` is set (by GitHub Copilot, Cursor, or similar tools), both shells skip expensive
+  interactive features:
+    - No completions (bash-completion, kubectl, kubelogin, etc.)
+    - No plugins (zsh-autosuggestions, zsh-syntax-highlighting, fzf)
+    - No history (`HISTFILE=/dev/null`, `HISTSIZE=0`)
+    - No prompts (Starship)
+    - No vi mode
+- **Interactive features**: When `ACTIVE_AGENT` is not set, both shells load their full configurations with completions, plugins,
+  history (1.2M entries), and Starship prompt
+
+This approach gives you fast, minimal shells for LLM agents (50-100ms startup) while maintaining full-featured interactive shells
+with all the conveniences you expect. The agent optimization is automatic—no manual switching required.
+
 ---
 
 *Until something better comes along...* <span title="@worthyl expects this to happen sooner rather than later">☠️</span>
