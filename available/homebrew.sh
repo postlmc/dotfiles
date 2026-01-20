@@ -14,5 +14,3 @@ alias brew-up='${HOMEBREW_PREFIX}/bin/brew update && \
 alias brew86-up='${HOMEBREW86_PREFIX}/bin/brew86 update && \
         (${HOMEBREW86_PREFIX}/bin/brew86 upgrade; ${HOMEBREW86_PREFIX}/bin/brew86 upgrade --cask) && \
         ${HOMEBREW86_PREFIX}/bin/brew86 cleanup -s'
-
-FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Essential shell behavior for consistent history and command editing
-set -o vi
-
 # Ensure consistent character encoding across all tools
 export LANGUAGE=en_US.UTF-8
 export LANG=en_US.UTF-8
@@ -145,8 +142,6 @@ elif command -v vim &>/dev/null; then
     export EDITOR="vim"
 elif command -v vi &>/dev/null; then
     export EDITOR="vi"
-else
-    export EDITOR="nano"
 fi
 
 # Common environment variables

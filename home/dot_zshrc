@@ -1,65 +1,95 @@
 #!/bin/zsh
 
-# First, set up all completion paths (fpath and FPATH)
-# Then, configure completion styles (zstyle)
-# Finally, initialize the completion system (compinit) once
-
-# Set up completion paths
-fpath=(
-    ~/.zsh/completion
-    $fpath
-)
-
-# Cache completions
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path $ZSH_CACHE_DIR
-
-# Completion system setup
-# Only run compinit once; -C skips security checks (faster, but only if you trust your completions)
-autoload -U +X compinit && compinit -C
-autoload -U +X bashcompinit && bashcompinit # Needed for bash-style 'complete' below
-
-[[ -f ${HOME}/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh ]] &&
-    source ${HOME}/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-[[ -f ${HOME}/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] &&
-    source ${HOME}/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-[[ -f ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh ]] && source ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh
-[[ -f ${HOME}/.fzf.zsh ]] && source ${HOME}/.fzf.zsh
-
-# Symlink additional configs in chezmoi/enabled to have them sourced, numbering for order
-# (these may have additional completions)
+# Source all enabled modules (aliases, env vars, functions only)
 CHEZMOI_SOURCE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
 for CFG in ${CHEZMOI_SOURCE_DIR}/enabled/??-*; do
     [[ -f "$CFG" ]] && . ${CFG}
 done
 
-# Ref: https://zsh.sourceforge.io/Doc/Release/User-Contributions.html#Accessing-On_002dLine-Help
-unalias run-help
-autoload run-help
-
-# Helps with uv default python installed with: `uv python install 3.12 --default --preview`
+# Home PATH additions
 [[ -d "${HOME}/.local/bin" ]] && prepend_path PATH ${HOME}/.local/bin
 [[ -d "${HOME}/bin" ]] && prepend_path PATH ${HOME}/bin
 
-# History configuration (works on both macOS and Linux)
-export HISTFILE=~/.zsh_history
-export HISTSIZE=1200000
-export SAVEHIST=1000000
+# GNU utilities PATH setup (darwin only)
+if [[ -n "${HOMEBREW_PREFIX}" ]] && [[ "$OSTYPE" == darwin* ]]; then
+    for gnu_tool in coreutils findutils gnu-tar gnu-sed grep make; do
+        [[ -d "${HOMEBREW_PREFIX}/opt/${gnu_tool}/libexec/gnubin" ]] && \
+            prepend_path PATH "${HOMEBREW_PREFIX}/opt/${gnu_tool}/libexec/gnubin"
+    done
+    [[ -d "${HOMEBREW_PREFIX}/opt/openssl/bin" ]] && prepend_path PATH "${HOMEBREW_PREFIX}/opt/openssl/bin"
+    [[ -d "${HOMEBREW_PREFIX}/opt/curl/bin" ]] && prepend_path PATH "${HOMEBREW_PREFIX}/opt/curl/bin"
+    prepend_path PATH "${HOMEBREW_PREFIX}/sbin"
+    prepend_path PATH "${HOMEBREW_PREFIX}/bin"
+    prepend_path MANPATH "${HOMEBREW_PREFIX}/share/man"
+fi
 
-# Timestamps: zsh stores timestamps if EXTENDED_HISTORY is set (see below).
-# To view timestamps, use: history -i
 
-# Ref: https://zsh.sourceforge.io/Doc/Release/Options.html#Options
-# History sharing: unsetopt SHARE_HISTORY means each session keeps its own history until exit.
-unsetopt SHARE_HISTORY
-setopt HIST_IGNORE_SPACE
-setopt HIST_IGNORE_ALL_DUPS
-setopt HIST_SAVE_NO_DUPS
-setopt HIST_FIND_NO_DUPS
-setopt HIST_EXPIRE_DUPS_FIRST
-setopt HIST_REDUCE_BLANKS
-unsetopt INC_APPEND_HISTORY
-setopt INC_APPEND_HISTORY_TIME
-setopt EXTENDED_HISTORY
+if [[ -z "${ACTIVE_AGENT}" ]]; then
+    # This is a regular interactive shell, so load full configuration
+    
+    # Completion System
 
-(( $+commands[fzf] )) && eval "$(fzf --zsh)"
+    # FPATH additions (must be before compinit)
+    fpath=(~/.zsh/completion $fpath)
+    [[ -n "${HOMEBREW_PREFIX}" ]] && fpath=(${HOMEBREW_PREFIX}/share/zsh/site-functions $fpath)
+
+    # Completion styles
+    zstyle ':completion:*' use-cache on
+    zstyle ':completion:*' cache-path $ZSH_CACHE_DIR
+
+    # Initialize completion (once)
+    autoload -U +X compinit && compinit -C
+    autoload -U +X bashcompinit && bashcompinit
+
+    # Tool-specific completions
+
+    # Azure CLI (bash-style completion)
+    if [[ -n "$HOMEBREW_PREFIX" ]] && [[ -f ${HOMEBREW_PREFIX}/etc/bash_completion.d/az ]]; then
+        source ${HOMEBREW_PREFIX}/etc/bash_completion.d/az
+    elif [[ -f /usr/local/etc/bash_completion.d/az ]]; then
+        source /usr/local/etc/bash_completion.d/az
+    fi
+
+    # Kubernetes
+    (( $+commands[kubectl] )) && source <(kubectl completion zsh 2>/dev/null)
+    (( $+commands[kubelogin] )) && source <(kubelogin completion zsh 2>/dev/null)
+
+    # Plugins
+    [[ -f ${HOME}/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
+        source ${HOME}/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+    [[ -f ${HOME}/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
+        source ${HOME}/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    [[ -f ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh ]] && \
+        source ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh
+
+    # Everything else preferred in interactive shells
+
+    [[ -f ${HOME}/.fzf.zsh ]] && source ${HOME}/.fzf.zsh
+    (( $+commands[fzf] )) && eval "$(fzf --zsh)"
+
+    export HISTFILE=~/.zsh_history
+    export HISTSIZE=1200000
+    export SAVEHIST=1000000
+    unsetopt SHARE_HISTORY
+    setopt HIST_IGNORE_SPACE HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS
+    setopt HIST_FIND_NO_DUPS HIST_EXPIRE_DUPS_FIRST HIST_REDUCE_BLANKS
+    unsetopt INC_APPEND_HISTORY
+    setopt INC_APPEND_HISTORY_TIME EXTENDED_HISTORY
+
+    unalias run-help 2>/dev/null
+    autoload run-help
+
+    set -o vi
+
+    if [[ -n "${HOMEBREW_PREFIX}" ]] && command -v ${HOMEBREW_PREFIX}/bin/starship &>/dev/null; then
+        export STARSHIP_CONFIG=${HOME}/.config/starship/starship.toml
+        eval "$(${HOMEBREW_PREFIX}/bin/starship init zsh)"
+    fi
+
+else
+    # This is an agent shell so load a minimal configuration
+    export HISTFILE=/dev/null
+    export HISTSIZE=0
+    export SAVEHIST=0
+    unsetopt SHARE_HISTORY
+fi
