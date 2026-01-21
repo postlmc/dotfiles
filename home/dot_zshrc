@@ -92,4 +92,13 @@ else
     export HISTSIZE=0
     export SAVEHIST=0
     unsetopt SHARE_HISTORY
+
+    export NO_COLOR=1
+    export TERM=dumb
+    export PAGER=cat
+    export GIT_PAGER=ca
+
+    export CLICOLOR=0
+    export LC_ALL=C
+    export LANG=C
 fi
