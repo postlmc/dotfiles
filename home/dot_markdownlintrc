@@ -11,11 +11,5 @@
     "MD024": {
         "siblings_only": true
     },
-    "MD033": {
-        "allowed_elements": [
-            "br",
-            "nobr",
-            "span"
-        ]
-    }
+    "MD033": false
 }
