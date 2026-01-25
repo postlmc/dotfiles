@@ -1,0 +1,28 @@
+#!/bin/bash
+# Configure VS Code to use Podman container for Copilot terminal
+# hash: {{ include "dot_local/bin/executable_copilot-podman-terminal.sh" | sha256sum }}
+
+# Detect OS and set appropriate paths
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    SETTINGS_FILE="$HOME/Library/Application Support/Code/User/settings.json"
+    PROFILE_KEY="chat.tools.terminal.terminalProfile.osx"
+else
+    SETTINGS_FILE="$HOME/.config/Code/User/settings.json"
+    PROFILE_KEY="chat.tools.terminal.terminalProfile.linux"
+fi
+
+SETTINGS_DIR="$(dirname "$SETTINGS_FILE")"
+
+# Create directory if it doesn't exist
+mkdir -p "$SETTINGS_DIR"
+
+# Create empty JSON if file doesn't exist
+if [ ! -f "$SETTINGS_FILE" ]; then
+    echo '{}' > "$SETTINGS_FILE"
+fi
+
+# Merge the terminal profile setting using jq
+jq --arg key "$PROFILE_KEY" '. + {($key): {"path": "'"$HOME"'/.local/bin/copilot-podman-terminal.sh"}}' \
+    "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+
+echo "✓ Updated VS Code settings for Copilot terminal ($PROFILE_KEY)"
