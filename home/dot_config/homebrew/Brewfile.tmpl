@@ -1,0 +1,76 @@
+{{- if eq .chezmoi.os "darwin" }}
+# GNU utilities (replace macOS BSD versions)
+brew "coreutils"
+brew "findutils"
+brew "gnu-tar"
+brew "gnu-sed"
+brew "grep"
+brew "make"
+brew "curl"
+brew "openssl"
+{{- end }}
+
+# Essential development tools
+brew "git"
+brew "tmux"
+brew "vim"
+brew "fzf"
+brew "jq"
+brew "yq"
+
+# Shell enhancements
+brew "starship"
+brew "direnv"
+brew "zellij"
+
+{{- /* Conditionally include tools based on chezmoi data */ -}}
+{{- /* Use hasKey and dig for safe nested key access */ -}}
+
+{{- if dig "development" "python" false . }}
+# Python development
+brew "python"
+brew "uv"
+{{- end }}
+
+{{- if dig "development" "golang" false . }}
+# Go development
+brew "go"
+{{- end }}
+
+{{- if dig "development" "rust" false . }}
+# Rust development
+brew "rustup"
+{{- end }}
+
+{{- if dig "development" "docker" false . }}
+# Container tools
+brew "podman"
+{{- end }}
+
+{{- if dig "development" "kubernetes" false . }}
+# Kubernetes tools
+brew "kubectl"
+brew "kubectx"
+brew "helm"
+brew "k9s"
+{{- end }}
+
+{{- if dig "cloud" "azure" false . }}
+# Azure tools
+brew "azure-cli"
+{{- end }}
+
+{{- if dig "cloud" "gcloud" false . }}
+# Google Cloud tools
+cask "google-cloud-sdk"
+{{- end }}
+
+{{- if dig "tools" "terraform" false . }}
+# Infrastructure as Code
+brew "terraform"
+{{- end }}
+
+{{- if dig "tools" "monitoring" false . }}
+# Monitoring and observability
+brew "gum"
+{{- end }}

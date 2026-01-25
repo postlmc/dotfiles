@@ -1,0 +1,16 @@
+#!/bin/bash
+# Install packages from Brewfile if Homebrew is available
+# Brewfile hash: {{ include "dot_config/homebrew/Brewfile.tmpl" | sha256sum }}
+
+{{- if lookPath "brew" }}
+BREWFILE="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/homebrew/Brewfile"
+
+if [[ -f "${BREWFILE}" ]]; then
+    echo "Installing packages from Brewfile..."
+    brew bundle --file="${BREWFILE}"
+else
+    echo "Warning: Brewfile not found at ${BREWFILE}"
+fi
+{{- else }}
+echo "Homebrew not found, skipping package installation"
+{{- end }}
