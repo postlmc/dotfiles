@@ -23,7 +23,6 @@ if [[ -n "${HOMEBREW_PREFIX}" ]] && [[ "$OSTYPE" == darwin* ]]; then
     prepend_path MANPATH "${HOMEBREW_PREFIX}/share/man"
 fi
 
-
 if [[ -z "${ACTIVE_AGENT}" ]]; then
     # This is a regular interactive shell, so load full configuration
     
@@ -61,6 +60,9 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
         source ${HOME}/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     [[ -f ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh ]] && \
         source ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh
+
+    # 1Password
+    (( $+commands[op] )) && eval "$(op completion zsh)" && compdef _op op
 
     # Everything else preferred in interactive shells
 
