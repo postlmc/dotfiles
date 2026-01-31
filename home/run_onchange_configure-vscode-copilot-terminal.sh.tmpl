@@ -1,5 +1,5 @@
 #!/bin/bash
-# Configure VS Code to use Podman container for Copilot terminal
+# Configure VS Code to use bash with ACTIVE_AGENT for Copilot terminal
 # hash: {{ include "dot_local/bin/executable_copilot-podman-terminal.sh" | sha256sum }}
 
 # Detect OS and set appropriate paths
@@ -21,8 +21,40 @@ if [ ! -f "$SETTINGS_FILE" ]; then
     echo '{}' > "$SETTINGS_FILE"
 fi
 
-# Merge the terminal profile setting using jq
-jq --arg key "$PROFILE_KEY" '. + {($key): {"path": "'"$HOME"'/.local/bin/copilot-podman-terminal.sh"}}' \
-    "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+# Check if setting already exists
+if grep -q "\"$PROFILE_KEY\"" "$SETTINGS_FILE"; then
+    # Replace existing setting using sed (preserves comments)
+    # This is a multi-line replacement that handles the nested structure
+    
+    # Option 1: Use bash directly with ACTIVE_AGENT environment variable
+    # Find and replace the entire profile block
+    sed -i.bak -E "/\"$PROFILE_KEY\":/,/\}/c\\
+    \"$PROFILE_KEY\": {\\
+        \"path\": \"bash\",\\
+        \"env\": {\\
+            \"ACTIVE_AGENT\": \"Copilot\"\\
+        }\\
+    }," "$SETTINGS_FILE"
+    
+    # Option 2: Use Podman container (commented out - uncomment to switch)
+    # sed -i.bak -E "/\"$PROFILE_KEY\":/,/\}/c\\
+    # \"$PROFILE_KEY\": {\\
+    #     \"path\": \"$HOME/.local/bin/copilot-podman-terminal.sh\"\\
+    # }," "$SETTINGS_FILE"
+    
+    rm -f "$SETTINGS_FILE.bak"
+else
+    # Add new setting before the final closing brace (preserves comments)
+    sed -i.bak -E '$s/}/    "'"$PROFILE_KEY"'": {\
+        "path": "bash",\
+        "env": {\
+            "ACTIVE_AGENT": "Copilot"\
+        }\
+    }\
+}/' "$SETTINGS_FILE"
+    rm -f "$SETTINGS_FILE.bak"
+fi
 
 echo "✓ Updated VS Code settings for Copilot terminal ($PROFILE_KEY)"
+echo "  - Shell: bash"
+echo "  - Environment: ACTIVE_AGENT=Copilot"
