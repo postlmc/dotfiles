@@ -5,13 +5,7 @@ export LANGUAGE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-# Enable color output for better visual parsing of command output
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
-
-# Prevent accidental file operations
+# Prevent accidental file operations (no color involved)
 alias rm='rm -I --preserve-root'
 alias mv='mv -i'
 alias cp='cp -i'
@@ -20,14 +14,7 @@ alias chown='chown --preserve-root'
 alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 
-# Common ls variations for different detail levels
-alias ll='ls -l'
-alias la='ls -la'
-alias l='ls -CF'
-
-# [Way too] Common typos
-alias ls-la='ls -la'
-alias ls-l='ls -l'
+# [Way too] Common typos (no color involved)
 alias ln-s='ln -s'
 alias cd..='cd ..'
 alias rm-f='rm -f'
@@ -39,10 +26,6 @@ alias ...='cd ../..'
 alias ..3='cd ../../..'
 alias ..4='cd ../../../..'
 alias ..5='cd ../../../../..'
-
-# Show octal permissions for easier chmod reference
-alias lso="ls -alG | \
-    awk '{k=0;for(i=0;i<=8;i++)k+=((substr(\$1,i+2,1)~/[rwx]/)*2^(8-i));if(k)printf(\" %0o \",k);print}'"
 
 # ISO 8601 is your friend
 
