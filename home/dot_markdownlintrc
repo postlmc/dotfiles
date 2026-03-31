@@ -6,7 +6,8 @@
     "MD013": {
         "line_length": 132,
         "heading_line_length": 132,
-        "code_block_line_length": 132
+        "code_block_line_length": 132,
+        "tables": false
     },
     "MD024": {
         "siblings_only": true
