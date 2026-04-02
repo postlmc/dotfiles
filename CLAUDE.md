@@ -1,4 +1,3 @@
-# Claude Instructions
+# Claude Configuration
 
-See [AGENTS.md](AGENTS.md) for all agent and LLM configuration. This file exists because Claude does not yet support AGENTS.md
-natively. (yet)
+See [AGENTS.md](AGENTS.md) for all agent and LLM configuration. Updates should go in that file instead of this one.
