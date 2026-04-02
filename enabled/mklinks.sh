@@ -6,8 +6,6 @@ OS=$(uname | awk -F "(_|/|-)" '{print tolower($1)}')
 # Core shell configuration (loaded early as other files may depend on it)
 ln -s ../available/core.sh 02-core 2>/dev/null
 
-# TODO: split out OS core items and link as 03-core-os
-
 # Tools we should have everywhere
 command -v openssl >/dev/null 2>&1 && ln -s ../available/openssl.sh 10-openssl 2>/dev/null
 command -v ssh >/dev/null 2>&1 && ln -s ../available/ssh.sh 11-ssh 2>/dev/null

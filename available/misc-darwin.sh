@@ -7,7 +7,6 @@ export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
 export COPYFILE_DISABLE=true
 export QUOTING_STYLE=literal
 
-# Mac OS-specific aliases
 alias show-files='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder'
 alias hide-files='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder'
 alias fix-openwith='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
@@ -17,3 +16,9 @@ alias reset-launchpad='defaults -currentHost write com.apple.dock ResetLaunchPad
 alias flush-dns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
 alias tm-wtf='sudo log stream --style syslog --predicate '\''processImagePath contains "backupd"'\'' --info'
 alias tm-logs='log stream --style syslog  --predicate '"'"'senderImagePath contains[cd] "TimeMachine"'"'"' --info'
+alias stopspotlight='sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist'
+alias startspotlight='sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist'
+
+# Old now, but keeping handy:
+# http://www.reecefowell.com/2012/11/16/ksfetch-annoyance-on-mac-os-x-10-8-ml-with-hands-off-or-little-snitch-firewall/)
+# defaults write com.google.Keystone.Agent checkInterval 4233600
