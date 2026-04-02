@@ -5,8 +5,16 @@ encryption = "age"
 [age]
 identity = "{{ $ageKeyPath }}"
 recipient = "age1jq0s5w8wl2cr5hla84jt97ewda4ucm3ctclkaep4mf3s5ev74vwqmwfhev"
+{{- else }}
 
-{{ end -}}
+[diff]
+exclude = ["encrypted"]
+
+[apply]
+exclude = ["encrypted"]
+{{- end }}
+
+
 [data.development]
 python = true
 golang = true

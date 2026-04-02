@@ -2,9 +2,3 @@
 # macOS-specific paths - ignore on non-macOS systems
 private_Library/**
 {{- end }}
-{{- $ageKeyPath := joinPath .chezmoi.homeDir ".config" "chezmoi" "key.txt" }}
-{{- if not (stat $ageKeyPath) }}
-# age identity key not present — skip encrypted files rather than failing
-.dotfiles.local/unidentified-device-gitconfig
-.dotfiles.local/unrecognized-device-gitconfig
-{{- end }}
