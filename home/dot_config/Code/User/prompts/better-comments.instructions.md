@@ -14,25 +14,12 @@ not needed most of the time. **Do not use emoji in code, comments, or documentat
 
 ### AVOID These Comment Types
 
-**Obvious Comments**
+**Obvious or Redundant Comments**
 ```python
-# Bad: States the obvious
+# Bad: States the obvious or repeats the code
 counter = 0  # Initialize counter to zero
-counter += 1  # Increment counter by one
-```
-
-**Redundant Comments**
-```python
-# Bad: Comment repeats the code
 def get_user_name():
     return user.name  # Return the user's name
-```
-
-**Outdated Comments**
-```python
-# Bad: Comment doesn't match the code
-# Calculate tax at 5% rate
-tax = price * 0.08  # Actually 8%
 ```
 
 ### WRITE These Comment Types
@@ -130,13 +117,3 @@ def process_data():
 # UTILITY FUNCTIONS
 #=====================================
 ```
-
-## Quality Checklist
-
-Before committing, ensure your comments:
-- [ ] Explain WHY, not WHAT
-- [ ] Are grammatically correct and clear
-- [ ] Will remain accurate as code evolves
-- [ ] Add genuine value to code understanding
-- [ ] Are placed appropriately (above the code they describe)
-- [ ] Use proper spelling and professional language
