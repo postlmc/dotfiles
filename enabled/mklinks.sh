@@ -47,5 +47,5 @@ command -v kubectl >/dev/null 2>&1 && ln -s ../available/kubernetes.sh 70-kubern
 command -v terraform >/dev/null 2>&1 && ln -s ../available/terraform.sh 71-terraform 2>/dev/null
 
 # Miscellaneous host-specific items (load last to allow overrides)
-[ -f ~/.dotfiles.local/${HOST}-misc ] &&
-    ln -s ~/.dotfiles.local/${HOST}-misc 99-misc 2>/dev/null
+[ -f ~/.config/dotfiles.local/shell/${HOST} ] &&
+    ln -s ~/.config/dotfiles.local/shell/${HOST} 99-misc 2>/dev/null

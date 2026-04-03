@@ -125,6 +125,11 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
     unalias run-help 2>/dev/null
     autoload run-help
 
+    # Host-specific local config
+    _local_shell="${HOME}/.config/dotfiles.local/shell/${$(hostname -s):l}"
+    [[ -f "$_local_shell" ]] && . "$_local_shell"
+    unset _local_shell
+
     set -o vi
 
     if [[ -n "${HOMEBREW_PREFIX}" ]] && command -v ${HOMEBREW_PREFIX}/bin/starship &>/dev/null; then
