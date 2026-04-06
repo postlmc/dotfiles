@@ -132,9 +132,9 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
 
     set -o vi
 
-    if [[ -n "${HOMEBREW_PREFIX}" ]] && command -v ${HOMEBREW_PREFIX}/bin/starship &>/dev/null; then
+    if command -v starship &>/dev/null; then
         export STARSHIP_CONFIG=${HOME}/.config/starship/starship.toml
-        eval "$(${HOMEBREW_PREFIX}/bin/starship init zsh)"
+        eval "$(starship init zsh)"
     fi
 
 else

@@ -1,0 +1,106 @@
+{{- $pkgs := list
+    "coreutils@latest"
+    "findutils@latest"
+    "gnutar@latest"
+    "gnused@latest"
+    "gnugrep@latest"
+    "gnumake@latest"
+    "curl@latest"
+    "openssl@latest"
+    "git@latest"
+    "openssh@latest"
+    "wget@latest"
+    "netcat@latest"
+    "rsync@latest"
+    "socat@latest"
+    "tmux@latest"
+    "zellij@latest"
+    "nushell@latest"
+    "starship@latest"
+    "direnv@latest"
+    "fzf@latest"
+    "bat@latest"
+    "tree@latest"
+    "watch@latest"
+    "television@latest"
+    "pv@latest"
+    "parallel@latest"
+    "stow@latest"
+    "vim@latest"
+    "ripgrep@latest"
+    "jq@latest"
+    "yq-go@latest"
+    "jc@latest"
+    "p7zip@latest"
+    "duckdb@latest"
+    "pandoc@latest"
+    "upx@latest"
+    "calc@latest"
+    "nmap@latest"
+    "arping@latest"
+    "wakeonlan@latest"
+    "xh@latest"
+    "aria2@latest"
+    "wireshark-cli@latest"
+    "gnupg@latest"
+    "age@latest"
+    "step-cli@latest"
+    "binwalk@latest"
+    "yara@latest"
+    "pwgen@latest"
+    "gh@latest"
+    "pre-commit@latest"
+    "buf@latest"
+    "rclone@latest"
+    "cosign@latest"
+    "crane@latest"
+    "skopeo@latest"
+    "doctl@latest"
+    "ffmpeg@latest"
+    "imagemagick@latest"
+    "gnuplot@latest"
+    "tesseract@latest"
+-}}
+{{- /* Python tooling — uv manages runtimes, no python runtime here */ -}}
+{{- if dig "development" "python" false . -}}
+{{- $pkgs = append $pkgs "uv@latest" -}}
+{{- end -}}
+{{- /* Go and Rust are project-specific — not installed globally */ -}}
+{{- /* Kubernetes tools */ -}}
+{{- if dig "development" "kubernetes" false . -}}
+{{- $pkgs = append $pkgs "kubectl@1.30" -}}
+{{- $pkgs = append $pkgs "kubectx@latest" -}}
+{{- $pkgs = append $pkgs "kubernetes-helm@latest" -}}
+{{- $pkgs = append $pkgs "k9s@latest" -}}
+{{- $pkgs = append $pkgs "argocd@latest" -}}
+{{- $pkgs = append $pkgs "kubeconform@latest" -}}
+{{- $pkgs = append $pkgs "kubetail@latest" -}}
+{{- $pkgs = append $pkgs "kustomize@latest" -}}
+{{- $pkgs = append $pkgs "talosctl@latest" -}}
+{{- $pkgs = append $pkgs "cmctl@latest" -}}
+{{- $pkgs = append $pkgs "kompose@latest" -}}
+{{- end -}}
+{{- /* Azure tools */ -}}
+{{- if dig "cloud" "azure" false . -}}
+{{- $pkgs = append $pkgs "azure-cli@latest" -}}
+{{- end -}}
+{{- /* Terraform */ -}}
+{{- if dig "tools" "terraform" false . -}}
+{{- $pkgs = append $pkgs "terraform@latest" -}}
+{{- end -}}
+{{- /* Monitoring / TUI tools */ -}}
+{{- if dig "tools" "monitoring" false . -}}
+{{- $pkgs = append $pkgs "gum@latest" -}}
+{{- end -}}
+{
+    "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
+    "packages": {{ $pkgs | toJson }},
+    "shell": {
+        "init_hook": [],
+        "scripts": {
+            "test": [
+                "echo \"Error: no test specified\" && exit 1"
+            ]
+        }
+    }
+}
