@@ -1,0 +1,5 @@
+#!/bin/bash
+{{- if eq .chezmoi.os "darwin" }}
+ln -sfn "{{ .chezmoi.homeDir }}/.config/Code/User/prompts" \
+    "{{ .chezmoi.homeDir }}/Library/Application Support/Code/User/prompts"
+{{- end }}
