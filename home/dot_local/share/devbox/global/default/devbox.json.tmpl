@@ -49,6 +49,7 @@
     "yara@latest"
     "pwgen@latest"
     "gh@latest"
+    "markdownlint-cli@latest"
     "pre-commit@latest"
     "buf@latest"
     "rclone@latest"
@@ -60,6 +61,15 @@
     "imagemagick@latest"
     "gnuplot@latest"
     "tesseract@latest"
+    "exiftool@latest"
+    "just@latest"
+    "websocat@latest"
+    "oath-toolkit@latest"
+    "tmux-xpanes@latest"
+    "mediainfo@latest"
+    "qpdf@latest"
+    "age-plugin-yubikey@latest"
+    "cfssl@latest"
 -}}
 {{- /* Python tooling — uv manages runtimes, no python runtime here */ -}}
 {{- if dig "development" "python" false . -}}
@@ -79,14 +89,14 @@
 {{- $pkgs = append $pkgs "talosctl@latest" -}}
 {{- $pkgs = append $pkgs "cmctl@latest" -}}
 {{- $pkgs = append $pkgs "kompose@latest" -}}
+{{- $pkgs = append $pkgs "argo@latest" -}}
+{{- $pkgs = append $pkgs "calicoctl@latest" -}}
 {{- end -}}
-{{- /* Azure tools */ -}}
-{{- if dig "cloud" "azure" false . -}}
-{{- $pkgs = append $pkgs "azure-cli@latest" -}}
-{{- end -}}
+{{- /* Azure tools managed by Homebrew per Microsoft's recommendations */ -}}
 {{- /* Terraform */ -}}
 {{- if dig "tools" "terraform" false . -}}
 {{- $pkgs = append $pkgs "terraform@latest" -}}
+{{- $pkgs = append $pkgs "cf-terraforming@latest" -}}
 {{- end -}}
 {{- /* Monitoring / TUI tools */ -}}
 {{- if dig "tools" "monitoring" false . -}}

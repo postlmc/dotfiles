@@ -23,6 +23,10 @@ brew "clamav"
 # Developer tools that must stay in Homebrew
 brew "dotnet"
 
+# macOS-specific utilities
+brew "nightlight"
+brew "age-plugin-se"
+
 # Fonts
 cask "font-fira-code-nerd-font"
 cask "font-monaspace"
@@ -54,14 +58,19 @@ cask "copilot-cli"
 {{- if dig "development" "docker" false . }}
 # Container tools
 brew "podman"
+brew "podman-compose"
 {{- if eq .chezmoi.os "darwin" }}
 cask "podman-desktop"
 {{- end }}
 {{- end }}
 
 {{- if dig "cloud" "azure" false . }}
-# Azure tools
+# Azure tools (Homebrew per Microsoft's recommendations)
+tap "azure/functions"
+brew "azure-cli"
 brew "azcopy"
+brew "aztfexport"
+brew "azure/functions/azure-functions-core-tools@4"
 {{- end }}
 
 {{- if dig "cloud" "gcloud" false . }}
@@ -75,6 +84,7 @@ cask "google-cloud-sdk"
 brew "airspy"
 brew "airspyhf"
 brew "esptool"
+brew "f3"
 brew "hackrf"
 brew "soapyrtlsdr"
 brew "soapysdr"
