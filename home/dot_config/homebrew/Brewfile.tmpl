@@ -24,7 +24,6 @@ brew "clamav"
 brew "dotnet"
 
 # macOS-specific utilities
-brew "nightlight"
 brew "age-plugin-se"
 
 # Fonts
@@ -67,15 +66,22 @@ cask "podman-desktop"
 {{- if dig "cloud" "azure" false . }}
 # Azure tools (Homebrew per Microsoft's recommendations)
 tap "azure/functions"
+tap "azure/kubelogin"
 brew "azure-cli"
 brew "azcopy"
 brew "aztfexport"
 brew "azure/functions/azure-functions-core-tools@4"
+brew "azure/kubelogin/kubelogin"
 {{- end }}
 
 {{- if dig "cloud" "gcloud" false . }}
 # Google Cloud tools
 cask "google-cloud-sdk"
+{{- end }}
+
+{{- if dig "development" "kubernetes" false . }}
+# Kubernetes tools not available in nixpkgs on macOS
+brew "calicoctl"
 {{- end }}
 
 {{- if dig "tools" "sdr" false . }}

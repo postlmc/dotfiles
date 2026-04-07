@@ -5,15 +5,18 @@ description: Audit installed packages across devbox global and Homebrew against 
 
 # /pkg-audit — Package Bucket Audit
 
-Review what is installed via devbox global and Homebrew against the chezmoi source files. Identify untracked ad-hoc installs and packages in the wrong bucket, then suggest corrections.
+Review what is installed via devbox global and Homebrew against the chezmoi source files. Identify untracked ad-hoc installs and
+packages in the wrong bucket, then suggest corrections.
 
 ## Bucketing Rules
 
 **devbox global** — default for CLI tools:
+
 - Any CLI tool available in nixpkgs belongs here
 - Language runtimes (go, rust/rustup, python/uv, node, ruby, java) are project-specific — never install globally
 
 **Homebrew formula** — stays here when any of these apply:
+
 - Needs `brew services` to run as a daemon (postgresql, mysql, clamav, etc.)
 - System or hardware-level integration (qemu, vde, iproute2mac)
 - Vendor explicitly recommends Homebrew (Azure CLI, azure-functions-core-tools, dotnet)
@@ -21,9 +24,11 @@ Review what is installed via devbox global and Homebrew against the chezmoi sour
 - Not available in nixpkgs — verify with `devbox search <name>` before concluding this
 
 **Homebrew cask** — GUI applications:
+
 - Anything that installs a `.app` bundle, never in devbox
 
 **Not globally tracked** — project-specific only:
+
 - go, rustup/rust, python, node, nvm, fnm, ruby, java and their version managers
 
 ## Workflow
@@ -31,6 +36,7 @@ Review what is installed via devbox global and Homebrew against the chezmoi sour
 ### Step 1: Gather current state
 
 Run in parallel:
+
 - `devbox global list`
 - `brew list --formula`
 - `brew list --cask`
@@ -39,10 +45,12 @@ Run in parallel:
 ### Step 2: Read chezmoi source of truth
 
 Read both source files:
+
 - `home/dot_local/share/devbox/global/default/devbox.json.tmpl`
 - `home/dot_config/homebrew/Brewfile.tmpl`
 
-Parse which packages are declared. For Brewfile, note which are inside conditional blocks and cross-reference with `chezmoi data` to determine if those conditionals are active.
+Parse which packages are declared. For Brewfile, note which are inside conditional blocks and cross-reference with `chezmoi data` to
+determine if those conditionals are active.
 
 ### Step 3: Find untracked installs
 
@@ -54,13 +62,14 @@ These were installed ad-hoc and need to be either added to the appropriate sourc
 
 ### Step 4: Check for misplaced packages
 
-**Homebrew formulae that might belong in devbox:**
-For each Homebrew formula not in a "stays in Homebrew" category, check `devbox search <name>`. If found in nixpkgs, flag as a devbox candidate.
+**Homebrew formulae that might belong in devbox:** For each Homebrew formula not in a "stays in Homebrew" category, check `devbox
+search <name>`. If found in nixpkgs, flag as a devbox candidate.
 
-**devbox packages that might belong in Homebrew:**
-Check for language runtimes — flag as should-be-project-specific. Check for anything with a vendor Homebrew recommendation.
+**devbox packages that might belong in Homebrew:** Check for language runtimes — flag as should-be-project-specific. Check for
+anything with a vendor Homebrew recommendation.
 
 **Stays-in-Homebrew categories** (do not flag as misplaced):
+
 - `brew services` daemons: postgresql, postgresql@*, mysql, clamav, redis, nginx
 - System-level: qemu, vde, iproute2mac
 - Vendor-mandated: azure-cli, azcopy, aztfexport, azure-functions-core-tools@*, dotnet
@@ -80,11 +89,14 @@ Three sections:
 ### Step 6: Offer to apply fixes
 
 For each confirmed fix:
-- Adding to devbox: edit `home/dot_local/share/devbox/global/default/devbox.json.tmpl` — append to the `$pkgs := list` block, or add `{{- $pkgs = append $pkgs "name@latest" -}}` inside the appropriate conditional
+
+- Adding to devbox: edit `home/dot_local/share/devbox/global/default/devbox.json.tmpl` — append to the `$pkgs := list` block, or add
+  `{{- $pkgs = append $pkgs "name@latest" -}}` inside the appropriate conditional
 - Adding to Brewfile: edit `home/dot_config/homebrew/Brewfile.tmpl` — add `brew "name"` or `cask "name"` in the appropriate section
 - Removing from a source file: delete the relevant line
 
-After edits, remind the user to run `chezmoi apply` followed by `gbox-up` or `brew bundle --file=~/.config/homebrew/Brewfile` as needed.
+After edits, remind the user to run `chezmoi apply` followed by `gbox-up` or `brew bundle --file=~/.config/homebrew/Brewfile` as
+needed.
 
 Never edit live files. All edits go to the chezmoi source in this repo.
 
@@ -92,4 +104,5 @@ Never edit live files. All edits go to the chezmoi source in this repo.
 
 - `devbox.json.tmpl`: `append` takes exactly two args — `append $list "single-item"`. Use `@latest` for all packages unless pinned.
 - `Brewfile.tmpl`: the `azure/functions` tap must be declared before `azure/functions/azure-functions-core-tools@4`.
-- A package missing from `devbox global list` may just be behind a false conditional — check `chezmoi data` before flagging it as missing.
+- A package missing from `devbox global list` may just be behind a false conditional — check `chezmoi data` before flagging it as
+  missing.

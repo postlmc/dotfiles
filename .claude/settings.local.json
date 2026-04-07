@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(devbox search:*)"
+      "Bash(devbox search:*)",
+      "Bash(brew search:*)"
     ]
   }
 }

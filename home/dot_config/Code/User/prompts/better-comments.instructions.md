@@ -15,6 +15,7 @@ not needed most of the time. **Do not use emoji in code, comments, or documentat
 ### AVOID These Comment Types
 
 **Obvious or Redundant Comments**
+
 ```python
 # Bad: States the obvious or repeats the code
 counter = 0  # Initialize counter to zero
@@ -25,6 +26,7 @@ def get_user_name():
 ### WRITE These Comment Types
 
 **Complex Business Logic**
+
 ```python
 # Good: Explains WHY this specific calculation
 # Apply progressive tax brackets: 10% up to 10k, 20% above
@@ -32,6 +34,7 @@ tax = calculate_progressive_tax(income, [0.10, 0.20], [10000])
 ```
 
 **Non-obvious Algorithms**
+
 ```python
 # Good: Explains the algorithm steps and reasoning
 # Exponential backoff: base * 2^(attempt - 1)
@@ -42,6 +45,7 @@ return delay + random.uniform(0, 1.0)
 ```
 
 **Regex Patterns**
+
 ```python
 # Good: Explains what the regex matches
 # Match email format: username@domain.extension
@@ -49,6 +53,7 @@ email_pattern = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 ```
 
 **API Constraints or Gotchas**
+
 ```python
 # Good: Explains external constraint
 # GitHub API rate limit: 5000 requests/hour for authenticated users
@@ -59,6 +64,7 @@ response = await http_client.get(github_api_url)
 ## Decision Framework
 
 Before writing a comment, ask:
+
 1. **Is the code self-explanatory?** → No comment needed
 2. **Would a better variable/function name eliminate the need?** → Refactor instead
 3. **Does this explain WHY, not WHAT?** → Good comment
@@ -72,6 +78,7 @@ Public functions and methods require docstrings documenting parameters, return v
 instruction files for format examples.
 
 ### Configuration and Constants
+
 ```python
 # Good: Explains the source or reasoning
 MAX_RETRIES = 3  # Based on network reliability studies
@@ -79,6 +86,7 @@ API_TIMEOUT = 5000  # AWS Lambda timeout is 15s, leaving buffer
 ```
 
 ### Annotations
+
 ```python
 # TODO: Replace with proper user authentication after security review
 # FIXME: Memory leak in production - investigate connection pooling
@@ -95,6 +103,7 @@ API_TIMEOUT = 5000  # AWS Lambda timeout is 15s, leaving buffer
 ## Anti-Patterns to Avoid
 
 ### Dead Code Comments
+
 ```python
 # Bad: Don't comment out code
 # def old_function(): ...
@@ -102,6 +111,7 @@ def new_function(): ...
 ```
 
 ### Changelog Comments
+
 ```python
 # Bad: Don't maintain history in comments
 # Modified by John on 2023-01-15
@@ -111,6 +121,7 @@ def process_data():
 ```
 
 ### Divider Comments
+
 ```python
 # Bad: Don't use decorative comments
 #=====================================

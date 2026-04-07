@@ -20,9 +20,8 @@ elif [[ "$OSTYPE" == linux* ]]; then
         eval "$(/var/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
-# direnv (universal - uses HOMEBREW_PREFIX if available)
-command -v ${HOMEBREW_PREFIX}/bin/direnv >/dev/null 2>&1 && \
-    eval "$(${HOMEBREW_PREFIX}/bin/direnv hook bash)"
+# direnv
+command -v direnv &>/dev/null && eval "$(direnv hook bash)"
 
 # Source all enabled modules (aliases, env vars, functions only)
 CHEZMOI_SOURCE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
@@ -34,18 +33,6 @@ done
 [[ -d "${HOME}/.local/bin" ]] && prepend_path PATH ${HOME}/.local/bin
 [[ -d "${HOME}/bin" ]] && prepend_path PATH ${HOME}/bin
 
-# GNU utilities PATH setup (darwin only)
-if [[ -n "${HOMEBREW_PREFIX}" ]] && [[ "$OSTYPE" == darwin* ]]; then
-    for gnu_tool in coreutils findutils gnu-tar gnu-sed grep make; do
-        [[ -d "${HOMEBREW_PREFIX}/opt/${gnu_tool}/libexec/gnubin" ]] && \
-            prepend_path PATH "${HOMEBREW_PREFIX}/opt/${gnu_tool}/libexec/gnubin"
-    done
-    [[ -d "${HOMEBREW_PREFIX}/opt/openssl/bin" ]] && prepend_path PATH "${HOMEBREW_PREFIX}/opt/openssl/bin"
-    [[ -d "${HOMEBREW_PREFIX}/opt/curl/bin" ]] && prepend_path PATH "${HOMEBREW_PREFIX}/opt/curl/bin"
-    prepend_path PATH "${HOMEBREW_PREFIX}/sbin"
-    prepend_path PATH "${HOMEBREW_PREFIX}/bin"
-    prepend_path MANPATH "${HOMEBREW_PREFIX}/share/man"
-fi
 
 
 if [[ -z "${ACTIVE_AGENT}" ]]; then
@@ -73,26 +60,29 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
     # Completion System
 
     # Source bash completion
-    if [[ -n "${HOMEBREW_PREFIX}" ]] && [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
-        . "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
-    elif [[ -f /usr/local/etc/bash_completion ]]; then
-        . /usr/local/etc/bash_completion
-    elif [[ -f /etc/bash_completion ]]; then
-        . /etc/bash_completion
-    fi
+    [[ -f /etc/bash_completion ]] && . /etc/bash_completion
 
     # Tool-specific completions
 
-    # Azure CLI
-    if [[ -n "$HOMEBREW_PREFIX" ]] && [[ -f ${HOMEBREW_PREFIX}/etc/bash_completion.d/az ]]; then
-        . ${HOMEBREW_PREFIX}/etc/bash_completion.d/az
-    elif [[ -f /usr/local/etc/bash_completion.d/az ]]; then
-        . /usr/local/etc/bash_completion.d/az
-    fi
+    # Azure CLI completion (installed via Homebrew)
+    [[ -f "${HOMEBREW_PREFIX}/etc/bash_completion.d/az" ]] && . "${HOMEBREW_PREFIX}/etc/bash_completion.d/az"
 
-    # Kubernetes
-    command -v kubectl &>/dev/null && source <(kubectl completion bash 2>/dev/null)
-    command -v kubelogin &>/dev/null && source <(kubelogin completion bash 2>/dev/null)
+    # Kubernetes (completions cached — rm ~/.cache/bash/kubectl.bash etc. to regenerate)
+    _BASH_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
+    [[ ! -d "$_BASH_CACHE" ]] && mkdir -p "$_BASH_CACHE"
+    if command -v kubectl &>/dev/null; then
+        _kc="${_BASH_CACHE}/kubectl.bash"
+        [[ ! -f "$_kc" ]] && kubectl completion bash 2>/dev/null > "$_kc"
+        [[ -f "$_kc" ]] && source "$_kc"
+        unset _kc
+    fi
+    if command -v kubelogin &>/dev/null; then
+        _kc="${_BASH_CACHE}/kubelogin.bash"
+        [[ ! -f "$_kc" ]] && kubelogin completion bash 2>/dev/null > "$_kc"
+        [[ -f "$_kc" ]] && source "$_kc"
+        unset _kc
+    fi
+    unset _BASH_CACHE
 
     # Everything else preferred in interactive shells
 
