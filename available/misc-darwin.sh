@@ -19,6 +19,8 @@ alias tm-logs='log stream --style syslog  --predicate '"'"'senderImagePath conta
 alias stopspotlight='sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist'
 alias startspotlight='sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist'
 
+alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+
 # Old now, but keeping handy:
 # http://www.reecefowell.com/2012/11/16/ksfetch-annoyance-on-mac-os-x-10-8-ml-with-hands-off-or-little-snitch-firewall/)
 # defaults write com.google.Keystone.Agent checkInterval 4233600
