@@ -31,6 +31,9 @@ linux)
     ;;
 esac
 
+# Markdown linting
+command -v markdownlint-cli2 >/dev/null 2>&1 && ln -s ../available/markdownlint.sh 22-markdownlint 2>/dev/null
+
 # Now we can load general development tools
 command -v git >/dev/null 2>&1 && ln -s ../available/git.sh 30-git 2>/dev/null
 command -v docker >/dev/null 2>&1 && ln -s ../available/docker.sh 31-docker 2>/dev/null
