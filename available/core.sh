@@ -119,9 +119,7 @@ if command -v tmux &>/dev/null; then
 fi
 
 # Set EDITOR with fallback
-if [ -n "$HOMEBREW_PREFIX" ] && [ -x "${HOMEBREW_PREFIX}/bin/vim" ]; then
-    export EDITOR="${HOMEBREW_PREFIX}/bin/vim"
-elif command -v vim &>/dev/null; then
+if command -v vim &>/dev/null; then
     export EDITOR="vim"
 elif command -v vi &>/dev/null; then
     export EDITOR="vi"
