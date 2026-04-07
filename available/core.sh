@@ -5,6 +5,25 @@ export LANGUAGE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# Color and display aliases
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# Common ls variations
+alias ll='ls -l'
+alias la='ls -la'
+alias l='ls -CF'
+
+# Common typos
+alias ls-la='ls -la'
+alias ls-l='ls -l'
+
+# Show octal permissions for easier chmod reference
+alias lso="ls -alG | \
+    awk '{k=0;for(i=0;i<=8;i++)k+=((substr(\$1,i+2,1)~/[rwx]/)*2^(8-i));if(k)printf(\" %0o \",k);print}'"
+
 # Prevent accidental file operations (no color involved)
 alias rm='rm -I --preserve-root'
 alias mv='mv -i'
@@ -117,6 +136,30 @@ if command -v tmux &>/dev/null; then
     alias tmux='tmux -2'
     alias tmuxa='tmux -2 attach -t'
 fi
+
+# Deduplicate entries in a colon-separated path variable (e.g. PATH, MANPATH)
+# Useful on systems with noisy /etc/profile.d/* that append duplicates
+dedup_path() {
+    local path_var=${1:-PATH}
+    local old_path=$(eval echo \$$path_var)
+    local new_path=""
+    local seen=""
+
+    IFS=':' read -ra path_components <<<"$old_path"
+    for component in "${path_components[@]}"; do
+        [[ -z "$component" ]] && continue
+        if [[ ":$seen:" != *":$component:"* ]]; then
+            seen="$seen:$component"
+            if [[ -z "$new_path" ]]; then
+                new_path="$component"
+            else
+                new_path="$new_path:$component"
+            fi
+        fi
+    done
+
+    export $path_var="$new_path"
+}
 
 # Set EDITOR with fallback
 if command -v vim &>/dev/null; then
