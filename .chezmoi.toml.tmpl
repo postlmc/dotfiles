@@ -19,6 +19,9 @@ kubernetes = true
 azure = true
 gcloud = false
 
+[data.machine]
+personal = {{ promptBool "Personal machine (enables lab/services not needed on work machines)" false }}
+
 [data.tools]
 terraform = true
 monitoring = true
