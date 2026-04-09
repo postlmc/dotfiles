@@ -9,16 +9,18 @@ brew "bash"
 # System networking
 brew "iproute2mac"
 
-# Virtualization
+{{- if dig "machine" "personal" false . }}
+# Virtualization (personal lab only)
 brew "qemu"
 brew "vde"
 
-# Database servers (brew services)
+# Database servers (personal dev only — work machines use remote DBs)
 brew "postgresql@14"
 brew "mysql"
 
 # Security scanning (brew services)
 brew "clamav"
+{{- end }}
 
 # Developer tools that must stay in Homebrew
 brew "dotnet"
