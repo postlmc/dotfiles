@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Identify Homebrew formulas whose binaries are now provided by devbox global.
+# Run after adding packages to devbox to find Homebrew redundancies.
+
+set -euo pipefail
+
+brew_bin="/opt/homebrew/bin"
+devbox_bin="${XDG_DATA_HOME:-$HOME/.local/share}/devbox/global/default/.devbox/nix/profile/default/bin"
+
+[[ -d "$brew_bin" ]]   || { echo "error: Homebrew not found at $brew_bin" >&2; exit 1; }
+[[ -d "$devbox_bin" ]] || { echo "error: devbox global profile not found at $devbox_bin" >&2; exit 1; }
+
+mapfile -t overlap < <(comm -12 \
+    <(ls "$brew_bin" | sort) \
+    <(ls "$devbox_bin" | sort))
+
+if (( ${#overlap[@]} == 0 )); then
+    echo "No overlapping binaries found between Homebrew and devbox global."
+    exit 0
+fi
+
+echo "=== Binaries in both Homebrew and devbox global ==="
+echo
+printf '  %s\n' "${overlap[@]}"
+echo
+
+echo "=== Corresponding Homebrew formulas ==="
+echo
+printf '%s\n' "${overlap[@]}" \
+    | xargs -I{} brew which-formula {} 2>/dev/null \
+    | sort -u \
+    | sed 's/^/  brew uninstall /'
+echo
+echo "Review before removing — some may still be needed as dependencies"
+echo "or for system-level integration (git, curl, openssl, etc.)."
