@@ -8,6 +8,7 @@
     "curl@latest"
     "openssl@latest"
     "git@latest"
+    "git-lfs@latest"
     "openssh@latest"
     "wget@latest"
     "netcat@latest"
@@ -75,7 +76,10 @@
 {{- if dig "development" "python" false . -}}
 {{- $pkgs = append $pkgs "uv@latest" -}}
 {{- end -}}
-{{- /* Go and Rust are project-specific — not installed globally */ -}}
+{{- /* Rust: rustup manages toolchains (like uv for Python) — installed globally */ -}}
+{{- if dig "development" "rust" false . -}}
+{{- $pkgs = append $pkgs "rustup@latest" -}}
+{{- end -}}
 {{- /* Kubernetes tools */ -}}
 {{- if dig "development" "kubernetes" false . -}}
 {{- $pkgs = append $pkgs "kubectl@1.30" -}}

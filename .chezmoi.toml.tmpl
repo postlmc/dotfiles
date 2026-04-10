@@ -18,6 +18,7 @@ kubernetes = true
 [data.cloud]
 azure = true
 gcloud = false
+aws = {{ promptBool "Enable AWS CLI tools" false }}
 
 [data.machine]
 personal = {{ promptBool "Personal machine (enables lab/services not needed on work machines)" false }}
