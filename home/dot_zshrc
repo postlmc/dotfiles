@@ -88,7 +88,6 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
 
     # Everything else preferred in interactive shells
 
-    [[ -f ${HOME}/.fzf.zsh ]] && source ${HOME}/.fzf.zsh
     (( $+commands[fzf] )) && eval "$(fzf --zsh)"
 
     export HISTFILE=~/.zsh_history
