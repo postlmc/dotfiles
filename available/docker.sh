@@ -34,7 +34,7 @@ alias docker-clean='docker rm $(docker ps -q -f "status=exited") 2>/dev/null \
 
 # Docker functions
 docker-flatten() {
-    docker export $(docker run -d ${1} /bin/bash) | docker import – ${2}
+    docker export $(docker run -d ${1} /bin/bash) | docker import - ${2}
 }
 
 ## Found at: http://stackoverflow.com/questions/24481564/how-can-i-find-docker-image-with-specific-tag-in-docker-registry-in-docker-comma
