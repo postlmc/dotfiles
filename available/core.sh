@@ -57,8 +57,7 @@ alias zulu="date -u '+%Y-%m-%dT%H:%M:%S%z'"
 alias zuluc="date -u '+%Y%m%dT%H%M%SZ'"
 
 if command -v curl &>/dev/null; then
-    # curl-trace from https://github.com/wickett/dotfiles/blob/master/.curl-format
-    alias curl-trace='curl -so /dev/null -w "@${HOME}/.dotfiles/curl-format"'
+    alias curl-trace='curl -so /dev/null -w "@${XDG_CONFIG_HOME:-${HOME}/.config}/curl/curl-format"'
     alias curl-status='curl -skw "%{http_code}" -o /dev/null'
     alias myip='curl -s http://ifconfig.me/ip'
 fi
