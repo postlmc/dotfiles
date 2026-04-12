@@ -28,6 +28,9 @@ linux)
     if [ -f /proc/device-tree/model ] && grep -q "Raspberry Pi" /proc/device-tree/model; then
         ln -s ../available/misc-rpi.sh 23-misc-rpi 2>/dev/null
     fi
+
+    # SSH agent management (macOS uses system keychain instead)
+    command -v ssh-agent >/dev/null 2>&1 && ln -s ../available/ssh-agent.sh 12-ssh-agent 2>/dev/null
     ;;
 esac
 
