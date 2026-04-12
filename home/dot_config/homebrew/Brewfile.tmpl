@@ -9,22 +9,6 @@ brew "bash"
 # System networking
 brew "iproute2mac"
 
-{{- if dig "machine" "personal" false . }}
-# Virtualization (personal lab only)
-brew "qemu"
-brew "vde"
-
-# Database servers (personal dev only — work machines use remote DBs)
-brew "postgresql@14"
-brew "mysql"
-
-# Security scanning (brew services)
-brew "clamav"
-{{- else }}
-# PostgreSQL client for connecting to remote databases
-brew "postgresql@15"
-{{- end }}
-
 # Developer tools that must stay in Homebrew
 brew "dotnet"
 brew "openvpn"
@@ -42,13 +26,6 @@ cask "1password-cli"
 cask "git-credential-manager"
 cask "keepassxc"
 
-{{- if dig "machine" "personal" false . }}
-# Security monitoring (personal only)
-cask "knockknock"
-cask "osquery"
-cask "taskexplorer"
-{{- end }}
-
 # GUI applications
 cask "bruno"
 cask "qlmarkdown"
@@ -56,11 +33,30 @@ cask "raycast"
 cask "visual-studio-code"
 
 {{- if dig "machine" "personal" false . }}
+# Virtualization (personal lab only)
+brew "qemu"
+brew "vde"
+
+# Database servers (personal dev only — work machines use remote DBs)
+brew "postgresql@14"
+brew "mysql"
+
+# Security scanning (brew services)
+brew "clamav"
+
+# Security monitoring
+cask "knockknock"
+cask "osquery"
+cask "taskexplorer"
+
 # Personal GUI applications
 cask "claude-code"
 cask "cmux"
 cask "packetsender"
 cask "wireshark-app"
+{{- else }}
+# PostgreSQL client for connecting to remote databases
+brew "postgresql@15"
 {{- end }}
 
 # AWS
@@ -155,7 +151,6 @@ vscode "ms-vscode-remote.remote-wsl"
 vscode "ms-vscode-remote.vscode-remote-extensionpack"
 vscode "ms-vscode.remote-server"
 vscode "sourcegraph.sourcegraph"
-vscode "stkb.rewrap"
 # Java development
 vscode "redhat.java"
 vscode "vscjava.vscode-gradle"
