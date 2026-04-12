@@ -5,7 +5,6 @@
 # Prevent resource fork and extended attribute issues when copying files
 export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
 export COPYFILE_DISABLE=true
-export QUOTING_STYLE=literal
 
 alias show-files='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder'
 alias hide-files='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder'
