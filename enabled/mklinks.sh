@@ -5,6 +5,7 @@ OS=$(uname | awk -F "(_|/|-)" '{print tolower($1)}')
 
 # Core shell configuration (loaded early as other files may depend on it)
 ln -s ../available/core.sh 02-core 2>/dev/null
+command -v chezmoi >/dev/null 2>&1 && ln -s ../available/chezmoi.sh 03-chezmoi 2>/dev/null
 
 # Tools we should have everywhere
 command -v openssl >/dev/null 2>&1 && ln -s ../available/openssl.sh 10-openssl 2>/dev/null
@@ -12,6 +13,7 @@ command -v ssh >/dev/null 2>&1 && ln -s ../available/ssh.sh 11-ssh 2>/dev/null
 
 # Load Homebrew on both macOS and Linux (for Aurora)
 command -v brew >/dev/null 2>&1 && ln -s ../available/homebrew.sh 20-homebrew 2>/dev/null
+command -v devbox >/dev/null 2>&1 && ln -s ../available/devbox.sh 21-devbox 2>/dev/null
 
 # OS-specific configurations (load after core, network, and tools)
 case "$OS" in
@@ -29,7 +31,7 @@ linux)
         ln -s ../available/misc-rpi.sh 23-misc-rpi 2>/dev/null
     fi
 
-    # SSH agent management (macOS uses system keychain instead)
+    # SSH agent management (macOS hosts use 1Password SSH agent instead)
     command -v ssh-agent >/dev/null 2>&1 && ln -s ../available/ssh-agent.sh 12-ssh-agent 2>/dev/null
     ;;
 esac
