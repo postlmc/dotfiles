@@ -11,3 +11,9 @@ az-abn() {
     fi
     az account list | jq -r --arg name "$1" 'map(select(.name | test($name; "i"))) | .[].id'
 }
+
+# Azure CLI completion — bash_completion.d style; needs bashcompinit in zsh
+if [[ -f "${HOMEBREW_PREFIX}/etc/bash_completion.d/az" ]]; then
+    [[ -n "$BASH_VERSION" ]] || [[ -n "$ZSH_CACHE_DIR" ]] && \
+        source "${HOMEBREW_PREFIX}/etc/bash_completion.d/az"
+fi

@@ -4,11 +4,11 @@
 [[ "$OSTYPE" == darwin* ]] && whence -w /usr/libexec/path_helper >/dev/null 2>&1 && \
     eval $(/usr/libexec/path_helper -s)
 
-# devbox (universal)
+# devbox (universal) — sets PATH and adds to fpath
 whence -w /usr/local/bin/devbox >/dev/null 2>&1 && \
     eval "$(/usr/local/bin/devbox global shellenv --init-hook)"
 
-# Homebrew setup
+# Homebrew setup — sets HOMEBREW_PREFIX and adds to fpath
 if [[ "$OSTYPE" == darwin* ]]; then
     # macOS Homebrew
     whence -w /opt/homebrew/bin/brew >/dev/null 2>&1 && \
@@ -22,7 +22,21 @@ fi
 # direnv
 command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
 
-# Source all enabled modules (aliases, env vars, functions only)
+if [[ -z "${ACTIVE_AGENT}" ]]; then
+    # Completion system — initialized before modules so they can call compdef/complete
+    fpath=(~/.zsh/completion $fpath)
+    typeset -U fpath
+
+    export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+    [[ ! -d "$ZSH_CACHE_DIR" ]] && mkdir -p "$ZSH_CACHE_DIR"
+    zstyle ':completion:*' use-cache on
+    zstyle ':completion:*' cache-path "$ZSH_CACHE_DIR"
+
+    autoload -U +X compinit && compinit
+    autoload -U +X bashcompinit && bashcompinit
+fi
+
+# Source all enabled modules
 CHEZMOI_SOURCE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
 for CFG in ${CHEZMOI_SOURCE_DIR}/enabled/??-*; do
     [[ -f "$CFG" ]] && . ${CFG}
@@ -32,45 +46,7 @@ done
 [[ -d "${HOME}/.local/bin" ]] && prepend_path PATH ${HOME}/.local/bin
 [[ -d "${HOME}/bin" ]] && prepend_path PATH ${HOME}/bin
 
-
 if [[ -z "${ACTIVE_AGENT}" ]]; then
-    # This is a regular interactive shell, so load full configuration
-    
-    # Completion System
-
-    # FPATH additions (must be before compinit)
-    fpath=(~/.zsh/completion $fpath)
-    typeset -U fpath
-
-    # Completion styles
-    ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
-    [[ ! -d "$ZSH_CACHE_DIR" ]] && mkdir -p "$ZSH_CACHE_DIR"
-    zstyle ':completion:*' use-cache on
-    zstyle ':completion:*' cache-path "$ZSH_CACHE_DIR"
-
-    # Initialize completion (once)
-    autoload -U +X compinit && compinit
-    autoload -U +X bashcompinit && bashcompinit
-
-    # Tool-specific completions
-
-    # Azure CLI completion (installed via Homebrew)
-    [[ -f "${HOMEBREW_PREFIX}/etc/bash_completion.d/az" ]] && source "${HOMEBREW_PREFIX}/etc/bash_completion.d/az"
-
-    # Kubernetes (completions cached — rm ~/.cache/zsh/kubectl.zsh etc. to regenerate)
-    if (( $+commands[kubectl] )); then
-        _kc="${ZSH_CACHE_DIR}/kubectl.zsh"
-        [[ ! -f "$_kc" ]] && kubectl completion zsh 2>/dev/null > "$_kc"
-        [[ -f "$_kc" ]] && source "$_kc"
-        unset _kc
-    fi
-    if (( $+commands[kubelogin] )); then
-        _kc="${ZSH_CACHE_DIR}/kubelogin.zsh"
-        [[ ! -f "$_kc" ]] && kubelogin completion zsh 2>/dev/null > "$_kc"
-        [[ -f "$_kc" ]] && source "$_kc"
-        unset _kc
-    fi
-
     # Plugins
     [[ -f ${HOME}/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
         source ${HOME}/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
@@ -78,16 +54,6 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
         source ${HOME}/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     [[ -f ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh ]] && \
         source ${HOME}/.zsh/zsh-hist/zsh-hist.plugin.zsh
-
-    # 1Password (completion cached — rm ~/.cache/zsh/op.zsh to regenerate)
-    if (( $+commands[op] )); then
-        _opc="${ZSH_CACHE_DIR}/op.zsh"
-        [[ ! -f "$_opc" ]] && op completion zsh 2>/dev/null > "$_opc"
-        [[ -f "$_opc" ]] && source "$_opc"
-        unset _opc
-    fi
-
-    # Everything else preferred in interactive shells
 
     (( $+commands[fzf] )) && eval "$(fzf --zsh)"
 
@@ -116,7 +82,7 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
     fi
 
 else
-    # This is an agent shell so load a minimal configuration
+    # Agent shell — minimal configuration
     export HISTFILE=/dev/null
     export HISTSIZE=0
     export SAVEHIST=0

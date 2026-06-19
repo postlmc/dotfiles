@@ -50,6 +50,7 @@ command -v rustc >/dev/null 2>&1 && ln -s ../available/rust.sh 42-rust 2>/dev/nu
 command -v npm >/dev/null 2>&1 && ln -s ../available/nodejs.sh 43-nodejs 2>/dev/null
 
 # Cloud and platform tools (load after all the other stuff)
+command -v op >/dev/null 2>&1 && ln -s ../available/op.sh 50-op 2>/dev/null
 command -v az >/dev/null 2>&1 && ln -s ../available/azure.sh 60-azure 2>/dev/null
 command -v gcloud >/dev/null 2>&1 && ln -s ../available/gcloud.sh 61-gcloud 2>/dev/null
 command -v kubectl >/dev/null 2>&1 && ln -s ../available/kubernetes.sh 70-kubernetes 2>/dev/null

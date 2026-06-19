@@ -108,3 +108,19 @@ kcfg() {
     fi
 }
 export KUBECONFIG=$(kcfg)
+
+# Completions (cached — delete cache file to regenerate)
+if [[ -n "$ZSH_CACHE_DIR" ]]; then
+    if (( $+commands[kubectl] )); then
+        _kc="${ZSH_CACHE_DIR}/kubectl.zsh"
+        [[ ! -f "$_kc" ]] && kubectl completion zsh 2>/dev/null > "$_kc"
+        [[ -f "$_kc" ]] && source "$_kc"
+        unset _kc
+    fi
+    if (( $+commands[kubelogin] )); then
+        _kc="${ZSH_CACHE_DIR}/kubelogin.zsh"
+        [[ ! -f "$_kc" ]] && kubelogin completion zsh 2>/dev/null > "$_kc"
+        [[ -f "$_kc" ]] && source "$_kc"
+        unset _kc
+    fi
+fi
