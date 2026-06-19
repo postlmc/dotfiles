@@ -40,6 +40,7 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
 
     # FPATH additions (must be before compinit)
     fpath=(~/.zsh/completion $fpath)
+    typeset -U fpath
 
     # Completion styles
     ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
