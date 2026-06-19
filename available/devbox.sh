@@ -6,13 +6,25 @@ command -v devbox >/dev/null 2>&1 || return
 export DEVBOX_NO_PROMPT=1
 
 # Update and refresh: global
-alias gbox-up='devbox global update && \
-        eval "$(devbox global shellenv --preserve-path-stack -r)" && \
-        hash -r && \
-        nix-collect-garbage'
+gbox-up() {
+    local _prev_nofile
+    _prev_nofile=$(ulimit -n)
+    ulimit -n 65536
+    devbox global update \
+        && eval "$(devbox global shellenv --preserve-path-stack -r)" \
+        && hash -r \
+        && nix-collect-garbage
+    ulimit -n "$_prev_nofile"
+}
 
 # Update: local project (no shell refresh needed — local devbox doesn't inject into interactive shell)
-alias box-up='devbox update && nix-collect-garbage'
+box-up() {
+    local _prev_nofile
+    _prev_nofile=$(ulimit -n)
+    ulimit -n 65536
+    devbox update && nix-collect-garbage
+    ulimit -n "$_prev_nofile"
+}
 
 # Nix store GC without a package update
 alias nix-gc='nix-collect-garbage'
@@ -44,10 +56,14 @@ gbox-add() {
         { print }
     ' "$tmpl" > "$tmp" && mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
 
+    local _prev_nofile
+    _prev_nofile=$(ulimit -n)
+    ulimit -n 65536
     chezmoi apply \
         && devbox global add "${pkg}" \
         && eval "$(devbox global shellenv --preserve-path-stack -r)" \
         && hash -r
+    ulimit -n "$_prev_nofile"
 }
 
 gbox-rm() {
@@ -67,10 +83,14 @@ gbox-rm() {
     grep -vE "\"${pkgbase}(@[^\"]+)?\"" "$tmpl" > "$tmp" \
         && mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
 
+    local _prev_nofile
+    _prev_nofile=$(ulimit -n)
+    ulimit -n 65536
     chezmoi apply \
         && devbox global rm "${pkgbase}" \
         && eval "$(devbox global shellenv --preserve-path-stack -r)" \
         && hash -r
+    ulimit -n "$_prev_nofile"
 }
 
 alias gbox-ls='devbox global list'
