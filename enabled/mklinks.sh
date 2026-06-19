@@ -18,7 +18,7 @@ command -v devbox >/dev/null 2>&1 && ln -s ../available/devbox.sh 21-devbox 2>/d
 # OS-specific configurations (load after core, network, and tools)
 case "$OS" in
 darwin)
-    ln -s ../available/misc-darwin.sh 21-misc-darwin 2>/dev/null
+    ln -s ../available/misc-darwin.sh 29-misc-darwin 2>/dev/null
     ;;
 linux)
     # Check for package managers and create appropriate links
@@ -37,7 +37,7 @@ linux)
 esac
 
 # Markdown linting
-command -v markdownlint-cli2 >/dev/null 2>&1 && ln -s ../available/markdownlint.sh 22-markdownlint 2>/dev/null
+command -v markdownlint-cli2 >/dev/null 2>&1 && ln -s ../available/markdownlint.sh 49-markdownlint 2>/dev/null
 
 # Now we can load general development tools
 command -v git >/dev/null 2>&1 && ln -s ../available/git.sh 30-git 2>/dev/null
@@ -47,6 +47,7 @@ command -v docker >/dev/null 2>&1 && ln -s ../available/docker.sh 31-docker 2>/d
 command -v python >/dev/null 2>&1 && ln -s ../available/python.sh 40-python 2>/dev/null
 command -v go >/dev/null 2>&1 && ln -s ../available/golang.sh 41-golang 2>/dev/null
 command -v rustc >/dev/null 2>&1 && ln -s ../available/rust.sh 42-rust 2>/dev/null
+command -v npm >/dev/null 2>&1 && ln -s ../available/nodejs.sh 43-nodejs 2>/dev/null
 
 # Cloud and platform tools (load after all the other stuff)
 command -v az >/dev/null 2>&1 && ln -s ../available/azure.sh 60-azure 2>/dev/null
