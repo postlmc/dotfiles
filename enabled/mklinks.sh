@@ -15,6 +15,10 @@ command -v ssh >/dev/null 2>&1 && ln -s ../available/ssh.sh 11-ssh 2>/dev/null
 command -v brew >/dev/null 2>&1 && ln -s ../available/homebrew.sh 20-homebrew 2>/dev/null
 command -v devbox >/dev/null 2>&1 && ln -s ../available/devbox.sh 21-devbox 2>/dev/null
 
+# Network tools
+{ command -v tailscale >/dev/null 2>&1 || [[ -f "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]]; } && \
+    ln -s ../available/tailscale.sh 28-tailscale 2>/dev/null
+
 # OS-specific configurations (load after core, network, and tools)
 case "$OS" in
 darwin)
