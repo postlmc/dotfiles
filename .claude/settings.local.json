@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(devbox search:*)",
-      "Bash(brew search:*)",
-      "Bash(grep:*)"
-    ]
-  }
-}
