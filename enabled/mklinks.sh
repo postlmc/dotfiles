@@ -4,58 +4,58 @@ HOST=$(hostname -s | tr "[:upper:]" "[:lower:]")
 OS=$(uname | awk -F "(_|/|-)" '{print tolower($1)}')
 
 # Core shell configuration (loaded early as other files may depend on it)
-ln -s ../available/core.sh 02-core 2>/dev/null
-command -v chezmoi >/dev/null 2>&1 && ln -s ../available/chezmoi.sh 03-chezmoi 2>/dev/null
+ln -sf ../available/core.sh 02-core
+command -v chezmoi >/dev/null 2>&1 && ln -sf ../available/chezmoi.sh 03-chezmoi
 
 # Tools we should have everywhere
-command -v openssl >/dev/null 2>&1 && ln -s ../available/openssl.sh 10-openssl 2>/dev/null
-command -v ssh >/dev/null 2>&1 && ln -s ../available/ssh.sh 11-ssh 2>/dev/null
+command -v openssl >/dev/null 2>&1 && ln -sf ../available/openssl.sh 10-openssl
+command -v ssh >/dev/null 2>&1 && ln -sf ../available/ssh.sh 11-ssh
 
 # Load Homebrew on both macOS and Linux (for Aurora)
-command -v brew >/dev/null 2>&1 && ln -s ../available/homebrew.sh 20-homebrew 2>/dev/null
-command -v devbox >/dev/null 2>&1 && ln -s ../available/devbox.sh 21-devbox 2>/dev/null
+command -v brew >/dev/null 2>&1 && ln -sf ../available/homebrew.sh 20-homebrew
+command -v devbox >/dev/null 2>&1 && ln -sf ../available/devbox.sh 21-devbox
 
 # Network tools
 { command -v tailscale >/dev/null 2>&1 || [[ -f "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]]; } && \
-    ln -s ../available/tailscale.sh 28-tailscale 2>/dev/null
+    ln -sf ../available/tailscale.sh 28-tailscale
 
 # OS-specific configurations (load after core, network, and tools)
 case "$OS" in
 darwin)
-    ln -s ../available/misc-darwin.sh 29-misc-darwin 2>/dev/null
+    ln -sf ../available/misc-darwin.sh 29-misc-darwin
     ;;
 linux)
     # Check for package managers and create appropriate links
     if command -v apt-get >/dev/null 2>&1 || command -v yum >/dev/null 2>&1; then
-        ln -s ../available/misc-linux.sh 22-misc-linux 2>/dev/null
+        ln -sf ../available/misc-linux.sh 22-misc-linux
     fi
 
     # Raspberry Pi detection using device tree model
     if [ -f /proc/device-tree/model ] && grep -q "Raspberry Pi" /proc/device-tree/model; then
-        ln -s ../available/misc-rpi.sh 23-misc-rpi 2>/dev/null
+        ln -sf ../available/misc-rpi.sh 23-misc-rpi
     fi
 
     # SSH agent management (macOS hosts use 1Password SSH agent instead)
-    command -v ssh-agent >/dev/null 2>&1 && ln -s ../available/ssh-agent.sh 12-ssh-agent 2>/dev/null
+    command -v ssh-agent >/dev/null 2>&1 && ln -sf ../available/ssh-agent.sh 12-ssh-agent
     ;;
 esac
 
 # Markdown linting
-command -v markdownlint-cli2 >/dev/null 2>&1 && ln -s ../available/markdownlint.sh 49-markdownlint 2>/dev/null
+command -v markdownlint-cli2 >/dev/null 2>&1 && ln -sf ../available/markdownlint.sh 49-markdownlint
 
 # Now we can load general development tools
-command -v git >/dev/null 2>&1 && ln -s ../available/git.sh 30-git 2>/dev/null
-command -v docker >/dev/null 2>&1 && ln -s ../available/docker.sh 31-docker 2>/dev/null
+command -v git >/dev/null 2>&1 && ln -sf ../available/git.sh 30-git
+command -v docker >/dev/null 2>&1 && ln -sf ../available/docker.sh 31-docker
 
 # Language-specific tools (load after general development tools)
-command -v python >/dev/null 2>&1 && ln -s ../available/python.sh 40-python 2>/dev/null
-command -v go >/dev/null 2>&1 && ln -s ../available/golang.sh 41-golang 2>/dev/null
-command -v rustc >/dev/null 2>&1 && ln -s ../available/rust.sh 42-rust 2>/dev/null
-command -v npm >/dev/null 2>&1 && ln -s ../available/nodejs.sh 43-nodejs 2>/dev/null
+command -v python >/dev/null 2>&1 && ln -sf ../available/python.sh 40-python
+command -v go >/dev/null 2>&1 && ln -sf ../available/golang.sh 41-golang
+command -v rustc >/dev/null 2>&1 && ln -sf ../available/rust.sh 42-rust
+command -v npm >/dev/null 2>&1 && ln -sf ../available/nodejs.sh 43-nodejs
 
 # Cloud and platform tools (load after all the other stuff)
-command -v op >/dev/null 2>&1 && ln -s ../available/op.sh 50-op 2>/dev/null
-command -v az >/dev/null 2>&1 && ln -s ../available/azure.sh 60-azure 2>/dev/null
-command -v gcloud >/dev/null 2>&1 && ln -s ../available/gcloud.sh 61-gcloud 2>/dev/null
-command -v kubectl >/dev/null 2>&1 && ln -s ../available/kubernetes.sh 70-kubernetes 2>/dev/null
-command -v terraform >/dev/null 2>&1 && ln -s ../available/terraform.sh 71-terraform 2>/dev/null
+command -v op >/dev/null 2>&1 && ln -sf ../available/op.sh 50-op
+command -v az >/dev/null 2>&1 && ln -sf ../available/azure.sh 60-azure
+command -v gcloud >/dev/null 2>&1 && ln -sf ../available/gcloud.sh 61-gcloud
+command -v kubectl >/dev/null 2>&1 && ln -sf ../available/kubernetes.sh 70-kubernetes
+command -v terraform >/dev/null 2>&1 && ln -sf ../available/terraform.sh 71-terraform
