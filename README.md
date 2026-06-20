@@ -111,6 +111,19 @@ Both bash and zsh now share a similar structure optimized for both interactive u
 This approach gives you fast, minimal shells for LLM agents (50-100ms startup) while maintaining full-featured interactive shells
 with all the conveniences you expect. The agent optimization is automatic—no manual switching required.
 
+## Operations
+
+### Refreshing zsh Completions
+
+The zsh completion system caches its state in `~/.cache/zsh/.zcompdump` and loads that file on every shell start rather than
+re-scanning fpath. This keeps startup fast but means completions for newly installed tools won't appear until the cache is cleared.
+
+After installing a new tool, delete the dump file and it will be rebuilt on the next shell start:
+
+```bash
+rm ~/.cache/zsh/.zcompdump
+```
+
 ---
 
 *Until something better comes along...* <span title="@worthyl expects this to happen sooner rather than later">☠️</span>
