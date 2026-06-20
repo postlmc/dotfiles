@@ -3,3 +3,6 @@
 enabled/*
 !enabled/00-bootstrap
 !enabled/mklinks.sh
+
+# Per-machine Claude Code settings (auto-approvals, local paths) — use .claude/settings.json for shared config
+.claude/settings.local.json
