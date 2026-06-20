@@ -39,22 +39,37 @@ docker-flatten() {
 
 ## Found at: http://stackoverflow.com/questions/24481564/how-can-i-find-docker-image-with-specific-tag-in-docker-registry-in-docker-comma
 docker-tags() {
-    if command -v curl &>/dev/null && command -v jq &>/dev/null; then
+    if ! command -v jq &>/dev/null; then
+        echo "Error: jq is required for docker-tags function"
+        return 1
+    fi
+    if command -v xh &>/dev/null; then
+        xh "https://registry.hub.docker.com/v2/repositories/$@/tags/" | jq '."results"[]["name"]' | sort
+    elif command -v curl &>/dev/null; then
         curl -s -S "https://registry.hub.docker.com/v2/repositories/$@/tags/" | jq '."results"[]["name"]' | sort
     else
-        echo "Error: curl and jq are required for docker-tags function"
+        echo "Error: xh or curl is required for docker-tags function"
         return 1
     fi
 }
 
 ## Check the balance of Docker's wonderful rate limit
 docker-rl() {
-    if command -v curl &>/dev/null && command -v jq &>/dev/null; then
+    if ! command -v jq &>/dev/null; then
+        echo "Error: jq is required for docker-rl function"
+        return 1
+    fi
+    local TOKEN
+    if command -v xh &>/dev/null; then
+        TOKEN=$(xh "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+        xh --print h HEAD "https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest" \
+            "Authorization:Bearer $TOKEN" 2>&1 | grep ratelimit-
+    elif command -v curl &>/dev/null; then
         TOKEN=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
         curl --head -H "Authorization: Bearer $TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 |
             grep ratelimit-
     else
-        echo "Error: curl and jq are required for docker-rl function"
+        echo "Error: xh or curl is required for docker-rl function"
         return 1
     fi
 }

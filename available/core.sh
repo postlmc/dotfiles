@@ -5,24 +5,33 @@ export LANGUAGE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-# Color and display aliases
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
+# ls — prefer eza; fall back to coreutils ls
+if command -v eza &>/dev/null; then
+    alias ls='eza'
+    alias ll='eza -l'
+    alias la='eza -la'
+    alias l='eza --classify'
+    alias ls-la='eza -la'
+    alias ls-l='eza -l'
+    alias lso='eza -la --octal-permissions'
+else
+    alias ls='ls --color=auto'
+    alias ll='ls -l'
+    alias la='ls -la'
+    alias l='ls -CF'
+    alias ls-la='ls -la'
+    alias ls-l='ls -l'
+    alias lso="ls -alG | awk '{k=0;for(i=0;i<=8;i++)k+=((substr(\$1,i+2,1)~/[rwx]/)*2^(8-i));if(k)printf(\" %0o \",k);print}'"
+fi
+
+# grep — prefer rg for interactive use; bare grep remains in PATH for scripts
+if command -v rg &>/dev/null; then
+    alias grep='rg'
+else
+    alias grep='grep --color=auto'
+fi
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
-
-# Common ls variations
-alias ll='ls -l'
-alias la='ls -la'
-alias l='ls -CF'
-
-# Common typos
-alias ls-la='ls -la'
-alias ls-l='ls -l'
-
-# Show octal permissions for easier chmod reference
-alias lso="ls -alG | \
-    awk '{k=0;for(i=0;i<=8;i++)k+=((substr(\$1,i+2,1)~/[rwx]/)*2^(8-i));if(k)printf(\" %0o \",k);print}'"
 
 # Prevent accidental file operations (no color involved)
 alias rm='rm -I --preserve-root'
@@ -63,7 +72,9 @@ if command -v curl &>/dev/null; then
 fi
 
 # Network utilities - check for availability
-if command -v dig &>/dev/null; then
+if command -v dog &>/dev/null; then
+    alias digs='dog'
+elif command -v dig &>/dev/null; then
     alias digs='dig +short'
 fi
 
@@ -161,10 +172,23 @@ dedup_path() {
 }
 
 # Set EDITOR with fallback
-if command -v vim &>/dev/null; then
+if command -v nvim &>/dev/null; then
+    export EDITOR="nvim"
+elif command -v vim &>/dev/null; then
     export EDITOR="vim"
 elif command -v vi &>/dev/null; then
     export EDITOR="vi"
+fi
+
+# Pager — bat provides syntax highlighting and line numbers; fall back to less
+if command -v bat &>/dev/null; then
+    export PAGER='bat --paging=always'
+    export MANPAGER='sh -c "col -bx | bat -l man -p"'
+fi
+
+# df — prefer duf for readable summaries with usage bars
+if command -v duf &>/dev/null; then
+    alias df='duf'
 fi
 
 # Common environment variables

@@ -96,15 +96,23 @@ alias kans='kubectl get --all-namespaces $(kubectl api-resources | awk '\''$4~/t
 
 ka() { kubectl "$@" --all-namespaces; }
 kdr() { kubectl "$@" --dry-run=client -o yaml; }
-ke() { kubectl explain "${1}" --recursive | less; }
+if command -v bat &>/dev/null; then
+    ke() { kubectl explain "${1}" --recursive | bat --paging=always --language=yaml; }
+else
+    ke() { kubectl explain "${1}" --recursive | less; }
+fi
 kf() { kubectl "$@" --grace-period=0 --force; }
 knh() { kubectl "$@" --no-headers; }
 kns() { kubectl config set-context --current --namespace="${1}"; }
 
 kcfg() {
     if [ -d ~/.kube ] && [ -s ~/.kube/current-context ]; then
-        echo ~/.kube/current-context:$(find ~/.kube -maxdepth 1 -type f \
-            \( -name '*.yml' -o -name '*.yaml' \) ! -name '.*' ! -name '_*' | tr '\n' ':')
+        if command -v fd &>/dev/null; then
+            echo ~/.kube/current-context:$(fd --max-depth 1 --type f -e yml -e yaml --exclude '_*' . ~/.kube | tr '\n' ':')
+        else
+            echo ~/.kube/current-context:$(find ~/.kube -maxdepth 1 -type f \
+                \( -name '*.yml' -o -name '*.yaml' \) ! -name '.*' ! -name '_*' | tr '\n' ':')
+        fi
     fi
 }
 export KUBECONFIG=$(kcfg)

@@ -8,7 +8,7 @@ alias gitb='for B in $(git branch -a | awk '\''/remotes/ && !/HEAD|master/'\'');
 
 # Git functions
 git-remotes() {
-    for DIR in $(find . -type d); do
+    for DIR in $(command -v fd &>/dev/null && fd --type d . || find . -type d); do
         [ -d "$DIR"/.git ] &&
             (cd "$DIR" && printf "${DIR}: [%s] %s\n" $(git remote -v | awk '{print $1" "$2}' | uniq))
     done
@@ -20,22 +20,31 @@ getgit() {
         if [[ -d .git ]]; then
             printf "${PWD}, %s\n" $(git config --get remote.origin.url)
         else
-            for D in $(find . -maxdepth 1 -mindepth 1 -type d -regex '.*/[^.-].*' -printf '%f\n'); do
+            for D in $(command -v fd &>/dev/null && \
+                fd --max-depth 1 --min-depth 1 --type d . || \
+                find . -maxdepth 1 -mindepth 1 -type d -regex '.*/[^.-].*' -printf '%f\n'); do
                 getgit ${D}
             done
         fi
     )
 }
 
-## Assumes jq is available!
 ghostars() {
-    if ! command -v jq &>/dev/null || ! command -v curl &>/dev/null; then
-        echo "Error: jq and curl are required for ghostars function"
+    local fetcher
+    if command -v xh &>/dev/null; then
+        fetcher='xh'
+    elif command -v curl &>/dev/null; then
+        fetcher='curl -s'
+    else
+        echo "Error: xh or curl is required for ghostars function"
         return 1
     fi
-
+    if ! command -v jq &>/dev/null; then
+        echo "Error: jq is required for ghostars function"
+        return 1
+    fi
     for ORG in $@; do
-        printf "$ORG: %s\n" $(curl -s https://api.github.com/orgs/$ORG/repos |
+        printf "$ORG: %s\n" $($fetcher https://api.github.com/orgs/$ORG/repos |
             jq '[ .[] | .stargazers_count ] | add')
     done
 }
