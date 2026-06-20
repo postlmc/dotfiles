@@ -19,7 +19,7 @@ ssh-alias() {
         done
     fi
 }
-ssh-alias
+[[ -z "${ACTIVE_AGENT}" ]] && ssh-alias
 
 ## For hosts where I immediately sudo su -
 root() { ssh $@ -t "sudo su -"; }
