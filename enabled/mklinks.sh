@@ -59,7 +59,3 @@ command -v az >/dev/null 2>&1 && ln -s ../available/azure.sh 60-azure 2>/dev/nul
 command -v gcloud >/dev/null 2>&1 && ln -s ../available/gcloud.sh 61-gcloud 2>/dev/null
 command -v kubectl >/dev/null 2>&1 && ln -s ../available/kubernetes.sh 70-kubernetes 2>/dev/null
 command -v terraform >/dev/null 2>&1 && ln -s ../available/terraform.sh 71-terraform 2>/dev/null
-
-# Miscellaneous host-specific items (load last to allow overrides)
-[ -f ~/.config/dotfiles.local/shell/${HOST} ] &&
-    ln -s ~/.config/dotfiles.local/shell/${HOST} 99-misc 2>/dev/null

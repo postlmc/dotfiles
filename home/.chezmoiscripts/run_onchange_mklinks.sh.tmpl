@@ -1,0 +1,3 @@
+#!/bin/bash
+# {{ include (joinPath .chezmoi.sourceDir ".." "enabled" "mklinks.sh") | sha256sum }}
+cd "${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi/enabled" && bash mklinks.sh
