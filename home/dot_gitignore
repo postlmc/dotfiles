@@ -57,3 +57,6 @@ _cruft*/
 
 # Direnv files
 .direnv
+
+# Claude Code local settings (written automatically by the Claude Code CLI)
+**/.claude/settings.local.json
