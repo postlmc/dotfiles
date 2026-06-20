@@ -24,7 +24,7 @@ command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
 
 if [[ -z "${ACTIVE_AGENT}" ]]; then
     # Completion system — initialized before modules so they can call compdef/complete
-    fpath=(~/.zsh/completion $fpath)
+    [[ -d ~/.zsh/completion ]] && fpath=(~/.zsh/completion $fpath)
     typeset -U fpath
 
     export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
@@ -32,7 +32,7 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
     zstyle ':completion:*' use-cache on
     zstyle ':completion:*' cache-path "$ZSH_CACHE_DIR"
 
-    autoload -U +X compinit && compinit
+    autoload -U +X compinit && compinit -C -d "$ZSH_CACHE_DIR/.zcompdump"
     autoload -U +X bashcompinit && bashcompinit
 fi
 
