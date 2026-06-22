@@ -1,6 +1,6 @@
 ---
 description: 'Guidelines to write comments to produce more descriptive code.'
-applyTo: '**/*.c, **/*.cpp, **/*.go, **/*.java, **/*.js, **/*.py, **/*.rs, **/*.ts'
+applyTo: '**/*.bash, **/*.c, **/*.cpp, **/*.cs, **/*.go, **/*.java, **/*.js, **/*.jsx, **/*.kt, **/*.lua, **/*.py, **/*.rb, **/*.rs, **/*.sh, **/*.swift, **/*.ts, **/*.tsx, **/*.zsh'
 ---
 
 # Self-explanatory Code Commenting Instructions
