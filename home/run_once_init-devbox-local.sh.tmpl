@@ -1,0 +1,15 @@
+#!/bin/bash
+PLUGIN_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/dotfiles.local/devbox"
+PLUGIN_FILE="${PLUGIN_DIR}/plugin.json"
+
+if [[ ! -f "${PLUGIN_FILE}" ]]; then
+    mkdir -p "${PLUGIN_DIR}"
+    cat > "${PLUGIN_FILE}" << 'EOF'
+{
+    "name": "local-extras",
+    "version": "0.0.1",
+    "packages": []
+}
+EOF
+    echo "Created ${PLUGIN_FILE} — add per-machine devbox packages here"
+fi

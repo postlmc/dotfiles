@@ -116,6 +116,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
     "packages": {{ $pkgs | toJson }},
+    "include": ["path:{{ .chezmoi.homeDir }}/.config/dotfiles.local/devbox"],
     "shell": {
         "init_hook": [],
         "scripts": {
