@@ -1,15 +1,13 @@
 # auto-update-channel = tip
 
 # Name as stated from: ghostty --list-fonts
-{{- if eq .chezmoi.os "darwin" }}
+{{- if eq .chezmoi.hostname "vtmacd275v9w67c" }}
+font-family = FiraCode Nerd Font
+{{- else }}
 font-family = FiraCode Nerd Font Light
-font-size = 14.5
-font-feature = +liga,+dlig,+calt
-{{- else if eq .chezmoi.os "linux" }}
-font-family = FiraCode Nerd Font Light
-font-size = 14.5
-font-feature = +liga,+dlig,+calt
 {{- end }}
+font-size = 14.5
+font-feature = +liga,+dlig,+calt
 
 # To preview, use: ghostty +list-themes
 theme = dracula
