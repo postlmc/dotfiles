@@ -19,12 +19,26 @@ layout_uv() {
     export VIRTUAL_ENV
 }
 
-# Devbox integration with direnv:
-#
-# To use Devbox with direnv, you do NOT need to add a function here.
-# Instead, in each project where you want Devbox integration, run:
-#   devbox generate direnv
-# This will create a .envrc file containing:
-#   eval "$(devbox generate direnv --print-envrc)"
-#
-# See: https://www.jetify.com/devbox/docs/ide_configuration/direnv/
+# Activate a project devbox environment and re-add Homebrew to PATH.
+# devbox shellenv prepends nix store paths without preserving the Homebrew prefix,
+# so PATH_add restores it after devbox runs. Use in .envrc as: layout devbox
+layout_devbox() {
+    eval "$(devbox shellenv --init-hook --install --no-refresh-alias)"
+    watch_file devbox.json devbox.lock
+    [[ -n "${HOMEBREW_PREFIX}" && -d "${HOMEBREW_PREFIX}/bin" && ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]] && PATH_add "${HOMEBREW_PREFIX}/bin"
+}
+
+# Load a lifecycle-specific .env file selected by .env.choice, falling back to .env.
+# Create .env.production, .env.development, etc. and write the desired name into
+# .env.choice to switch between them. direnv reloads automatically when .env.choice
+# changes. Use in .envrc as: layout dotenv
+layout_dotenv() {
+    local env_file=".env"
+    if [[ -f ".env.choice" ]]; then
+        local choice
+        choice=$(< .env.choice)
+        [[ -f ".env.${choice}" ]] && env_file=".env.${choice}"
+    fi
+    watch_file .env.choice
+    [[ -f "$env_file" ]] && dotenv "$env_file"
+}
