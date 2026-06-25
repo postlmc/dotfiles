@@ -1,0 +1,119 @@
+colourful: true
+
+# Dracula palette
+# Background  #282A36   Foreground  #F8F8F2   Selection  #44475A
+# Comment     #6272A4   Cyan        #8BE9FD   Green      #50FA7B
+# Orange      #FFB86C   Pink        #FF79C6   Purple     #BD93F9
+# Red         #FF5555   Yellow      #F1FA8C
+#
+# Color semantics used throughout:
+#   Foreground #F8F8F2  neutral / unremarkable
+#   Comment    #6272A4  muted / secondary / metadata noise
+#   Cyan       #8BE9FD  navigation (dirs), source code, informational
+#   Purple     #BD93F9  symlinks, timestamps, link counts
+#   Green      #50FA7B  executable, new/added, clean, success
+#   Yellow     #F1FA8C  notable / special (build files, octal, mid-large sizes)
+#   Orange     #FFB86C  caution, modified, archives, large files
+#   Pink       #FF79C6  media (images, video, music), flags, special perms
+#   Red        #FF5555  danger — deleted, broken, root, world-writable, huge
+
+filekinds:
+  normal:       {foreground: "#F8F8F2"}
+  directory:    {foreground: "#8BE9FD"}
+  symlink:      {foreground: "#BD93F9"}
+  pipe:         {foreground: "#6272A4"}
+  block_device: {foreground: "#FFB86C"}
+  char_device:  {foreground: "#FFB86C"}
+  socket:       {foreground: "#6272A4"}
+  special:      {foreground: "#FF79C6"}
+  executable:   {foreground: "#50FA7B"}
+  mount_point:  {foreground: "#8BE9FD"}
+
+perms:
+  user_read:         {foreground: "#50FA7B"}
+  user_write:        {foreground: "#F1FA8C"}
+  user_execute_file: {foreground: "#FF5555"}
+  user_execute_other: {foreground: "#FF5555"}
+  group_read:        {foreground: "#50FA7B"}
+  group_write:       {foreground: "#F1FA8C"}
+  group_execute:     {foreground: "#FF5555"}
+  other_read:        {foreground: "#50FA7B"}
+  other_write:       {foreground: "#F1FA8C"}
+  other_execute:     {foreground: "#FF5555"}
+  special_user_file: {foreground: "#FF79C6"}  # setuid/setgid
+  special_other:     {foreground: "#FF79C6"}  # sticky bit
+  attribute:         {foreground: "#6272A4"}
+
+size:
+  major:       {foreground: "#FFB86C"}  # device major number
+  minor:       {foreground: "#BD93F9"}  # device minor number
+  number_byte: {foreground: "#F8F8F2"}
+  number_kilo: {foreground: "#F8F8F2"}
+  number_mega: {foreground: "#F1FA8C"}
+  number_giga: {foreground: "#FFB86C"}
+  number_huge: {foreground: "#FF5555"}
+  unit_byte:   {foreground: "#6272A4"}
+  unit_kilo:   {foreground: "#6272A4"}
+  unit_mega:   {foreground: "#6272A4"}
+  unit_giga:   {foreground: "#6272A4"}
+  unit_huge:   {foreground: "#6272A4"}
+
+users:
+  user_you:   {foreground: "#FFB86C"}
+  user_root:  {foreground: "#FF5555"}
+  user_other: {foreground: "#FFB86C"}
+  group_yours: {foreground: "#6272A4"}
+  group_other: {foreground: "#6272A4"}
+  group_root: {foreground: "#FF5555"}
+
+links:
+  normal:          {foreground: "#BD93F9"}
+  multi_link_file: {foreground: "#FFB86C"}  # multiple hard links = notable
+
+git:
+  new:        {foreground: "#50FA7B"}
+  modified:   {foreground: "#FFB86C"}
+  deleted:    {foreground: "#FF5555"}
+  renamed:    {foreground: "#8BE9FD"}
+  typechange: {foreground: "#FF79C6"}
+  ignored:    {foreground: "#6272A4"}
+  conflicted: {foreground: "#FF5555"}
+
+git_repo:
+  branch_main:  {foreground: "#8BE9FD"}
+  branch_other: {foreground: "#BD93F9"}
+  git_clean:    {foreground: "#50FA7B"}
+  git_dirty:    {foreground: "#FFB86C"}
+
+security_context:
+  colon: {foreground: "#6272A4"}
+  user:  {foreground: "#F8F8F2"}
+  role:  {foreground: "#BD93F9"}
+  typ:   {foreground: "#6272A4"}
+  range: {foreground: "#FF79C6"}
+
+file_type:
+  image:      {foreground: "#FF79C6"}  # pink for visual media
+  video:      {foreground: "#FF79C6"}
+  music:      {foreground: "#50FA7B"}
+  lossless:   {foreground: "#8BE9FD"}  # lossless audio distinct from lossy
+  crypto:     {foreground: "#FF5555"}  # keys/certs = treat with care
+  document:   {foreground: "#F8F8F2"}
+  compressed: {foreground: "#FFB86C"}
+  temp:       {foreground: "#6272A4"}  # temp files = noise, mute them
+  compiled:   {foreground: "#6272A4"}  # .o, .pyc = noise
+  build:      {foreground: "#F1FA8C"}  # Makefile, Dockerfile = notable
+  source:     {foreground: "#8BE9FD"}
+
+punctuation:         {foreground: "#6272A4"}
+date:                {foreground: "#50FA7B"}
+inode:               {foreground: "#6272A4"}
+blocks:              {foreground: "#6272A4"}
+header:              {foreground: "#F8F8F2"}
+octal:               {foreground: "#F1FA8C"}
+flags:               {foreground: "#FF79C6"}
+
+symlink_path:        {foreground: "#BD93F9"}
+control_char:        {foreground: "#FF5555"}
+broken_symlink:      {foreground: "#FF5555"}
+broken_path_overlay: {foreground: "#FF5555"}

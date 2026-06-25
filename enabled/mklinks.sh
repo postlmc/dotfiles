@@ -8,6 +8,7 @@ ln -sf ../available/core.sh 02-core
 command -v chezmoi >/dev/null 2>&1 && ln -sf ../available/chezmoi.sh 03-chezmoi
 
 # Tools we should have everywhere
+command -v eza >/dev/null 2>&1 && ln -sf ../available/eza.sh 09-eza
 command -v openssl >/dev/null 2>&1 && ln -sf ../available/openssl.sh 10-openssl
 command -v ssh >/dev/null 2>&1 && ln -sf ../available/ssh.sh 11-ssh
 
