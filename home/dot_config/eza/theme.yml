@@ -18,102 +18,102 @@ colourful: true
 #   Red        #FF5555  danger — deleted, broken, root, world-writable, huge
 
 filekinds:
-  normal:       {foreground: "#F8F8F2"}
-  directory:    {foreground: "#8BE9FD"}
-  symlink:      {foreground: "#BD93F9"}
-  pipe:         {foreground: "#6272A4"}
-  block_device: {foreground: "#FFB86C"}
-  char_device:  {foreground: "#FFB86C"}
-  socket:       {foreground: "#6272A4"}
-  special:      {foreground: "#FF79C6"}
-  executable:   {foreground: "#50FA7B"}
-  mount_point:  {foreground: "#8BE9FD"}
+  normal:       {foreground: "#F8F8F2", is_bold: false}
+  directory:    {foreground: "#8BE9FD", is_bold: false}
+  symlink:      {foreground: "#BD93F9", is_bold: false}
+  pipe:         {foreground: "#6272A4", is_bold: false}
+  block_device: {foreground: "#FFB86C", is_bold: false}
+  char_device:  {foreground: "#FFB86C", is_bold: false}
+  socket:       {foreground: "#6272A4", is_bold: false}
+  special:      {foreground: "#FF79C6", is_bold: false}
+  executable:   {foreground: "#50FA7B", is_bold: false}
+  mount_point:  {foreground: "#8BE9FD", is_bold: false}
 
 perms:
-  user_read:         {foreground: "#50FA7B"}
-  user_write:        {foreground: "#F1FA8C"}
-  user_execute_file: {foreground: "#FF5555"}
-  user_execute_other: {foreground: "#FF5555"}
-  group_read:        {foreground: "#50FA7B"}
-  group_write:       {foreground: "#F1FA8C"}
-  group_execute:     {foreground: "#FF5555"}
-  other_read:        {foreground: "#50FA7B"}
-  other_write:       {foreground: "#F1FA8C"}
-  other_execute:     {foreground: "#FF5555"}
-  special_user_file: {foreground: "#FF79C6"}  # setuid/setgid
-  special_other:     {foreground: "#FF79C6"}  # sticky bit
-  attribute:         {foreground: "#6272A4"}
+  user_read:          {foreground: "#50FA7B", is_bold: false}
+  user_write:         {foreground: "#F1FA8C", is_bold: false}
+  user_execute_file:  {foreground: "#FF5555", is_bold: false}
+  user_execute_other: {foreground: "#FF5555", is_bold: false}
+  group_read:         {foreground: "#50FA7B", is_bold: false}
+  group_write:        {foreground: "#F1FA8C", is_bold: false}
+  group_execute:      {foreground: "#FF5555", is_bold: false}
+  other_read:         {foreground: "#50FA7B", is_bold: false}
+  other_write:        {foreground: "#F1FA8C", is_bold: false}
+  other_execute:      {foreground: "#FF5555", is_bold: false}
+  special_user_file:  {foreground: "#FF79C6", is_bold: false}  # setuid/setgid
+  special_other:      {foreground: "#FF79C6", is_bold: false}  # sticky bit
+  attribute:          {foreground: "#6272A4", is_bold: false}
 
 size:
-  major:       {foreground: "#FFB86C"}  # device major number
-  minor:       {foreground: "#BD93F9"}  # device minor number
-  number_byte: {foreground: "#F8F8F2"}
-  number_kilo: {foreground: "#F8F8F2"}
-  number_mega: {foreground: "#F1FA8C"}
-  number_giga: {foreground: "#FFB86C"}
-  number_huge: {foreground: "#FF5555"}
-  unit_byte:   {foreground: "#6272A4"}
-  unit_kilo:   {foreground: "#6272A4"}
-  unit_mega:   {foreground: "#6272A4"}
-  unit_giga:   {foreground: "#6272A4"}
-  unit_huge:   {foreground: "#6272A4"}
+  major:       {foreground: "#FFB86C", is_bold: false}  # device major number
+  minor:       {foreground: "#BD93F9", is_bold: false}  # device minor number
+  number_byte: {foreground: "#F8F8F2", is_bold: false}
+  number_kilo: {foreground: "#F8F8F2", is_bold: false}
+  number_mega: {foreground: "#F1FA8C", is_bold: false}
+  number_giga: {foreground: "#FFB86C", is_bold: false}
+  number_huge: {foreground: "#FF5555", is_bold: false}
+  unit_byte:   {foreground: "#6272A4", is_bold: false}
+  unit_kilo:   {foreground: "#6272A4", is_bold: false}
+  unit_mega:   {foreground: "#6272A4", is_bold: false}
+  unit_giga:   {foreground: "#6272A4", is_bold: false}
+  unit_huge:   {foreground: "#6272A4", is_bold: false}
 
 users:
-  user_you:   {foreground: "#FFB86C"}
-  user_root:  {foreground: "#FF5555"}
-  user_other: {foreground: "#FFB86C"}
-  group_yours: {foreground: "#6272A4"}
-  group_other: {foreground: "#6272A4"}
-  group_root: {foreground: "#FF5555"}
+  user_you:    {foreground: "#FFB86C", is_bold: false}
+  user_root:   {foreground: "#FF5555", is_bold: false}
+  user_other:  {foreground: "#FFB86C", is_bold: false}
+  group_yours: {foreground: "#6272A4", is_bold: false}
+  group_other: {foreground: "#6272A4", is_bold: false}
+  group_root:  {foreground: "#FF5555", is_bold: false}
 
 links:
-  normal:          {foreground: "#BD93F9"}
-  multi_link_file: {foreground: "#FFB86C"}  # multiple hard links = notable
+  normal:          {foreground: "#BD93F9", is_bold: false}
+  multi_link_file: {foreground: "#FFB86C", is_bold: false}  # multiple hard links = notable
 
 git:
-  new:        {foreground: "#50FA7B"}
-  modified:   {foreground: "#FFB86C"}
-  deleted:    {foreground: "#FF5555"}
-  renamed:    {foreground: "#8BE9FD"}
-  typechange: {foreground: "#FF79C6"}
-  ignored:    {foreground: "#6272A4"}
-  conflicted: {foreground: "#FF5555"}
+  new:        {foreground: "#50FA7B", is_bold: false}
+  modified:   {foreground: "#FFB86C", is_bold: false}
+  deleted:    {foreground: "#FF5555", is_bold: false}
+  renamed:    {foreground: "#8BE9FD", is_bold: false}
+  typechange: {foreground: "#FF79C6", is_bold: false}
+  ignored:    {foreground: "#6272A4", is_bold: false}
+  conflicted: {foreground: "#FF5555", is_bold: false}
 
 git_repo:
-  branch_main:  {foreground: "#8BE9FD"}
-  branch_other: {foreground: "#BD93F9"}
-  git_clean:    {foreground: "#50FA7B"}
-  git_dirty:    {foreground: "#FFB86C"}
+  branch_main:  {foreground: "#8BE9FD", is_bold: false}
+  branch_other: {foreground: "#BD93F9", is_bold: false}
+  git_clean:    {foreground: "#50FA7B", is_bold: false}
+  git_dirty:    {foreground: "#FFB86C", is_bold: false}
 
 security_context:
-  colon: {foreground: "#6272A4"}
-  user:  {foreground: "#F8F8F2"}
-  role:  {foreground: "#BD93F9"}
-  typ:   {foreground: "#6272A4"}
-  range: {foreground: "#FF79C6"}
+  colon: {foreground: "#6272A4", is_bold: false}
+  user:  {foreground: "#F8F8F2", is_bold: false}
+  role:  {foreground: "#BD93F9", is_bold: false}
+  typ:   {foreground: "#6272A4", is_bold: false}
+  range: {foreground: "#FF79C6", is_bold: false}
 
 file_type:
-  image:      {foreground: "#FF79C6"}  # pink for visual media
-  video:      {foreground: "#FF79C6"}
-  music:      {foreground: "#50FA7B"}
-  lossless:   {foreground: "#8BE9FD"}  # lossless audio distinct from lossy
-  crypto:     {foreground: "#FF5555"}  # keys/certs = treat with care
-  document:   {foreground: "#F8F8F2"}
-  compressed: {foreground: "#FFB86C"}
-  temp:       {foreground: "#6272A4"}  # temp files = noise, mute them
-  compiled:   {foreground: "#6272A4"}  # .o, .pyc = noise
-  build:      {foreground: "#F1FA8C"}  # Makefile, Dockerfile = notable
-  source:     {foreground: "#8BE9FD"}
+  image:      {foreground: "#FF79C6", is_bold: false}  # pink for visual media
+  video:      {foreground: "#FF79C6", is_bold: false}
+  music:      {foreground: "#50FA7B", is_bold: false}
+  lossless:   {foreground: "#8BE9FD", is_bold: false}  # lossless audio distinct from lossy
+  crypto:     {foreground: "#FF5555", is_bold: false}  # keys/certs = treat with care
+  document:   {foreground: "#F8F8F2", is_bold: false}
+  compressed: {foreground: "#FFB86C", is_bold: false}
+  temp:       {foreground: "#6272A4", is_bold: false}  # temp files = noise, mute them
+  compiled:   {foreground: "#6272A4", is_bold: false}  # .o, .pyc = noise
+  build:      {foreground: "#F1FA8C", is_bold: false}  # Makefile, Dockerfile = notable
+  source:     {foreground: "#8BE9FD", is_bold: false}
 
-punctuation:         {foreground: "#6272A4"}
-date:                {foreground: "#50FA7B"}
-inode:               {foreground: "#6272A4"}
-blocks:              {foreground: "#6272A4"}
-header:              {foreground: "#F8F8F2"}
-octal:               {foreground: "#F1FA8C"}
-flags:               {foreground: "#FF79C6"}
+punctuation:         {foreground: "#6272A4", is_bold: false}
+date:                {foreground: "#50FA7B", is_bold: false}
+inode:               {foreground: "#6272A4", is_bold: false}
+blocks:              {foreground: "#6272A4", is_bold: false}
+header:              {foreground: "#F8F8F2", is_bold: false}
+octal:               {foreground: "#F1FA8C", is_bold: false}
+flags:               {foreground: "#FF79C6", is_bold: false}
 
-symlink_path:        {foreground: "#BD93F9"}
-control_char:        {foreground: "#FF5555"}
-broken_symlink:      {foreground: "#FF5555"}
-broken_path_overlay: {foreground: "#FF5555"}
+symlink_path:        {foreground: "#BD93F9", is_bold: false}
+control_char:        {foreground: "#FF5555", is_bold: false}
+broken_symlink:      {foreground: "#FF5555", is_bold: false}
+broken_path_overlay: {foreground: "#FF5555", is_bold: false}
