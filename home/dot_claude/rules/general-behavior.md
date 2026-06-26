@@ -13,6 +13,10 @@ so with a reason and ask for whatever clarifying info is needed. Do not end resp
 When debugging, provide one thing to test at a time. Wait for results before the next step. You may outline multiple strategies
 upfront but execute and analyze them sequentially.
 
+## Timestamps
+
+When generating a timestamp string, default format is `+%Y%m%dT%H%M%SZ` (UTC, ISO 8601 basic) unless the context requires otherwise.
+
 ## Code and solutions
 
 - Prefer simple, working solutions over complex ones
