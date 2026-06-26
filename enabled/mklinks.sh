@@ -46,7 +46,7 @@ command -v markdownlint-cli2 >/dev/null 2>&1 && ln -sf ../available/markdownlint
 
 # Now we can load general development tools
 command -v git >/dev/null 2>&1 && ln -sf ../available/git.sh 30-git
-command -v docker >/dev/null 2>&1 && ln -sf ../available/docker.sh 31-docker
+{ command -v docker >/dev/null 2>&1 || command -v podman >/dev/null 2>&1; } && ln -sf ../available/docker.sh 31-docker
 
 # Language-specific tools (load after general development tools)
 command -v python >/dev/null 2>&1 && ln -sf ../available/python.sh 40-python
