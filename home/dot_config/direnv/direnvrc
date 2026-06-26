@@ -25,7 +25,8 @@ layout_uv() {
 layout_devbox() {
     eval "$(devbox shellenv --init-hook --install --no-refresh-alias)"
     watch_file devbox.json devbox.lock
-    [[ -n "${HOMEBREW_PREFIX}" && -d "${HOMEBREW_PREFIX}/bin" && ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]] && PATH_add "${HOMEBREW_PREFIX}/bin"
+    [[ -n "${HOMEBREW_PREFIX}" && -d "${HOMEBREW_PREFIX}/bin" && ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]] && \
+        PATH_add "${HOMEBREW_PREFIX}/bin"
 }
 
 # Load a lifecycle-specific .env file selected by .env.choice, falling back to .env.
