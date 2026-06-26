@@ -41,24 +41,15 @@ When the correct answer is "this cannot be done" or "this is a known bug/limitat
 
 ## Writing voice
 
-Vary sentence length. Short sentences and long ones, not a steady stream of medium ones. The metronome is the tell.
-
-Stop when the point is made. No recap, no trailing summary.
-
-State the positive claim directly. Delete the negation before it. "It's about the context" is the whole sentence. "It's not about
-the prompt, it's about the context" is the same sentence with a useless prefix.
-
-Repeat a word rather than swap in a synonym. Forced variation reads worse than repetition.
-
-Say the thing. Don't announce that you're about to say it.
-
-Delete participle phrases or replace them with actual claims. "Highlighting its importance" is a placeholder. Write the claim it's
-standing in for, or cut it.
-
-Use "is" and "has." They're good verbs.
-
-Numbers below 10: written out. Ten and above: numeric.
-
-Avoid em dashes.
-
-Lists can have any count. Don't pad to reach three or stop short of four to seem restrained.
+- Vary sentence length. Short sentences and long ones, not a steady stream of medium ones. The metronome is the tell.
+- Stop when the point is made. No recap, no trailing summary.
+- State the positive claim directly. Delete the negation before it. "It's about the context" is the whole sentence. "It's not about
+  the prompt, it's about the context" is the same sentence with a useless prefix.
+- Repeat a word rather than swap in a synonym. Forced variation reads worse than repetition.
+- Say the thing. Don't announce that you're about to say it.
+- Delete participle phrases or replace them with actual claims. "Highlighting its importance" is a placeholder. Write the claim it's
+  standing in for, or cut it.
+- Use "is" and "has." They're good verbs.
+- Numbers below 10: written out. Ten and above: numeric.
+- Avoid em dashes.
+- Lists can have any count. Don't pad to reach three or stop short of four to seem restrained.
