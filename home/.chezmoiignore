@@ -1,5 +1,5 @@
 {{- $ageKeyPath := joinPath .chezmoi.homeDir ".config" "chezmoi" "key.txt" }}
 {{- if not (stat $ageKeyPath) }}
 # age identity key not present — skip encrypted files rather than failing
-.config/dotfiles.local/**
+.config/local/**
 {{- end }}
