@@ -1,0 +1,9 @@
+#!/bin/bash
+input=$(cat)
+[ -z "$input" ] && input="{}"
+printf '%s' "$input" | jq --arg home "$HOME" '. * {
+  "statusLine": {
+    "type": "command",
+    "command": ($home + "/.claude/statusline-command.sh")
+  }
+}'
