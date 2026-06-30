@@ -1,5 +1,5 @@
 #!/bin/bash
-PLUGIN_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/dotfiles.local/devbox"
+PLUGIN_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/local/devbox"
 PLUGIN_FILE="${PLUGIN_DIR}/plugin.json"
 
 if [[ ! -f "${PLUGIN_FILE}" ]]; then

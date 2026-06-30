@@ -30,7 +30,7 @@ Load order:
 
 - `ACTIVE_AGENT` env var: when set, shell configs skip history, plugins, and interactive features — set this in agent/LLM contexts
 - Templates reference `.chezmoi.hostname` (case-preserved), `.chezmoi.os`, and custom data from `~/.config/chezmoi/chezmoi.toml`
-- Host-specific configs live in `~/.config/dotfiles.local/` (gitignored, not managed by chezmoi)
+- Host-specific configs live in `~/.config/local/` (gitignored, not managed by chezmoi)
 - `prepend_path` / `append_path` (defined in `00-bootstrap`) handle idempotent PATH modifications
 - `dot_zshenv` sets XDG base directory variables on macOS (Linux gets these from PAM/systemd)
 

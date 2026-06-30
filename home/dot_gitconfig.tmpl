@@ -2,7 +2,7 @@
 {{- $hostnameParts := splitList "." $hostname }}
 {{- $shortHostname := index $hostnameParts 0 }}
 [include]
-path = ~/.config/dotfiles.local/git/{{ $shortHostname }}
+path = ~/.config/local/git/{{ $shortHostname }}
 
 [core]
 filemode = false
