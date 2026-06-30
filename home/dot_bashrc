@@ -91,7 +91,7 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
     shopt-alias
 
     # Host-specific local config
-    _local_shell="${HOME}/.config/dotfiles.local/shell/$(hostname -s | tr '[:upper:]' '[:lower:]')"
+    _local_shell="${HOME}/.config/local/shell/$(hostname -s | tr '[:upper:]' '[:lower:]')"
     [[ -f "$_local_shell" ]] && . "$_local_shell"
     unset _local_shell
 

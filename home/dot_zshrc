@@ -70,7 +70,7 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
     autoload run-help
 
     # Host-specific local config
-    _local_shell="${HOME}/.config/dotfiles.local/shell/${$(hostname -s):l}"
+    _local_shell="${HOME}/.config/local/shell/${$(hostname -s):l}"
     [[ -f "$_local_shell" ]] && . "$_local_shell"
     unset _local_shell
 
