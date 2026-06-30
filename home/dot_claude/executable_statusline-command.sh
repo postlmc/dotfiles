@@ -52,16 +52,16 @@ fi
 # model display name
 [ -n "$model" ] && add_part "${C_PURPLE}${model}${C_RESET}"
 
-# 5-hour rate limit usage % (only present after first API response for subscribers)
-if [ -n "$five_pct" ]; then
-    pct=$(printf '%.0f' "$five_pct")
-    add_part "${C_FG}5h:${C_ORANGE}${pct}%${C_RESET}"
-fi
-
 # context window used %
 if [ -n "$ctx_pct" ]; then
     ctx=$(printf '%.0f' "$ctx_pct")
     add_part "${C_FG}ctx:${C_YELLOW}${ctx}%${C_RESET}"
+fi
+
+# 5-hour rate limit usage % (only present after first API response for subscribers)
+if [ -n "$five_pct" ]; then
+    pct=$(printf '%.0f' "$five_pct")
+    add_part "${C_FG}5h:${C_ORANGE}${pct}%${C_RESET}"
 fi
 
 # countdown to 5-hour window reset
