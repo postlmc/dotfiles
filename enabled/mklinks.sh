@@ -60,3 +60,6 @@ command -v az >/dev/null 2>&1 && ln -sf ../available/azure.sh 60-azure
 command -v gcloud >/dev/null 2>&1 && ln -sf ../available/gcloud.sh 61-gcloud
 command -v kubectl >/dev/null 2>&1 && ln -sf ../available/kubernetes.sh 70-kubernetes
 command -v terraform >/dev/null 2>&1 && ln -sf ../available/terraform.sh 71-terraform
+
+# AI tools
+command -v claude >/dev/null 2>&1 && ln -sf ../available/claude.sh 80-claude
