@@ -5,5 +5,18 @@ printf '%s' "$input" | jq --arg home "$HOME" '. * {
   "statusLine": {
     "type": "command",
     "command": ($home + "/.claude/statusline-command.sh")
+  },
+  "hooks": {
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ($home + "/.claude/hooks/session-resume.sh")
+          }
+        ]
+      }
+    ]
   }
 }'
