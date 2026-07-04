@@ -81,15 +81,12 @@
     "rmlint@latest"
     "jdupes@latest"
 -}}
-{{- /* Python tooling — uv manages runtimes, no python runtime here */ -}}
 {{- if dig "development" "python" false . -}}
 {{- $pkgs = append $pkgs "uv@latest" -}}
 {{- end -}}
-{{- /* Rust: rustup manages toolchains (like uv for Python) — installed globally */ -}}
 {{- if dig "development" "rust" false . -}}
 {{- $pkgs = append $pkgs "rustup@latest" -}}
 {{- end -}}
-{{- /* Kubernetes tools */ -}}
 {{- if dig "development" "kubernetes" false . -}}
 {{- $pkgs = append $pkgs "kubectl@1.30" -}}
 {{- $pkgs = append $pkgs "kubectx@latest" -}}
@@ -104,26 +101,22 @@
 {{- $pkgs = append $pkgs "kompose@latest" -}}
 {{- $pkgs = append $pkgs "argo@latest" -}}
 {{- end -}}
-{{- /* Azure tools managed by Homebrew per Microsoft's recommendations */ -}}
-{{- /* Terraform */ -}}
 {{- if dig "tools" "terraform" false . -}}
 {{- $pkgs = append $pkgs "terraform@latest" -}}
 {{- $pkgs = append $pkgs "cf-terraforming@latest" -}}
 {{- end -}}
-{{- /* Monitoring / TUI tools */ -}}
 {{- if dig "tools" "monitoring" false . -}}
 {{- $pkgs = append $pkgs "gum@latest" -}}
 {{- end -}}
-{
+#!/bin/bash
+input=$(cat)
+[ -z "$input" ] && input='{}'
+
+printf '%s' "$input" | jq \
+  --arg home "{{ .chezmoi.homeDir }}" \
+  --argjson pkgs '{{ $pkgs | toJson }}' \
+  '. + {
     "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
-    "packages": {{ $pkgs | toJson }},
-    "include": ["path:{{ .chezmoi.homeDir }}/.config/local/devbox"],
-    "shell": {
-        "init_hook": [],
-        "scripts": {
-            "test": [
-                "echo \"Error: no test specified\" && exit 1"
-            ]
-        }
-    }
-}
+    "packages": $pkgs,
+    "include": [("path:" + $home + "/.config/local/devbox")]
+  }'

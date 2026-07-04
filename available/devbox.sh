@@ -11,6 +11,7 @@ gbox-up() {
     _prev_nofile=$(ulimit -n)
     ulimit -n 65536
     devbox global update \
+        && chezmoi apply "${HOME}/.local/share/devbox/global/default/devbox.json" \
         && eval "$(devbox global shellenv --preserve-path-stack -r)" \
         && hash -r \
         && nix-collect-garbage
@@ -30,21 +31,22 @@ box-up() {
 alias nix-gc='nix-collect-garbage'
 alias nix-gc-all='nix-collect-garbage -d'
 
-# Package management — template-aware wrappers keep devbox.json.tmpl in sync
-# Plain add/rm would mutate the live file but get clobbered on next chezmoi apply.
-# These update the chezmoi template first, then apply + install atomically.
-# Only handles unconditional packages (main $pkgs list). Edit the template
+# Package management — wrappers keep the chezmoi modify script in sync.
+# Plain add/rm would mutate the live file but get normalized on next chezmoi apply.
+# These update the modify script source first, then apply + install atomically.
+# Only handles unconditional packages (main $pkgs list). Edit the modify script
 # directly for conditional packages (kubernetes, python, etc.).
 gbox-add() {
-    local pkg="${1}"
+    local pkg="${1:-}"
     [[ -z "$pkg" ]] && { echo "Usage: gbox-add <package>[@version]" >&2; return 1; }
     [[ "$pkg" != *"@"* ]] && pkg="${pkg}@latest"
 
     local tmpl
-    tmpl="$(chezmoi source-path)/dot_local/share/devbox/global/default/devbox.json.tmpl"
+    tmpl="$(chezmoi source-path)/dot_local/share/devbox/global/default/modify_devbox.json.tmpl"
+    [[ -f "$tmpl" ]] || { echo "gbox-add: modify script not found: $tmpl" >&2; return 1; }
 
     if grep -qF "\"${pkg}\"" "$tmpl"; then
-        echo "gbox-add: ${pkg} already in template" >&2
+        echo "gbox-add: ${pkg} already in modify script" >&2
         return 1
     fi
 
@@ -54,11 +56,11 @@ gbox-add() {
     awk -v pkg="    \"${pkg}\"" '
         !inserted && /^-\}\}/ { print pkg; inserted=1 }
         { print }
-    ' "$tmpl" > "$tmp" && mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
+    ' "$tmpl" > "$tmp" && command mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
 
     local _prev_nofile
     _prev_nofile=$(ulimit -n)
-    ulimit -n 65536
+    ulimit -n 65536 2>/dev/null || true
     chezmoi apply \
         && devbox global add "${pkg}" \
         && eval "$(devbox global shellenv --preserve-path-stack -r)" \
@@ -67,27 +69,29 @@ gbox-add() {
 }
 
 gbox-rm() {
-    local pkgbase="${1%%@*}"  # strip @version — match on base name
+    local pkgbase="${1:-}"
+    pkgbase="${pkgbase%%@*}"  # strip @version — match on base name
     [[ -z "$pkgbase" ]] && { echo "Usage: gbox-rm <package>[@version]" >&2; return 1; }
 
     local tmpl
-    tmpl="$(chezmoi source-path)/dot_local/share/devbox/global/default/devbox.json.tmpl"
+    tmpl="$(chezmoi source-path)/dot_local/share/devbox/global/default/modify_devbox.json.tmpl"
+    [[ -f "$tmpl" ]] || { echo "gbox-rm: modify script not found: $tmpl" >&2; return 1; }
 
     if ! grep -qE "\"${pkgbase}(@[^\"]+)?\"" "$tmpl"; then
-        echo "gbox-rm: ${pkgbase} not found in template" >&2
+        echo "gbox-rm: ${pkgbase} not found in modify script" >&2
         return 1
     fi
 
     local tmp
     tmp=$(mktemp) || return 1
     grep -vE "\"${pkgbase}(@[^\"]+)?\"" "$tmpl" > "$tmp" \
-        && mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
+        && command mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
 
     local _prev_nofile
     _prev_nofile=$(ulimit -n)
-    ulimit -n 65536
-    chezmoi apply \
-        && devbox global rm "${pkgbase}" \
+    ulimit -n 65536 2>/dev/null || true
+    devbox global rm "${pkgbase}" \
+        && chezmoi apply \
         && eval "$(devbox global shellenv --preserve-path-stack -r)" \
         && hash -r
     ulimit -n "$_prev_nofile"
