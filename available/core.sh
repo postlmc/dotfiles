@@ -24,12 +24,7 @@ else
     alias lso="ls -alG | awk '{k=0;for(i=0;i<=8;i++)k+=((substr(\$1,i+2,1)~/[rwx]/)*2^(8-i));if(k)printf(\" %0o \",k);print}'"
 fi
 
-# grep — prefer rg for interactive use; bare grep remains in PATH for scripts
-if command -v rg &>/dev/null; then
-    alias grep='rg'
-else
-    alias grep='grep --color=auto'
-fi
+alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
