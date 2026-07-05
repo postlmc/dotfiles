@@ -50,6 +50,9 @@ with no extra padding. One space on each side of cell content. Separator rows us
 | Cursor      | `home/dot_cursor/rules/` | `.mdc`    |
 ```
 
+To produce this formatting, run `align-tables <file>` after editing a table, then lint. It aligns every table in the file and
+leaves fenced code blocks untouched.
+
 ## Documentation Content
 
 - Do not include entire source files in documentation. Include only the sections necessary to explain the subject and link to the
