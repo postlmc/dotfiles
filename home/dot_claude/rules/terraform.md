@@ -8,10 +8,10 @@ paths:
 
 # Terraform Instructions
 
-## Core & Stucture
+## Core & Structure
 
 - Use variables; no hardcoded values
-- Organize into reuseable, versioned modules (semver)
+- Organize into reusable, versioned modules (semver)
 - File structure: `main.tf`, `variables.tf`, `outputs.tf`, `providers.tf`
 - Lock provider versions
 - Tag all resources
@@ -19,7 +19,7 @@ paths:
 
 ## State Management
 
-- Use remote, encryted backends (S3, Azure Blob, GCS) with state locking
+- Use remote, encrypted backends (S3, Azure Blob, GCS) with state locking
 - Isolate environments via workspaces or dedicated backends/state files
 - Monitor for drift and backup state
 
@@ -35,8 +35,3 @@ paths:
 - CI/CD: Require `terraform plan` approval before `apply`. Automate tests (`terratest`).
 - Cache provider plugins locally to speed up CI
 - Document modules with examples and explicit I/O definitions in READMEs
-
-## Resources
-
-- [Terraform Registry](https://registry.terraform.io/)
-- [State Management](https://www.terraform.io/docs/state/index.html)
