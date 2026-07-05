@@ -65,6 +65,7 @@ fix-cert-name() {
     fi
 }
 
+# Decrypting requires the same KDF flags: openssl aes-256-cbc -d -salt -pbkdf2 -iter 600000 -in <file>
 aesenc() {
-    openssl aes-256-cbc -e -salt -in "$1" -out "$1.enc"
+    openssl aes-256-cbc -e -salt -pbkdf2 -iter 600000 -in "$1" -out "$1.enc"
 }
