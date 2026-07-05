@@ -13,12 +13,17 @@ start_agent() {
     /usr/bin/ssh-add
 }
 
+# The saved PID must exist and actually be ssh-agent — a bare pgrep/ps match on an empty or
+# recycled PID could hit an unrelated (or another user's) process
+agent_running() {
+    [ -n "${SSH_AGENT_PID:-}" ] && \
+        ps -p "${SSH_AGENT_PID}" -o comm= 2>/dev/null | grep -q 'ssh-agent$'
+}
+
 # Now run it if needed
 if [ -f "${SSH_ENV}" ]; then
     . "${SSH_ENV}" >/dev/null
-    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ >/dev/null || {
-        start_agent
-    }
+    agent_running || start_agent
 else
     start_agent
 fi
