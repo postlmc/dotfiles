@@ -5,8 +5,9 @@ export LANGUAGE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-# ls — prefer eza; fall back to coreutils ls
-if command -v eza &>/dev/null; then
+# Prefer eza only on a real terminal ([ -t 1 ]); non-TTY shells (Claude Code !, pipes) and
+# hosts without eza get plain ls, since bare eza reads empty stdin and prints nothing there
+if command -v eza &>/dev/null && [ -t 1 ]; then
     alias ls='eza'
     alias ll='eza -l'
     alias la='eza -la'
