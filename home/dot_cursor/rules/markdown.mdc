@@ -8,30 +8,54 @@ alwaysApply: false
 
 ## Line Length
 
-**132 columns is the maximum, not the target.** Prose lines must fill toward 132 characters before wrapping. A line that ends at
-80 or 100 characters when the sentence has more to say violates the intent of the rule, even if it passes the check numerically.
-The markdownlint config sets a ceiling; write toward it.
+**Fill each prose line as close to 132 columns as possible without exceeding it.** 132 is the target width, not merely a ceiling.
+Wrap to the next line only when the following word would push the line past 132. A line that ends at 80 or 100 characters while the
+sentence continues is wrong, even though the linter accepts it.
 
-Exceptions (already configured in `.markdownlint-cli2.jsonc` — no action required):
+The linter does not enforce line length inside code blocks or tables (set in `.markdownlint-cli2.jsonc`):
 
-- Code blocks: no line length limit
-- Tables: no line length limit
+- Code blocks: aim for 100 columns, not the 132 used for prose. Break at a sensible syntactic boundary once a line would exceed
+  100, and keep logical units intact instead of filling to the edge. Exceed 100 only when a break would change behavior or hurt
+  clarity, such as long string literals, URLs, import paths, or regex that cannot be split.
+- Tables: no limit. Let them run to whatever width the aligned columns require.
 
 A line is correctly short only when content genuinely ends there: the last sentence of a paragraph that would exceed 132 combined
 with the next, a list item, a heading, or a similar natural terminal point.
 
+## Headings
+
+Use title case for all headings: capitalize the first word, the last word, and every principal word. Leave articles, coordinating
+conjunctions, and short prepositions lowercase unless they begin or end the heading.
+
 ## Linting Tool
 
-Always validate Markdown with:
+Validate every Markdown file with exactly this command and no other tool:
 
 ```bash
 markdownlint-cli2 --config "${HOME}/.markdownlint-cli2.jsonc" <file>
 ```
 
-**Do not use:** `markdownlint`, `npx markdownlint-cli2`, or `markdownlint-cli2` without the `--config` flag. The bare invocation
-loads different defaults and may auto-modify files.
+This command is mandatory and not optional. Do not use any other linter, formatter, or invocation for Markdown. The tool and the
+config are fixed. Run it after writing or editing any `.md` file and resolve all reported errors before declaring the task
+complete.
 
-Run the linter after writing or editing any `.md` file. Resolve all reported errors before declaring the task complete.
+## Tables
+
+Tables must use column-aligned padding so cells line up visually. Each column is padded to exactly the width of its widest cell,
+with no extra padding. One space on each side of cell content. Separator rows use compact dashes with no spaces. Example:
+
+```markdown
+| Tool        | Path                     | Extension |
+|-------------|--------------------------|-----------|
+| Claude Code | `home/dot_claude/rules/` | `.md`     |
+| Cursor      | `home/dot_cursor/rules/` | `.mdc`    |
+```
+
+## Documentation Content
+
+- Do not include entire source files in documentation. Include only the sections necessary to explain the subject and link to the
+  full file.
+- Emoji are not acceptable in Markdown documentation.
 
 ## Prohibited Workarounds
 
