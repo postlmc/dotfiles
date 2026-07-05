@@ -78,12 +78,10 @@
     "age-plugin-yubikey@latest"
     "cfssl@latest"
     "nodejs@latest"
+    "uv@latest"
     "rmlint@latest"
     "jdupes@latest"
 -}}
-{{- if dig "development" "python" false . -}}
-{{- $pkgs = append $pkgs "uv@latest" -}}
-{{- end -}}
 {{- if dig "development" "rust" false . -}}
 {{- $pkgs = append $pkgs "rustup@latest" -}}
 {{- end -}}
