@@ -28,9 +28,18 @@ alias dimgsize='docker images 2>&1 | awk '\''{sum+=$(NF-1)}END{print sum,"MB"};'
 alias lookl33t='docker run -t --rm --name hollywood --net none jess/hollywood; docker rm -f hollywood; clear'
 
 ## This is potentially dangerous as it deletes volumes!
-alias docker-clean='docker rm $(docker ps -q -f "status=exited") 2>/dev/null \
-    docker rmi $(docker images -q -f "dangling=true") 2>/dev/null \
-    docker volume rm $(docker volume ls -q -f "dangling=true")  2>/dev/null'
+docker-clean() {
+    # command -v can return alias text (docker=podman), so accept only an executable path
+    local rt bin
+    for bin in docker podman; do
+        rt=$(command -v -- "$bin" 2>/dev/null) && [ -x "$rt" ] && break
+        rt=""
+    done
+    [ -n "$rt" ] || { echo "docker or podman required" >&2; return 1; }
+    "$rt" container prune -f
+    "$rt" image prune -f
+    "$rt" volume prune -f
+}
 
 # Docker functions
 docker-flatten() {
