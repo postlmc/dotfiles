@@ -10,12 +10,15 @@ Files deployed to `~/.claude/`:
 
 | Source                                            | Target                                      | Purpose                                                       |
 |---------------------------------------------------|---------------------------------------------|---------------------------------------------------------------|
+| `home/dot_claude/CLAUDE.md`                       | `~/.claude/CLAUDE.md`                       | Stub pointing to `rules/` for behavioral guidelines           |
 | `home/dot_claude/rules/general-behavior.md`       | `~/.claude/rules/general-behavior.md`       | Behavioral guidelines and writing voice; applies to all files |
 | `home/dot_claude/rules/better-comments.md`        | `~/.claude/rules/better-comments.md`        | Commenting guidelines; scoped to source code files            |
+| `home/dot_claude/rules/markdown.md`               | `~/.claude/rules/markdown.md`               | Markdown formatting rules; scoped to `**/*.md`                |
 | `home/dot_claude/rules/python.md`                 | `~/.claude/rules/python.md`                 | Python best practices; scoped to `**/*.py`, `**/*.pyi`        |
 | `home/dot_claude/rules/terraform.md`              | `~/.claude/rules/terraform.md`              | Terraform code style; scoped to `**/*.tf`, `**/*.tfvars`      |
 | `home/dot_claude/commands/git-commit.md`          | `~/.claude/commands/git-commit.md`          | Slash command: review staged changes and commit               |
 | `home/dot_claude/commands/import-from-copilot.md` | `~/.claude/commands/import-from-copilot.md` | Slash command: sync new Copilot files into Claude Code        |
+| `home/dot_claude/commands/import-from-cursor.md`  | `~/.claude/commands/import-from-cursor.md`  | Slash command: sync new Cursor rules into Claude Code         |
 
 Rules use frontmatter (`description`, `paths`) recognized by Claude Code. Commands use frontmatter (`description`, `allowed-tools`).
 
@@ -27,10 +30,12 @@ Files deployed to `~/.copilot/instructions/`:
 |------------------------------------------------------------------|------------------------------------------------------------|----------------------------------------------------|
 | `home/dot_copilot/instructions/general-behavior.instructions.md` | `~/.copilot/instructions/general-behavior.instructions.md` | Behavioral guidelines; applies to all files        |
 | `home/dot_copilot/instructions/better-comments.instructions.md`  | `~/.copilot/instructions/better-comments.instructions.md`  | Commenting guidelines; scoped to source code files |
+| `home/dot_copilot/instructions/markdown.instructions.md`         | `~/.copilot/instructions/markdown.instructions.md`         | Markdown formatting rules                          |
 | `home/dot_copilot/instructions/python.instructions.md`           | `~/.copilot/instructions/python.instructions.md`           | Python best practices                              |
 | `home/dot_copilot/instructions/terraform.instructions.md`        | `~/.copilot/instructions/terraform.instructions.md`        | Terraform code style                               |
 | `home/dot_copilot/instructions/git-commit.prompt.md`             | `~/.copilot/instructions/git-commit.prompt.md`             | Prompt: create a git commit                        |
 | `home/dot_copilot/instructions/import-from-claude.prompt.md`     | `~/.copilot/instructions/import-from-claude.prompt.md`     | Prompt: sync new Claude Code files into Copilot    |
+| `home/dot_copilot/instructions/import-from-cursor.prompt.md`     | `~/.copilot/instructions/import-from-cursor.prompt.md`     | Prompt: sync new Cursor rules into Copilot         |
 
 VS Code also needs its terminal profile configured so that Copilot agent sessions set `ACTIVE_AGENT=Copilot` — this skips shell
 history, plugins, and interactive features that interfere with agent execution. This is handled automatically by a chezmoi script
@@ -44,6 +49,7 @@ Files deployed to `~/.cursor/rules/` (user-level rules, `.mdc` format):
 |----------------------------------------------|----------------------------------------|----------------------------------------------------------|
 | `home/dot_cursor/rules/general-behavior.mdc` | `~/.cursor/rules/general-behavior.mdc` | Behavioral guidelines and writing voice; always applied  |
 | `home/dot_cursor/rules/better-comments.mdc`  | `~/.cursor/rules/better-comments.mdc`  | Commenting guidelines; scoped to source code files       |
+| `home/dot_cursor/rules/markdown.mdc`         | `~/.cursor/rules/markdown.mdc`         | Markdown formatting rules; scoped to `**/*.md`           |
 | `home/dot_cursor/rules/python.mdc`           | `~/.cursor/rules/python.mdc`           | Python best practices; scoped to `**/*.py`, `**/*.pyi`   |
 | `home/dot_cursor/rules/terraform.mdc`        | `~/.cursor/rules/terraform.mdc`        | Terraform code style; scoped to `**/*.tf`, `**/*.tfvars` |
 
@@ -65,9 +71,17 @@ Other Cursor behaviour:
   chezmoi. Set once via **Cursor Settings → Rules** after a new install. Paste the content of `~/.claude/rules/general-behavior.md`
   as a baseline.
 
+## Supporting tools
+
+`home/dot_local/bin/executable_align-tables` deploys to `~/.local/bin/align-tables`. It reformats Markdown tables to the MD060
+aligned style the markdown rule requires, padding cells to display width and skipping fenced code blocks. Agents run it after
+editing a table, then lint. It is stdlib-only Python invoked through a uv-run shebang.
+
 ## Cross-tool sync
 
-Rules and instructions are kept in sync manually. None of these overwrite existing files; all are additive only.
+Rules and instructions are kept in sync manually across all three tools. `AGENTS.md` requires a rule to exist for Claude Code,
+Cursor, and Copilot together unless it is explicitly tool-specific. None of these commands overwrite existing files; all are
+additive only.
 
 | Command / Skill        | Tool           | Pulls from                                | Pushes to                                 |
 |------------------------|----------------|-------------------------------------------|-------------------------------------------|
@@ -87,7 +101,7 @@ Scripts run automatically during `chezmoi apply` when their trigger condition is
 | Script                                                        | Trigger                         | Effect                                                           |
 |---------------------------------------------------------------|---------------------------------|------------------------------------------------------------------|
 | `home/.chezmoiscripts/run_onchange_mklinks.sh.tmpl`           | `enabled/mklinks.sh` changes    | Rebuilds `enabled/` symlinks for shell module loader             |
-| `home/run_onchange_after_install-packages.sh.tmpl`            | Package list changes            | Installs new devbox/Homebrew packages                            |
+| `home/run_onchange_after_install-packages.sh.tmpl`            | Brewfile changes                | Installs Homebrew packages from the Brewfile                     |
 | `home/run_onchange_configure-vscode-copilot-terminal.sh.tmpl` | Copilot terminal script changes | Writes the Copilot terminal profile into VS Code `settings.json` |
 | `home/run_once_init-devbox-local.sh.tmpl`                     | Never re-runs after first apply | Initializes the devbox local environment                         |
 
