@@ -14,7 +14,8 @@ ssh-alias() {
         for FILE in config ${INCS[@]}; do
             for NAME in $(awk '/^Host / && $2 !~ /\*/ {for (i=1;i<=NF;++i) if (i>1 && $i !~ /\./ ) print $i}' \
                 ${HOME}/.ssh/${FILE}); do
-                alias ${NAME}="ssh ${NAME}"
+                # Don't shadow an existing command/alias/function with a host shortname
+                command -v "${NAME}" >/dev/null 2>&1 || alias ${NAME}="ssh ${NAME}"
             done
         done
     fi
