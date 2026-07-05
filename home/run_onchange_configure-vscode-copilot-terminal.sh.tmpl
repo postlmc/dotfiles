@@ -14,9 +14,15 @@ fi
 mkdir -p "$(dirname "$SETTINGS_FILE")"
 [[ -f "$SETTINGS_FILE" ]] || echo '{}' > "$SETTINGS_FILE"
 
+# Live settings.json is JSONC in practice (VS Code writes comments), which jq can't parse.
+# If the key is already present, leave the file alone; delete the key to force a rewrite.
+if grep -q "\"$PROFILE_KEY\"" "$SETTINGS_FILE"; then
+    exit 0
+fi
+
 # jq can't parse JSONC — bail rather than corrupt a settings file that has comments or trailing commas
 if ! jq empty "$SETTINGS_FILE" 2>/dev/null; then
-    echo "Warning: $SETTINGS_FILE is not strict JSON; set $PROFILE_KEY manually" >&2
+    echo "Warning: $SETTINGS_FILE is not strict JSON and $PROFILE_KEY is missing; add it manually" >&2
     exit 0
 fi
 
