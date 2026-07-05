@@ -20,6 +20,8 @@
         },
         "MD033": false,
         "MD036": false,
-        "MD060": "aligned"
+        "MD060": {
+            "style": "aligned"
+        }
     }
 }
