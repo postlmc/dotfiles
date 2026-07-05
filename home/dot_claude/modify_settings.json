@@ -1,7 +1,11 @@
 #!/bin/bash
 input=$(cat)
 [ -z "$input" ] && input="{}"
+# ACTIVE_AGENT trips the minimal agent-shell branch in .zshrc/.bashrc for CC command execution
 printf '%s' "$input" | jq --arg home "$HOME" '. * {
+  "env": {
+    "ACTIVE_AGENT": "claude-code"
+  },
   "statusLine": {
     "type": "command",
     "command": ($home + "/.claude/statusline-command.sh")
