@@ -50,6 +50,17 @@ alias ..3='cd ../../..'
 alias ..4='cd ../../../..'
 alias ..5='cd ../../../../..'
 
+# cd -P resolves dir symlinks; cdl adds file symlinks, landing in the target file's directory
+cdl() {
+    local target
+    target=$(realpath "$1") || return
+    if [ -d "$target" ]; then
+        cd "$target"
+    else
+        cd "$(dirname "$target")"
+    fi
+}
+
 # ISO 8601 is your friend
 
 # Local (server) time
