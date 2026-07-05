@@ -5,24 +5,14 @@ export LANGUAGE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-# ls=eza only on a TTY; under non-TTY (Claude Code, pipes) bare eza prints nothing, so use plain ls
-if command -v eza &>/dev/null && [ -t 1 ]; then
-    alias ls='eza'
-    alias ll='eza -l'
-    alias la='eza -la'
-    alias l='eza --classify'
-    alias ls-la='eza -la'
-    alias ls-l='eza -l'
-    alias lso='eza -la --octal-permissions'
-else
-    alias ls='ls --color=auto'
-    alias ll='ls -l'
-    alias la='ls -la'
-    alias l='ls -CF'
-    alias ls-la='ls -la'
-    alias ls-l='ls -l'
-    alias lso="ls -alG | awk '{k=0;for(i=0;i<=8;i++)k+=((substr(\$1,i+2,1)~/[rwx]/)*2^(8-i));if(k)printf(\" %0o \",k);print}'"
-fi
+# Plain-ls baseline for every shell; eza.sh overrides these on a TTY when eza is installed
+alias ls='ls --color=auto'
+alias ll='ls -l'
+alias la='ls -la'
+alias l='ls -CF'
+alias ls-la='ls -la'
+alias ls-l='ls -l'
+alias lso="ls -alG | awk '{k=0;for(i=0;i<=8;i++)k+=((substr(\$1,i+2,1)~/[rwx]/)*2^(8-i));if(k)printf(\" %0o \",k);print}'"
 
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
