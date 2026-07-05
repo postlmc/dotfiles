@@ -141,8 +141,8 @@ data flags and must be added or removed by editing the modify script directly:
 
 Claude Code sessions are ephemeral by default — closing the terminal loses the session ID and with it the conversation history,
 tool call record, and everything Claude was tracking. The hook-based resume approach ([credit: erikzaadi][session-resume-ref])
-recovers automatically: a `SessionEnd` hook writes the resume command to a `.ccid` file in the project directory when a session
-ends, and the `c()` shell function reads it back on the next invocation.
+recovers automatically: a `SessionEnd` hook writes the session ID to a `.ccid` file in the project directory when a session ends,
+and the `c()` shell function reads it back and resumes that session on the next invocation.
 
 ```bash
 c          # resumes the last session in this directory if .ccid exists; starts fresh otherwise

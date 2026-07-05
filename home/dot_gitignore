@@ -60,3 +60,6 @@ _cruft*/
 
 # Claude Code local settings (written automatically by the Claude Code CLI)
 **/.claude/settings.local.json
+
+# Claude Code session-resume stash written by the SessionEnd hook
+.ccid
