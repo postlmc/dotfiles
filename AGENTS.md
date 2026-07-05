@@ -3,12 +3,12 @@
 ## Repository structure
 
 - `.chezmoiroot` points to `home/` — all managed dotfiles live under `home/`
-- File naming: `dot_` prefix → `.` in target, `.tmpl` suffix → processed as Go template, `run_once_before_` prefix → script runs
-  once before apply
+- File naming: `dot_` prefix → `.` in target; `.tmpl` suffix → processed as Go template; `run_once_before_` → script runs once
+  before apply
 
 ## Modular shell configuration
 
-`available/` and `enabled/` implement Apache/Nginx-style modular shell config:
+`available/` and `enabled/` implement modular shell config:
 
 - `available/`: Shell config modules (aliases, functions, env vars) grouped by tool
 - `enabled/`: Symlinks into `available/` with numeric prefixes controlling load order
@@ -18,13 +18,13 @@ installed tools. Never commit symlinks from `enabled/` to git.
 
 Load order:
 
-- `00-09`: Bootstrap and universal tools (`prepend_path`/`append_path` helpers, core, chezmoi, eza)
-- `10-19`: Core tools (openssl, ssh, ssh-agent on Linux)
-- `20-29`: Package managers and OS-specific (homebrew, devbox, linux, rpi, tailscale, darwin)
-- `30-39`: Dev tools (git, docker)
-- `40-49`: Languages and linting (python, go, rust, nodejs, markdownlint)
-- `50-59`: Identity and secrets (1Password op)
-- `60-79`: Cloud/platform (azure, gcloud, kubernetes, terraform)
+- `00-09`: Bootstrap and universal tools
+- `10-19`: Core tools
+- `20-29`: Package managers and OS-specific
+- `30-39`: Dev tools
+- `40-49`: Languages and linting
+- `50-59`: Identity and secrets
+- `60-79`: Cloud/platform
 
 ## Key conventions
 
@@ -44,16 +44,16 @@ Load order:
 
 Project `.envrc` files should use these layouts rather than raw `eval "$(devbox ...)"` calls.
 
-## Notable managed configs
+## Agent rules and instructions
 
-- `home/dot_config/eza/theme.yml` — Dracula palette eza theme; `available/eza.sh` sets `EZA_CONFIG_DIR`
-- `home/dot_config/ghostty/config.tmpl` — per-host font weight via `.chezmoi.hostname`
-- `home/dot_config/direnv/direnvrc` — direnv stdlib extensions (layouts above)
-- `home/dot_local/share/devbox/global/default/devbox.json.tmpl` — global devbox packages, conditionally includes kubernetes, rust,
-  python, terraform tooling based on chezmoi data
+Rules and instructions must be published for all three supported tools unless a rule is explicitly tool-specific. When adding or
+updating a rule, update all three variants together:
 
-## Session resumption
+| Tool        | Path                             | Extension          |
+|-------------|----------------------------------|--------------------|
+| Claude Code | `home/dot_claude/rules/`         | `.md`              |
+| Cursor      | `home/dot_cursor/rules/`         | `.mdc`             |
+| Copilot     | `home/dot_copilot/instructions/` | `.instructions.md` |
 
-A `SessionEnd` hook writes `claude --resume <session_id>` to `.ccid` in the project's working directory. The `c()` shell function
-in `available/claude.sh` reads `.ccid` on invocation, resumes the session, and deletes the file. Falls back to a fresh `claude`
-session if no `.ccid` is present. `.ccid` is gitignored globally.
+Content bodies are identical across all three; only frontmatter differs. A rule that intentionally omits one or two tools must
+include a comment in that rule file explaining the reason.
