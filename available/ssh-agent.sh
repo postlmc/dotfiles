@@ -2,6 +2,9 @@
 
 command -v ssh-agent >/dev/null 2>&1 || return
 
+# An agent is already available (e.g. forwarded) — don't spawn another or clobber its socket
+[ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "${SSH_AUTH_SOCK}" ] && return
+
 # (Adapted from: http://mah.everybody.org/docs/ssh)
 SSH_ENV="${HOME}/.ssh/environment"
 
