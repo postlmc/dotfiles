@@ -54,5 +54,6 @@ Project `.envrc` files should use these layouts rather than raw `eval "$(devbox 
 
 ## Session resumption
 
-`.ccid` in the repo root contains the current Claude Code session ID. `.envrc` adds `.bin/` to PATH, which provides a `clr`
-command that runs `claude --resume $(cat .ccid)`.
+A `SessionEnd` hook writes `claude --resume <session_id>` to `.ccid` in the project's working directory. The `c()` shell function
+in `available/claude.sh` reads `.ccid` on invocation, resumes the session, and deletes the file. Falls back to a fresh `claude`
+session if no `.ccid` is present. `.ccid` is gitignored globally.
