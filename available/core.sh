@@ -5,8 +5,7 @@ export LANGUAGE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-# Prefer eza only on a real terminal ([ -t 1 ]); non-TTY shells (Claude Code !, pipes) and
-# hosts without eza get plain ls, since bare eza reads empty stdin and prints nothing there
+# ls=eza only on a TTY; under non-TTY (Claude Code, pipes) bare eza prints nothing, so use plain ls
 if command -v eza &>/dev/null && [ -t 1 ]; then
     alias ls='eza'
     alias ll='eza -l'
@@ -29,11 +28,15 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
-# Prevent accidental file operations (no color involved)
-alias rm='rm -I --preserve-root'
-alias mv='mv -i'
-alias cp='cp -i'
-alias ln='ln -i'
+# -i/-I need a TTY to answer the prompt; non-TTY reads EOF and aborts, so gate on [ -t 0 ]
+if [ -t 0 ]; then
+    alias rm='rm -I --preserve-root'
+    alias mv='mv -i'
+    alias cp='cp -i'
+    alias ln='ln -i'
+else
+    alias rm='rm --preserve-root'
+fi
 alias chown='chown --preserve-root'
 alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
