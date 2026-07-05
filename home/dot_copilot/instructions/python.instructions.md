@@ -7,7 +7,7 @@ applyTo: '**/*.py, **/*.pyi'
 
 ## Core Standards
 
-Write concise, idiomatic code following **PEP 8** and **PEP 257**. Indent with 4 spaces and limit lines to 132 characters. Ensure
+Write concise, idiomatic code following **PEP 8** and **PEP 257**. Indent with 4 spaces and limit lines to 100 characters. Ensure
 all functions have complete type annotations (using the `typing` module where necessary) and docstrings. Break complex logic into
 manageable functions.
 
