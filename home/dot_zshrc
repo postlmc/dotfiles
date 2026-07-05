@@ -91,7 +91,7 @@ else
     export NO_COLOR=1
     export TERM=dumb
     export PAGER=cat
-    export GIT_PAGER=ca
+    export GIT_PAGER=cat
 
     export CLICOLOR=0
     export LC_ALL=C
