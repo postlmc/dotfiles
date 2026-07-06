@@ -27,7 +27,8 @@ if [[ -z "${ACTIVE_AGENT}" ]]; then
     [[ -d ~/.zsh/completion ]] && fpath=(~/.zsh/completion $fpath)
     typeset -U fpath
 
-    export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+    # Not exported — a bash child inheriting it would source zsh completions (see kubernetes.sh, op.sh)
+    ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
     [[ ! -d "$ZSH_CACHE_DIR" ]] && mkdir -p "$ZSH_CACHE_DIR"
     zstyle ':completion:*' use-cache on
     zstyle ':completion:*' cache-path "$ZSH_CACHE_DIR"
