@@ -65,6 +65,8 @@ Cursor `.mdc` frontmatter uses `globs` (comma-separated string) and `alwaysApply
 Other Cursor behaviour:
 
 - **Agents**: Cursor reads `~/.claude/agents/` natively; no `~/.cursor/agents/` needed.
+- **Commands**: Cursor also reads `~/.claude/commands/` natively, so slash commands like `/git-commit` need no Cursor copy — a
+  duplicate skill would show up twice in the command picker.
 - **Project-level instructions**: `AGENTS.md` in a project root is read natively by Cursor.
 - **User Rules** (global instructions set in the UI): stored in a SQLite database at `~/Library/Application
   Support/Cursor/User/globalStorage/state.vscdb` under the key `aicontext.personalContext`. Not a plain file; not managed by
