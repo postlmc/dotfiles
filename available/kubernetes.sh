@@ -108,17 +108,21 @@ kns() { kubectl config set-context --current --namespace="${1}"; }
 kcfg() {
     if [ -d ~/.kube ] && [ -s ~/.kube/current-context ]; then
         if command -v fd &>/dev/null; then
-            echo ~/.kube/current-context:$(fd --max-depth 1 --type f -e yml -e yaml --exclude '_*' . ~/.kube | tr '\n' ':')
+            echo ~/.kube/current-context:$(fd --max-depth 1 --type f -e yml -e yaml --exclude '_*' . ~/.kube | tr '\n' ':' | sed 's/:$//')
         else
             echo ~/.kube/current-context:$(find ~/.kube -maxdepth 1 -type f \
-                \( -name '*.yml' -o -name '*.yaml' \) ! -name '.*' ! -name '_*' | tr '\n' ':')
+                \( -name '*.yml' -o -name '*.yaml' \) ! -name '.*' ! -name '_*' | tr '\n' ':' | sed 's/:$//')
         fi
     fi
 }
-export KUBECONFIG=$(kcfg)
+# Only set KUBECONFIG when there is something to point at — an empty export can mask ~/.kube/config
+_kcfg=$(kcfg)
+[ -n "$_kcfg" ] && export KUBECONFIG="$_kcfg"
+unset _kcfg
 
-# Completions (cached — delete cache file to regenerate)
-if [[ -n "$ZSH_CACHE_DIR" ]]; then
+# Completions (cached — delete cache file to regenerate); ZSH_VERSION guard keeps zsh-only
+# syntax and zsh completion scripts away from bash
+if [[ -n "$ZSH_VERSION" && -n "$ZSH_CACHE_DIR" ]]; then
     if (( $+commands[kubectl] )); then
         _kc="${ZSH_CACHE_DIR}/kubectl.zsh"
         [[ ! -f "$_kc" ]] && kubectl completion zsh 2>/dev/null > "$_kc"
