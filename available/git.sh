@@ -4,7 +4,7 @@ command -v git >/dev/null 2>&1 || return
 
 # Git aliases
 alias gitv='GIT_SSH_COMMAND="ssh -v" GIT_CURL_VERBOSE=1 GIT_TRACE=1 git'
-alias gitb='for B in $(git branch -a | awk '\''/remotes/ && !/HEAD|master/'\''); do git branch --track ${B#remotes/origin/} $B ; done'
+alias gitb='for B in $(git branch -a | awk '\''/remotes/ && !/HEAD|master|main/'\''); do git branch --track ${B#remotes/origin/} $B ; done'
 
 # Git functions
 git-remotes() {
@@ -16,14 +16,14 @@ git-remotes() {
 
 getgit() {
     (
-        cd ${D}
+        cd "${1:-.}" || return
         if [[ -d .git ]]; then
             printf "${PWD}, %s\n" $(git config --get remote.origin.url)
         else
             for D in $(command -v fd &>/dev/null && \
                 fd --max-depth 1 --min-depth 1 --type d . || \
-                find . -maxdepth 1 -mindepth 1 -type d -regex '.*/[^.-].*' -printf '%f\n'); do
-                getgit ${D}
+                find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name '-*'); do
+                getgit "${D}"
             done
         fi
     )
