@@ -1,6 +1,5 @@
 #!/bin/bash
 
-HOST=$(hostname -s | tr "[:upper:]" "[:lower:]")
 OS=$(uname | awk -F "(_|/|-)" '{print tolower($1)}')
 
 # Core shell configuration (loaded early as other files may depend on it)
