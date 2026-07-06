@@ -3,8 +3,9 @@
 ## Repository structure
 
 - `.chezmoiroot` points to `home/` — all managed dotfiles live under `home/`
-- File naming: `dot_` prefix → `.` in target; `.tmpl` suffix → processed as Go template; `run_once_before_` → script runs once
-  before apply
+- File naming: `dot_` prefix → `.` in target; `.tmpl` suffix → processed as Go template; `run_once_` → script runs once ever;
+  `run_onchange_` → script re-runs when its rendered content (including hashed includes) changes; an optional `before_`/`after_`
+  segment orders scripts relative to file application
 
 ## Modular shell configuration
 
@@ -25,6 +26,7 @@ Load order:
 - `40-49`: Languages and linting
 - `50-59`: Identity and secrets
 - `60-79`: Cloud/platform
+- `80-89`: AI tools
 
 ## Key conventions
 
