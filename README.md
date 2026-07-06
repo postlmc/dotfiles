@@ -53,15 +53,13 @@ chezmoi edit     # Edit a file in your source directory
 
 ## Machine-Specific Config
 
-For variables that change from one machine to another (like your name, email, or a machine-specific identifier), create a
-`~/.config/chezmoi/chezmoi.toml` file:
+`chezmoi init` generates `~/.config/chezmoi/chezmoi.toml` from `.chezmoi.toml.tmpl`, prompting for the flags that genuinely vary
+by machine (AWS tooling, personal vs. work, SDR hardware) and filling in the static data groups (`development`, `cloud`,
+`machine`, `tools`) that templates read via `dig`. To change a machine's profile, edit that file and run `chezmoi apply`.
 
-```toml
-[data]
-name = "Your Name"
-email = "your.email@example.com"
-machine = "work-laptop"
-```
+Identity does not live there: git user/email comes from the per-host include at `~/.config/local/git/<short-hostname>`, and
+host-specific shell config is sourced from `~/.config/local/shell/<short-hostname>`. Files under `~/.config/local/` are
+host-local; the per-host variants checked into the source tree are age-encrypted and only deploy when the machine has the key.
 
 ## Repository Layout
 
@@ -120,7 +118,7 @@ reformats this file in its own style whenever it runs, which would cause format 
 outputs via `jq`, which matches devbox's formatting, so the two stay in sync.
 
 Use the `gbox-*` wrappers in `available/devbox.sh` for all package changes. They update the modify script source first, then
-apply chezmoi and install — keeping the source and the live file in sync atomically:
+reconcile the live environment (the devbox operation plus `chezmoi apply`) so the source and the live file stay in sync:
 
 ```bash
 gbox-add ripgrep          # adds ripgrep@latest — @latest is appended automatically
@@ -130,7 +128,7 @@ gbox-up                   # updates all packages and re-normalizes devbox.json f
 gbox-ls                   # lists currently installed global packages
 ```
 
-**Conditional packages** (kubernetes tooling, terraform, python/uv, rust/rustup) are controlled by `~/.config/chezmoi/chezmoi.toml`
+**Conditional packages** (kubernetes tooling, terraform, rust/rustup) are controlled by `~/.config/chezmoi/chezmoi.toml`
 data flags and must be added or removed by editing the modify script directly:
 `home/dot_local/share/devbox/global/default/modify_devbox.json.tmpl`
 

@@ -9,6 +9,8 @@ recipient = "age1jq0s5w8wl2cr5hla84jt97ewda4ucm3ctclkaep4mf3s5ev74vwqmwfhev"
 {{ end -}}
 
 [data.development]
+# python and golang are read by no template today (uv is a baseline devbox package and
+# golang.sh gates on the go binary) — kept as toggles for future conditionals
 python = true
 golang = true
 rust = true
