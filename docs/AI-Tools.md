@@ -96,6 +96,13 @@ additive only.
 
 All commands stage results in chezmoi and run `chezmoi apply` for the affected directory.
 
+### Known asymmetry: per-command model selection
+
+The Copilot `git-commit.prompt.md` uses `model: claude-haiku-4-5` in its frontmatter to run commits against a cheaper model.
+Claude Code command frontmatter only supports `description` and `allowed-tools` — there is no `model` key. Cursor reads
+`~/.claude/commands/` using the same format and has the same limitation. Until Claude Code adds per-command model selection,
+the Haiku optimization exists only in the Copilot context.
+
 ## Chezmoi scripts
 
 Scripts run automatically during `chezmoi apply` when their trigger condition is met:
