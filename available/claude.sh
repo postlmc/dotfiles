@@ -20,7 +20,7 @@ c() {
     fi
 }
 
-cq() {
+ccq() {
     local model="" OPTIND opt
     while getopts "m:" opt; do
         case $opt in
@@ -33,5 +33,23 @@ cq() {
         claude -p --no-session-persistence --model "$model" "$@"
     else
         claude -p --no-session-persistence "$@"
+    fi
+}
+
+command -v copilot >/dev/null 2>&1 || return
+
+cpq() {
+    local model="" OPTIND opt
+    while getopts "m:" opt; do
+        case $opt in
+            m) model=$OPTARG ;;
+            *) return 1 ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+    if [ -n "$model" ]; then
+        copilot -p "$*" --allow-all-tools --silent --model "$model"
+    else
+        copilot -p "$*" --allow-all-tools --silent
     fi
 }
