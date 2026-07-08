@@ -19,3 +19,19 @@ c() {
         claude "$@"
     fi
 }
+
+cq() {
+    local model="" OPTIND opt
+    while getopts "m:" opt; do
+        case $opt in
+            m) model=$OPTARG ;;
+            *) return 1 ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+    if [ -n "$model" ]; then
+        claude -p --no-session-persistence --model "$model" "$@"
+    else
+        claude -p --no-session-persistence "$@"
+    fi
+}
