@@ -4,7 +4,8 @@ enabled/*
 !enabled/00-bootstrap
 !enabled/mklinks.sh
 
-# Per-machine Claude Code settings (auto-approvals, local paths) — use .claude/settings.json for shared config
+# Per-machine Claude Code settings — both files are personal preference, not shared config
+.claude/settings.json
 .claude/settings.local.json
 
 # Stash file for the session ID for fast resumes
