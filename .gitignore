@@ -8,9 +8,6 @@ enabled/*
 .claude/settings.json
 .claude/settings.local.json
 
-# Stash file for the session ID for fast resumes
-.ccid
-
 # Local scratch space for repo-level dev tools (test scripts, etc.) — not committed
 .bin/
 

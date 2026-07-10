@@ -3,18 +3,11 @@
 
 command -v claude >/dev/null 2>&1 || return
 
-c() {
-    if [[ -f .ccid ]]; then
-        local id
-        id=$(<.ccid)
-        rm -f .ccid
-        # .ccid may come from an untrusted repo — resume only if it looks like a session UUID
-        if [[ "$id" =~ ^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$ ]]; then
-            claude --resume "$id" "$@"
-        else
-            echo "c: ignoring .ccid with unexpected content" >&2
-            claude "$@"
-        fi
+ccr() {
+    # Transcripts for a directory live under its sanitized path ("/" and "." become "-");
+    # claude -c errors when the directory has no history, so probe before choosing
+    if ls "${HOME}/.claude/projects/${PWD//[\/.]/-}/"*.jsonl >/dev/null 2>&1; then
+        claude -c "$@"
     else
         claude "$@"
     fi
@@ -37,6 +30,20 @@ ccq() {
 }
 
 command -v copilot >/dev/null 2>&1 || return
+
+cpr() {
+    local id
+    # Copilot records every session's cwd in its own store; resume the newest one for this
+    # directory. A missed probe (schema change, no history) falls through to a fresh session.
+    id=$(sqlite3 "${HOME}/.copilot/session-store.db" \
+        "SELECT id FROM sessions WHERE cwd = '${PWD//\'/\'\'}' ORDER BY updated_at DESC LIMIT 1;" \
+        2>/dev/null)
+    if [[ "$id" =~ ^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$ ]]; then
+        copilot --resume="$id" "$@"
+    else
+        copilot "$@"
+    fi
+}
 
 cpq() {
     local model="" OPTIND opt

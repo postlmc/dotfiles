@@ -137,24 +137,15 @@ data flags and must be added or removed by editing the modify script directly:
 
 ### Session Resume
 
-Claude Code sessions are ephemeral by default — closing the terminal loses the session ID and with it the conversation history,
-tool call record, and everything Claude was tracking. The hook-based resume approach ([credit: erikzaadi][session-resume-ref])
-recovers automatically: a `SessionEnd` hook writes the session ID to a `.ccid` file in the project directory when a session ends,
-and the `c()` shell function reads it back and resumes that session on the next invocation.
+`ccr` and `cpr` reconnect to the most recent Claude Code or Copilot CLI conversation for the current directory, starting fresh
+when there is none. Neither needs hooks or marker files: each tool already records where its sessions ran. `ccr` probes Claude
+Code's per-directory transcript store (`~/.claude/projects/<sanitized-path>/`) and invokes `claude -c` only when history exists,
+since `-c` errors in a directory without any. `cpr` asks Copilot's session database (`~/.copilot/session-store.db`) for the
+newest session recorded against the directory and hands it to `--resume`. Both degrade gracefully — if either internal storage
+layout changes, the probe misses and you get a fresh session instead of an error.
 
-```bash
-c          # resumes the last session in this directory if .ccid exists; starts fresh otherwise
-c --help   # passes arguments through when no .ccid is present
-```
-
-`.ccid` is gitignored globally so it never ends up committed. The hook fires for any session exit, including crashes and
-timeouts, so the resume file is almost always current.
-
-Worth noting: this is only useful if you don't name your sessions. A named session (`claude --session my-feature`) is immediately
-resumable without any of this machinery. If you're the type who names things, skip the ceremony. If you're the type who isn't,
-this eliminates the "wait, what was that session ID?" problem entirely. Both camps are valid; the nay-sayers are just less fun.
-
-[session-resume-ref]: https://erikzaadi.com/2026/02/15/auto-resume-claude-code-sessions/
+An earlier hook-based approach wrote a `.ccid` marker file at session end; it was retired in favor of the probes once
+`claude -c` covered the resume-by-directory case natively. The git history keeps the details.
 
 ### Refreshing zsh Completions
 
