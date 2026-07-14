@@ -1,13 +1,23 @@
 #!/bin/bash
 input=$(cat)
 [ -z "$input" ] && input="{}"
+
+# Add the rtk PreToolUse rewrite hook only when rtk is on PATH — the hook runs on every Bash
+# call, so a missing binary would break all command execution. Rebuilt idempotently below so
+# repeated applies never duplicate it and a removed rtk strips it back out.
+rtk_present=0
+command -v rtk >/dev/null 2>&1 && rtk_present=1
+
 # ACTIVE_AGENT trips the minimal agent-shell branch in .zshrc/.bashrc for CC command execution
-printf '%s' "$input" | jq --arg home "$HOME" '. * {
-  "env": {
-    "ACTIVE_AGENT": "claude-code"
-  },
-  "statusLine": {
-    "type": "command",
-    "command": ($home + "/.claude/statusline-command.sh")
+printf '%s' "$input" | jq --arg home "$HOME" --argjson rtk "$rtk_present" '
+  . * {
+    "env": { "ACTIVE_AGENT": "claude-code" },
+    "statusLine": { "type": "command", "command": ($home + "/.claude/statusline-command.sh") }
   }
-}'
+  | .hooks.PreToolUse = ((.hooks.PreToolUse // []) | map(select(.hooks[0].command != "rtk hook claude")))
+  | if $rtk == 1
+    then .hooks.PreToolUse += [ { "matcher": "Bash", "hooks": [ { "type": "command", "command": "rtk hook claude" } ] } ]
+    else . end
+  | if (.hooks.PreToolUse | length) == 0 then del(.hooks.PreToolUse) else . end
+  | if .hooks == {} then del(.hooks) else . end
+'
