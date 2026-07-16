@@ -5,3 +5,11 @@ if [[ "$OSTYPE" == darwin* ]]; then
     export XDG_CACHE_HOME="$HOME/.cache"
     export XDG_STATE_HOME="$HOME/.local/state"
 fi
+
+# User bins on PATH for *every* zsh, including non-interactive tool shells that skip .zshrc.
+# .zshrc re-prepends these (line ~47) so they stay ahead of path_helper/devbox/brew reshuffles
+# in interactive shells; prepend_path there dedupes, so the two placements never double up.
+for _dir in "$HOME/.local/bin" "$HOME/bin"; do
+    [[ -d "$_dir" && ":$PATH:" != *":$_dir:"* ]] && export PATH="$_dir:$PATH"
+done
+unset _dir

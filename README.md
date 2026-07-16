@@ -118,6 +118,33 @@ with all the conveniences you expect. The agent optimization is automatic—no m
 
 ## Operational Notes
 
+### PATH in Agent Tool Shells
+
+The shell that runs an agent's tool calls (Claude Code's Bash tool spawns `zsh -c`) is a **non-interactive login** zsh. It reads
+`~/.zshenv` (and `/etc/zprofile`, which runs `path_helper`), but **not `~/.zshrc`**. So the devbox and Homebrew `shellenv` evals
+near the top of `dot_zshrc` never run for a tool shell. What a tool shell actually gets is the PATH it **inherited** from the CC
+process (captured from whatever interactive shell launched `claude`, which did run `.zshrc`) plus the user-bin prepend in
+`dot_zshenv`.
+
+That inheritance is why `dot_zshenv` prepends `~/.local/bin` and `~/bin`: a devbox project entered via direnv recomputes PATH and
+silently drops earlier prepends, so tool shells there lost `~/.local/bin` until `.zshenv` started restoring it unconditionally.
+`dot_zshrc` still re-prepends the same dirs so they stay ahead of `path_helper`/devbox/brew reshuffles in interactive shells;
+`prepend_path` dedupes, so the two placements never double up.
+
+devbox global and Homebrew are deliberately **not** ported into `dot_zshenv`. They reach agents by inheritance in every launch
+context that matters, and the alternatives are worse: running `devbox global shellenv` costs ~120ms on *every* tool call, and its
+PATH contribution is a moving set of virtenv dirs that changes with the global package set, so a hand-copied static path would rot
+silently. Coverage by launch context:
+
+| Tool           | Clean launch (from a terminal) | Project launch (direnv/devbox) | Context-less launch (Spotlight, LaunchAgent) |
+|----------------|--------------------------------|--------------------------------|----------------------------------------------|
+| `~/.local/bin` | inherited                      | restored by `dot_zshenv`       | provided by `dot_zshenv`                     |
+| devbox global  | inherited                      | present via project activation | absent                                       |
+| Homebrew       | inherited                      | inherited                      | absent                                       |
+
+Only the context-less column misses devbox and brew, and launching agents that way is rare here. If that changes, revisit — but
+adding brittle static devbox paths to guard a case you do not hit is speculative complexity worth skipping.
+
 ### Managing Devbox Global Packages
 
 `~/.local/share/devbox/global/default/devbox.json` is managed via a chezmoi modify script rather than a regular template. Devbox
