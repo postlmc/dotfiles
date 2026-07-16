@@ -1,4 +1,5 @@
 # Claude Configuration
 
-See [AGENTS.md](AGENTS.md) for all agent and LLM configuration. Updates should go in that file instead of this one unless the
-updates are are Claude-specific.
+Agent and LLM configuration lives in [AGENTS.md](AGENTS.md) (imported below). Put updates there unless Claude-specific.
+
+@AGENTS.md
