@@ -61,6 +61,13 @@ Identity does not live there: git user/email comes from the per-host include at 
 host-specific shell config is sourced from `~/.config/local/shell/<short-hostname>`. Files under `~/.config/local/` are
 host-local; the per-host variants checked into the source tree are age-encrypted and only deploy when the machine has the key.
 
+Host-local files that need version control but cannot live in this public repo (work configs, host-specific agent files in
+`~/.claude` and friends) belong to a second, private chezmoi instance. This repo delivers its config
+(`~/.config/chezmoi.local/chezmoi.toml`, reusing the same age key when present) and the `cml` wrapper in
+`available/chezmoi-local.sh`. On a new host, enable the module and run `cml-init`: it creates `~/.local/share/chezmoi.local` as
+the source repo and seeds a `run_after_` guard that fails any `cml apply` where both instances claim the same path. Point that
+repo at whatever private remote suits the host and track files with `cml add <path>`.
+
 ## Repository Layout
 
 This repository uses `.chezmoiroot` to relocate the source directory structure. The actual dotfiles are stored in `home/`, while

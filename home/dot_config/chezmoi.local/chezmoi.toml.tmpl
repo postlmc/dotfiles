@@ -1,0 +1,10 @@
+{{- $ageKeyPath := joinPath .chezmoi.homeDir ".config" "chezmoi" "key.txt" -}}
+sourceDir = "{{ .chezmoi.homeDir }}/.local/share/chezmoi.local"
+destDir = "{{ .chezmoi.homeDir }}"
+{{ if stat $ageKeyPath }}
+encryption = "age"
+
+[age]
+identity = "{{ $ageKeyPath }}"
+recipient = "age1jq0s5w8wl2cr5hla84jt97ewda4ucm3ctclkaep4mf3s5ev74vwqmwfhev"
+{{ end -}}
