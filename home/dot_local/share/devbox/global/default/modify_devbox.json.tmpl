@@ -81,8 +81,9 @@
     "uv@latest"
     "rmlint@latest"
     "jdupes@latest"
-    "rtk@latest"
+    "github:NixOS/nixpkgs/389ed85304b281ca7f306cf8a1eb4378651ca44e#rtk"
     "cmux@latest"
+    "herdr@latest"
 -}}
 {{- if dig "development" "rust" false . -}}
 {{- $pkgs = append $pkgs "rustup@latest" -}}
