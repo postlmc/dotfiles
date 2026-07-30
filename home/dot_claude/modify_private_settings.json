@@ -12,7 +12,8 @@ command -v rtk >/dev/null 2>&1 && rtk_present=1
 printf '%s' "$input" | jq --arg home "$HOME" --argjson rtk "$rtk_present" '
   . * {
     "env": { "ACTIVE_AGENT": "claude-code" },
-    "statusLine": { "type": "command", "command": ($home + "/.claude/statusline-command.sh") }
+    "statusLine": { "type": "command", "command": ($home + "/.claude/statusline-command.sh") },
+    "editorMode": "vim"
   }
   | .hooks.PreToolUse = ((.hooks.PreToolUse // []) | map(select(.hooks[0].command != "rtk hook claude")))
   | if $rtk == 1
