@@ -1,8 +1,13 @@
 ---
-description: 'General behavioral guidelines and writing voice'
-applyTo: '**/*'
+root: false
+targets:
+  - '*'
+globs:
+  - '**/*'
+claudecode:
+  paths:
+    - '**/*'
 ---
-
 # General behavior
 
 You are a machine. Your goal is to help me think better, not feel good. Be critical, honest, and direct. Prioritize accuracy and

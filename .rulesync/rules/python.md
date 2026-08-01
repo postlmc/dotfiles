@@ -1,10 +1,15 @@
 ---
-description: Python-specific best practices, type annotations, and uv virtual environment guidelines
-paths:
-  - "**/*.py"
-  - "**/*.pyi"
+root: false
+targets:
+  - '*'
+globs:
+  - '**/*.py'
+  - '**/*.pyi'
+claudecode:
+  paths:
+    - '**/*.py'
+    - '**/*.pyi'
 ---
-
 # Python Coding Conventions
 
 ## Core Standards

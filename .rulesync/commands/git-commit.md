@@ -1,8 +1,10 @@
 ---
+targets:
+  - '*'
 description: Review staged changes and create a git commit
-allowed-tools: Bash
+claudecode:
+  allowed-tools: Bash
 ---
-
 # Git Commit
 
 Review the staged changes and create a git commit.

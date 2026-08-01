@@ -1,0 +1,18 @@
+#!/bin/bash
+# rulesync source hash (forces a re-run whenever a file under .rulesync/ changes):
+{{- range $p := (glob (joinPath .chezmoi.sourceDir ".." ".rulesync" "**" "*.md")) }}
+# {{ $p }}: {{ include $p | sha256sum }}
+{{- end }}
+
+# rulesync isn't distributed via nixpkgs, so it's not a devbox package — run it
+# via npx (Node is already on PATH from devbox global) rather than a global npm
+# install, and pin the version here since generate is unattended.
+command -v npx >/dev/null 2>&1 || exit 0
+
+repo="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
+
+# Cursor rules and Copilot commands don't support global scope in rulesync
+# (checked against v16.5.0's source) — the copilot/commands skip is expected
+# and prints its own message; Cursor stays fully hand-rolled and isn't
+# targeted here at all.
+npx --yes rulesync@16.5.0 generate -g --input-root "$repo" --targets claudecode,copilot --features rules,commands

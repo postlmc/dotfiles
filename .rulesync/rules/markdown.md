@@ -1,9 +1,13 @@
 ---
-description: Markdown formatting rules — line length, linting tool, and prohibited workarounds.
-paths:
-  - "**/*.md"
+root: false
+targets:
+  - '*'
+globs:
+  - '**/*.md'
+claudecode:
+  paths:
+    - '**/*.md'
 ---
-
 # Markdown Formatting
 
 ## Line Length
@@ -70,3 +74,4 @@ Linting errors must be resolved by fixing the content, not by:
 
 If content cannot satisfy a rule, say so and ask. Per-project rule overrides are the user's decision. Model-initiated config
 changes are not acceptable.
+

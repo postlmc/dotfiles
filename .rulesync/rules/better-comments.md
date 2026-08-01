@@ -1,8 +1,47 @@
 ---
-description: 'Guidelines to write comments to produce more descriptive code.'
-applyTo: '**/*.bash, **/*.c, **/*.cpp, **/*.cs, **/*.go, **/*.java, **/*.js, **/*.jsx, **/*.kt, **/*.lua, **/*.py, **/*.rb, **/*.rs, **/*.sh, **/*.swift, **/*.ts, **/*.tsx, **/*.zsh'
+root: false
+targets:
+  - '*'
+globs:
+  - '**/*.bash'
+  - '**/*.c'
+  - '**/*.cpp'
+  - '**/*.cs'
+  - '**/*.go'
+  - '**/*.java'
+  - '**/*.js'
+  - '**/*.jsx'
+  - '**/*.kt'
+  - '**/*.lua'
+  - '**/*.py'
+  - '**/*.rb'
+  - '**/*.rs'
+  - '**/*.sh'
+  - '**/*.swift'
+  - '**/*.ts'
+  - '**/*.tsx'
+  - '**/*.zsh'
+claudecode:
+  paths:
+    - '**/*.bash'
+    - '**/*.c'
+    - '**/*.cpp'
+    - '**/*.cs'
+    - '**/*.go'
+    - '**/*.java'
+    - '**/*.js'
+    - '**/*.jsx'
+    - '**/*.kt'
+    - '**/*.lua'
+    - '**/*.py'
+    - '**/*.rb'
+    - '**/*.rs'
+    - '**/*.sh'
+    - '**/*.swift'
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '**/*.zsh'
 ---
-
 # Self-explanatory Code Commenting Instructions
 
 ## Core Principle

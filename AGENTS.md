@@ -6,6 +6,8 @@
 - File naming: `dot_` prefix → `.` in target; `.tmpl` suffix → processed as Go template; `run_once_` → script runs once ever;
   `run_onchange_` → script re-runs when its rendered content (including hashed includes) changes; an optional `before_`/`after_`
   segment orders scripts relative to file application
+- `.rulesync/` (repo root, outside `home/`) is source material for [rulesync](https://github.com/dyoshikawa/rulesync), not a
+  dotfile itself — see "Agent rules and instructions" below
 
 ## Modular shell configuration
 
@@ -63,14 +65,21 @@ migrate off Homebrew.
 
 ## Agent rules and instructions
 
-Rules and instructions must be published for all three supported tools unless a rule is explicitly tool-specific. When adding or
-updating a rule, update all three variants together:
+Rules are managed by [rulesync](https://github.com/dyoshikawa/rulesync) from a single source, `.rulesync/rules/*.md`, for
+**Claude Code and Copilot only**. `home/.chezmoiscripts/run_onchange_rulesync-generate.sh.tmpl` runs `rulesync generate`
+on every `chezmoi apply` where `.rulesync/` changed, writing `~/.claude/rules/*.md` and `~/.copilot/instructions/*.instructions.md`.
+To change a rule, edit `.rulesync/rules/<name>.md` and run `chezmoi apply` — don't hand-edit the generated files, they get
+overwritten.
 
-| Tool        | Path                             | Extension          |
-|-------------|----------------------------------|--------------------|
-| Claude Code | `home/dot_claude/rules/`         | `.md`              |
-| Cursor      | `home/dot_cursor/rules/`         | `.mdc`             |
-| Copilot     | `home/dot_copilot/instructions/` | `.instructions.md` |
+**Cursor is the exception**: rulesync doesn't support global-scope rules for Cursor (checked against v16.5.0's source —
+`rules-processor.ts` declares `cursor: { supportsGlobal: false }`), so `home/dot_cursor/rules/*.mdc` stays entirely
+hand-maintained, kept in sync by hand with `.rulesync/rules/` content.
 
-Content bodies are identical across all three; only frontmatter differs. A rule that intentionally omits one or two tools must
-include a comment in that rule file explaining the reason.
+Commands work the same way for the one real command, `git-commit`: `.rulesync/commands/git-commit.md` generates
+`~/.claude/commands/git-commit.md`. Copilot's version is hand-maintained at
+`home/dot_copilot/instructions/git-commit.prompt.md` — rulesync doesn't support global-scope commands for Copilot either
+(`commands-processor.ts`: `copilot: { supportsGlobal: false }`, and there's no `copilotcli` command target at all). There's
+no Cursor command surface to mirror.
+
+`rulesync` isn't in nixpkgs, so it isn't a devbox package — it runs via `npx rulesync@<pinned version>`, pinned in the
+run_onchange script itself. Update the pin deliberately (never `@latest`); rulesync ships breaking changes roughly monthly.

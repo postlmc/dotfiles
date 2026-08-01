@@ -1,11 +1,17 @@
 ---
-description: Terraform code style guidelines
-paths:
-  - "**/*.tf"
-  - "**/*.tfvars"
-  - "**/*.tfvars.json"
+root: false
+targets:
+  - '*'
+globs:
+  - '**/*.tf'
+  - '**/*.tfvars'
+  - '**/*.tfvars.json'
+claudecode:
+  paths:
+    - '**/*.tf'
+    - '**/*.tfvars'
+    - '**/*.tfvars.json'
 ---
-
 # Terraform Instructions
 
 ## Core & Structure
