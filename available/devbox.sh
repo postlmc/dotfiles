@@ -58,14 +58,21 @@ gbox-add() {
         { print }
     ' "$tmpl" > "$tmp" && command mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
 
-    local _prev_nofile
+    local devbox_json="${HOME}/.local/share/devbox/global/default/devbox.json"
+    local _prev_nofile _status
     _prev_nofile=$(ulimit -n)
     ulimit -n 65536 2>/dev/null || true
-    chezmoi apply \
+    chezmoi apply "$devbox_json" \
+        && grep -qF "\"${pkg}\"" "$devbox_json" \
         && devbox global add "${pkg}" \
         && eval "$(devbox global shellenv --preserve-path-stack -r)" \
         && hash -r
+    _status=$?
     ulimit -n "$_prev_nofile"
+    if (( _status != 0 )); then
+        echo "gbox-add: aborted — chezmoi apply of devbox.json was skipped or ${pkg} was not installed" >&2
+    fi
+    return "$_status"
 }
 
 gbox-rm() {
@@ -87,14 +94,20 @@ gbox-rm() {
     grep -vE "\"${pkgbase}(@[^\"]+)?\"" "$tmpl" > "$tmp" \
         && command mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
 
-    local _prev_nofile
+    local devbox_json="${HOME}/.local/share/devbox/global/default/devbox.json"
+    local _prev_nofile _status
     _prev_nofile=$(ulimit -n)
     ulimit -n 65536 2>/dev/null || true
     devbox global rm "${pkgbase}" \
-        && chezmoi apply \
+        && chezmoi apply "$devbox_json" \
         && eval "$(devbox global shellenv --preserve-path-stack -r)" \
         && hash -r
+    _status=$?
     ulimit -n "$_prev_nofile"
+    if (( _status != 0 )); then
+        echo "gbox-rm: aborted — chezmoi apply of devbox.json was skipped" >&2
+    fi
+    return "$_status"
 }
 
 alias gbox-ls='devbox global list'
