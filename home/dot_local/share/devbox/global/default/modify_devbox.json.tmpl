@@ -101,10 +101,14 @@
 {{- $pkgs = append $pkgs "cmctl@latest" -}}
 {{- $pkgs = append $pkgs "kompose@latest" -}}
 {{- $pkgs = append $pkgs "argo@latest" -}}
+{{- $pkgs = append $pkgs "kubelogin@latest" -}}
+{{- $pkgs = append $pkgs "pluto@latest" -}}
 {{- end -}}
 {{- if dig "tools" "terraform" false . -}}
 {{- $pkgs = append $pkgs "terraform@latest" -}}
 {{- $pkgs = append $pkgs "cf-terraforming@latest" -}}
+{{- $pkgs = append $pkgs "vault@latest" -}}
+{{- $pkgs = append $pkgs "hcledit@latest" -}}
 {{- end -}}
 {{- if dig "tools" "monitoring" false . -}}
 {{- $pkgs = append $pkgs "gum@latest" -}}

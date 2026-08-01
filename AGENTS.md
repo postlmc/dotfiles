@@ -46,6 +46,21 @@ Load order:
 
 Project `.envrc` files should use these layouts rather than raw `eval "$(devbox ...)"` calls.
 
+## Package management: devbox vs Homebrew
+
+devbox global (`home/dot_local/share/devbox/global/default/modify_devbox.json.tmpl`) is the primary package manager;
+Homebrew is minimized. A package stays on Homebrew only when at least one of these holds:
+
+1. It's a Mac GUI app (cask) — devbox/nix doesn't manage these.
+2. It isn't available in nixpkgs at all.
+3. It has some other complication that blocks a clean migration — e.g. no cached binary on `cache.nixos.org`, forcing an
+   expensive from-source build (seen with `azure-functions-core-tools`, which pulls in the full dotnet SDK).
+
+Use `gbox-add`/`gbox-rm` (defined in `available/devbox.sh`) to add or remove global devbox packages — they keep the modify
+script source in sync with the live install. Run `bin/brew-devbox-overlap` periodically to find Homebrew formulas whose
+binaries are now also provided by devbox global; anything that overlaps and isn't covered by the exceptions above should
+migrate off Homebrew.
+
 ## Agent rules and instructions
 
 Rules and instructions must be published for all three supported tools unless a rule is explicitly tool-specific. When adding or
