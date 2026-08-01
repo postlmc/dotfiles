@@ -26,10 +26,24 @@ echo
 
 echo "=== Corresponding Homebrew formulas ==="
 echo
-printf '%s\n' "${overlap[@]}" \
-    | xargs -I{} brew which-formula {} 2>/dev/null \
-    | sort -u \
-    | sed 's/^/  brew uninstall /'
+formulas=()
+unresolved=()
+for bin in "${overlap[@]}"; do
+    if formula=$(brew which-formula "$bin" 2>/dev/null); then
+        formulas+=("$formula")
+    else
+        unresolved+=("$bin")
+    fi
+done
+printf '%s\n' "${formulas[@]}" | sort -u | sed 's/^/  brew uninstall /'
+
+if (( ${#unresolved[@]} > 0 )); then
+    echo
+    echo "=== No formula match (cask-installed or otherwise unmanaged) ==="
+    echo
+    printf '  %s\n' "${unresolved[@]}"
+fi
+
 echo
 echo "Review before removing — some may still be needed as dependencies"
 echo "or for system-level integration (git, curl, openssl, etc.)."
