@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# Regenerate Claude Code + Copilot agent rules/commands from .rulesync/, verify
+# the hand-maintained Cursor copies are still in body-parity with that source,
+# and lint everything, in one pass. rulesync can't manage Cursor at global scope,
+# so Cursor is the one surface that drifts silently; this is what catches it.
+#
+# Usage: bin/sync-agent-rules [--fix]
+#   (default)  report any Cursor rule whose body has drifted from its .rulesync
+#              source, and exit non-zero if any has
+#   --fix      rewrite each drifted Cursor .mdc body from its .rulesync source
+#              counterpart, preserving the .mdc's own frontmatter
+
+set -euo pipefail
+
+# Keep in sync with the pin in
+# home/.chezmoiscripts/run_onchange_rulesync-generate.sh.tmpl
+RULESYNC_VERSION="16.5.0"
+
+repo="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
+rules_src="$repo/.rulesync/rules"
+commands_src="$repo/.rulesync/commands"
+cursor_src="$repo/home/dot_cursor/rules"
+mdlint_config="${HOME}/.markdownlint-cli2.jsonc"
+
+fix=0
+[[ "${1:-}" == "--fix" ]] && fix=1
+
+# 1. Generate the Claude Code + Copilot live files from the rulesync source.
+#    (Copilot commands + Cursor are skipped by rulesync itself with a message.)
+if command -v npx >/dev/null 2>&1; then
+    npx --yes "rulesync@${RULESYNC_VERSION}" generate -g --input-root "$repo" \
+        --targets claudecode,copilot --features rules,commands
+else
+    echo "sync-agent-rules: npx not found; skipping generate" >&2
+fi
+
+# Body of a frontmatter'd markdown file: everything after the second '---'.
+rule_body() {
+    local f="$1" close
+    close=$(grep -n '^---$' "$f" | sed -n '2p' | cut -d: -f1 || true)
+    [[ -n "$close" ]] || { cat "$f"; return; }
+    tail -n +"$((close + 1))" "$f"
+}
+
+# Normalize for comparison: strip trailing whitespace, then drop leading and
+# trailing blank lines (the .mdc keeps a blank line after its frontmatter that
+# the generated source body does not).
+norm() {
+    sed 's/[[:space:]]*$//' | awk '
+        { line[NR] = $0 }
+        END {
+            s = 1;  while (s <= NR && line[s] == "") s++
+            e = NR; while (e >= s  && line[e] == "") e--
+            for (i = s; i <= e; i++) print line[i]
+        }'
+}
+
+# 2. Cursor body-parity check (each hand-maintained .mdc vs its rulesync source).
+drift=0
+for mdc in "$cursor_src"/*.mdc; do
+    name=$(basename "$mdc" .mdc)
+    src="$rules_src/$name.md"
+    if [[ ! -f "$src" ]]; then
+        echo "DRIFT: $name.mdc has no .rulesync/rules/$name.md source" >&2
+        drift=1
+        continue
+    fi
+    if diff -q <(rule_body "$src" | norm) <(rule_body "$mdc" | norm) >/dev/null; then
+        continue
+    fi
+    if (( fix )); then
+        close=$(grep -n '^---$' "$mdc" | sed -n '2p' | cut -d: -f1 || true)
+        { head -n "$close" "$mdc"; echo; rule_body "$src"; } > "$mdc.tmp"
+        mv "$mdc.tmp" "$mdc"
+        echo "fixed: $name.mdc body synced from .rulesync/rules/$name.md"
+    else
+        echo "DRIFT: $name.mdc body differs from .rulesync/rules/$name.md" >&2
+        drift=1
+    fi
+done
+
+# 3. Lint every source file (not the generated output — that is build product).
+markdownlint-cli2 --config "$mdlint_config" \
+    "$rules_src"/*.md "$commands_src"/*.md "$cursor_src"/*.mdc
+
+if (( drift && ! fix )); then
+    echo >&2
+    echo "sync-agent-rules: Cursor drift found. Re-run with --fix, or edit by hand." >&2
+    exit 1
+fi
+
+echo "sync-agent-rules: ok. Run 'chezmoi apply' to publish any Cursor .mdc changes."
