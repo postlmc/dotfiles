@@ -7,7 +7,7 @@
 # rulesync isn't distributed via nixpkgs, so it's not a devbox package — run it
 # via npx (Node is already on PATH from devbox global) rather than a global npm
 # install, and pin the version here since generate is unattended.
-command -v npx >/dev/null 2>&1 || exit 0
+command -v npx >/dev/null 2>&1 || { echo "rulesync-generate: npx not on PATH, skipping (will retry next apply)" >&2; exit 1; }
 
 repo="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
 
