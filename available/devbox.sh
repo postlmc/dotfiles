@@ -92,16 +92,31 @@ gbox-add() {
 }
 
 gbox-rm() {
-    local pkgbase="${1:-}"
-    pkgbase="${pkgbase%%@*}"  # strip @version — match on base name
-    [[ -z "$pkgbase" ]] && { echo "Usage: gbox-rm <package>[@version]" >&2; return 1; }
+    local pkg="${1:-}"
+    [[ -z "$pkg" ]] && { echo "Usage: gbox-rm <package>[@version]" >&2; return 1; }
+    local pkgbase="${pkg%%@*}"
 
     local tmpl
     tmpl="$(chezmoi source-path)/dot_local/share/devbox/global/default/modify_devbox.json.tmpl"
     [[ -f "$tmpl" ]] || { echo "gbox-rm: modify script not found: $tmpl" >&2; return 1; }
 
-    if ! grep -qE "\"${pkgbase}(@[^\"]+)?\"" "$tmpl"; then
-        echo "gbox-rm: ${pkgbase} not found in modify script" >&2
+    # An explicit @version matches only that entry; a bare name matches any
+    # version — but never several at once (kubectl@1.30 vs kubectl@1.31), since
+    # the removal below is a grep -v that would delete every match at once.
+    local pattern matches
+    if [[ "$pkg" == *"@"* ]]; then
+        pattern="\"${pkg}\""
+    else
+        pattern="\"${pkgbase}(@[^\"]+)?\""
+    fi
+    matches=$(grep -cE "$pattern" "$tmpl")
+    if (( matches == 0 )); then
+        echo "gbox-rm: ${pkg} not found in modify script" >&2
+        return 1
+    fi
+    if (( matches > 1 )); then
+        echo "gbox-rm: ${pkg} matches multiple entries — pass the versioned name:" >&2
+        grep -E "$pattern" "$tmpl" | sed 's/^[[:space:]]*/  /' >&2
         return 1
     fi
 
@@ -111,7 +126,7 @@ gbox-rm() {
 
     local tmp
     tmp=$(mktemp) || { rm -f "$backup"; return 1; }
-    grep -vE "\"${pkgbase}(@[^\"]+)?\"" "$tmpl" > "$tmp" \
+    grep -vE "$pattern" "$tmpl" > "$tmp" \
         && command mv "$tmp" "$tmpl" || { rm -f "$tmp" "$backup"; return 1; }
 
     local devbox_json="${HOME}/.local/share/devbox/global/default/devbox.json"
