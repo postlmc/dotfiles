@@ -57,11 +57,28 @@ Homebrew is minimized. A package stays on Homebrew only when at least one of the
 2. It isn't available in nixpkgs at all.
 3. It has some other complication that blocks a clean migration — e.g. no cached binary on `cache.nixos.org`, forcing an
    expensive from-source build (seen with `azure-functions-core-tools`, which pulls in the full dotnet SDK).
+4. A vendor ships it as supporting tooling for another Homebrew-managed package — e.g. `kubelogin`, which Microsoft
+   expects alongside the Azure CLI.
 
-Use `gbox-add`/`gbox-rm` (defined in `available/devbox.sh`) to add or remove global devbox packages — they keep the modify
-script source in sync with the live install. Run `bin/brew-devbox-overlap` periodically to find Homebrew formulas whose
-binaries are now also provided by devbox global; anything that overlaps and isn't covered by the exceptions above should
-migrate off Homebrew.
+Use `gbox-add`/`gbox-rm` (defined in `available/devbox.sh`) to add or remove global devbox packages, and `brew-add`/`brew-rm`
+(`available/homebrew.sh`, `--cask` for casks) for Homebrew. Both pairs edit the chezmoi template first, then apply and
+install, rolling the template back if the package manager fails — so the source and the live install never diverge. They only
+handle the unconditional sections; edit the template directly for packages behind a conditional (azure, kubernetes, etc.).
+
+Homebrew drift needs active pruning: `brew bundle` only ever *adds*, so deleting a Brewfile line never uninstalls anything.
+`brew-prune` shows what is installed but undeclared (`--force` to actually remove it), `brew-check` verifies the Brewfile is
+satisfied, and `brew-sync` installs what is missing. Run `bin/brew-devbox-overlap` periodically to find Homebrew formulas
+whose binaries are now also provided by devbox global; anything that overlaps and isn't covered by the exceptions above
+should migrate off Homebrew.
+
+The two templates must never declare the same package. To check, render both and compare base names — this is the failure
+mode that keeps recurring, because `chezmoi apply` faithfully reinstalls both copies and Homebrew's `bin` shadows devbox's.
+
+VS Code extensions are deliberately **not** in the Brewfile. `brew bundle` supports a `vscode` verb, but it only shells out to
+`code --install-extension`, and it resolves the first of `code`, `codium`, `cursor`, `code-insiders` on `PATH` — so it silently
+installs into whichever editor answers first. It also reports success when an extension fails to install; only `brew bundle
+check` catches that. Above all, extensions get installed from the editor GUI, which no template can intercept, so the manifest
+drifts permanently. VS Code Settings Sync already handles them bidirectionally, GUI installs included. Do not add them back.
 
 ## Agent rules and instructions
 
