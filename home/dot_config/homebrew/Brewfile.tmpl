@@ -183,14 +183,6 @@ brew "azure/functions/azure-functions-core-tools@4"
 brew "azure/kubelogin/kubelogin"
 {{- end }}
 
-{{- if dig "tools" "terraform" false . }}
-# HashiCorp tools (Homebrew for proper macOS integration)
-tap "hashicorp/tap"
-brew "hashicorp/tap/vault"
-tap "minamijoyo/hcledit"
-brew "minamijoyo/hcledit/hcledit"
-{{- end }}
-
 {{- if dig "cloud" "gcloud" false . }}
 # Google Cloud tools
 cask "google-cloud-sdk"
@@ -205,8 +197,6 @@ brew "awscli"
 # Kubernetes tools not available in nixpkgs on macOS
 brew "calicoctl"
 {{- if eq .chezmoi.os "darwin" }}
-tap "fairwindsops/tap"
-brew "fairwindsops/tap/pluto"
 cask "lens"
 {{- end }}
 {{- end }}

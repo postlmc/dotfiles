@@ -75,6 +75,7 @@
     "tmux-xpanes@latest"
     "mediainfo@latest"
     "qpdf@latest"
+    "poppler-utils@latest"
     "age-plugin-yubikey@latest"
     "cfssl@latest"
     "nodejs@latest"
@@ -103,7 +104,6 @@
 {{- $pkgs = append $pkgs "cmctl@latest" -}}
 {{- $pkgs = append $pkgs "kompose@latest" -}}
 {{- $pkgs = append $pkgs "argo@latest" -}}
-{{- $pkgs = append $pkgs "kubelogin@latest" -}}
 {{- $pkgs = append $pkgs "pluto@latest" -}}
 {{- end -}}
 {{- if dig "tools" "terraform" false . -}}
