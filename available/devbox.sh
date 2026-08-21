@@ -33,7 +33,10 @@ alias nix-gc-all='nix-collect-garbage -d'
 
 # Package management — wrappers keep the chezmoi modify script in sync.
 # Plain add/rm would mutate the live file but get normalized on next chezmoi apply.
-# These update the modify script source first, then apply + install atomically.
+# These update the modify script source first, then apply + install. If the
+# install/uninstall step fails (e.g. a package name that doesn't resolve in
+# nixpkgs), the template edit is rolled back so the template and live
+# devbox.json never end up out of sync with what devbox actually has installed.
 # Only handles unconditional packages (main $pkgs list). Edit the modify script
 # directly for conditional packages (kubernetes, python, etc.).
 gbox-add() {
@@ -50,13 +53,17 @@ gbox-add() {
         return 1
     fi
 
+    local backup
+    backup=$(mktemp) || return 1
+    cp "$tmpl" "$backup" || { rm -f "$backup"; return 1; }
+
     # Insert before the first standalone -}} line (closes the $pkgs := list block)
     local tmp
-    tmp=$(mktemp) || return 1
+    tmp=$(mktemp) || { rm -f "$backup"; return 1; }
     awk -v pkg="    \"${pkg}\"" '
         !inserted && /^-\}\}/ { print pkg; inserted=1 }
         { print }
-    ' "$tmpl" > "$tmp" && command mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
+    ' "$tmpl" > "$tmp" && command mv "$tmp" "$tmpl" || { rm -f "$tmp" "$backup"; return 1; }
 
     local devbox_json="${HOME}/.local/share/devbox/global/default/devbox.json"
     local _prev_nofile _status
@@ -64,13 +71,22 @@ gbox-add() {
     ulimit -n 65536 2>/dev/null || true
     chezmoi apply "$devbox_json" \
         && grep -qF "\"${pkg}\"" "$devbox_json" \
-        && devbox global add "${pkg}" \
-        && eval "$(devbox global shellenv --preserve-path-stack -r)" \
-        && hash -r
+        && devbox global add "${pkg}"
+    _status=$?
+    if (( _status != 0 )); then
+        echo "gbox-add: ${pkg} failed to install — rolling back template and devbox.json" >&2
+        command mv "$backup" "$tmpl"
+        chezmoi apply "$devbox_json"
+        ulimit -n "$_prev_nofile"
+        return "$_status"
+    fi
+    rm -f "$backup"
+
+    eval "$(devbox global shellenv --preserve-path-stack -r)" && hash -r
     _status=$?
     ulimit -n "$_prev_nofile"
     if (( _status != 0 )); then
-        echo "gbox-add: aborted — chezmoi apply of devbox.json was skipped or ${pkg} was not installed" >&2
+        echo "gbox-add: ${pkg} installed but shell refresh failed — run 'hash -r' or restart your shell" >&2
     fi
     return "$_status"
 }
@@ -89,23 +105,36 @@ gbox-rm() {
         return 1
     fi
 
+    local backup
+    backup=$(mktemp) || return 1
+    cp "$tmpl" "$backup" || { rm -f "$backup"; return 1; }
+
     local tmp
-    tmp=$(mktemp) || return 1
+    tmp=$(mktemp) || { rm -f "$backup"; return 1; }
     grep -vE "\"${pkgbase}(@[^\"]+)?\"" "$tmpl" > "$tmp" \
-        && command mv "$tmp" "$tmpl" || { rm -f "$tmp"; return 1; }
+        && command mv "$tmp" "$tmpl" || { rm -f "$tmp" "$backup"; return 1; }
 
     local devbox_json="${HOME}/.local/share/devbox/global/default/devbox.json"
     local _prev_nofile _status
     _prev_nofile=$(ulimit -n)
     ulimit -n 65536 2>/dev/null || true
-    devbox global rm "${pkgbase}" \
-        && chezmoi apply "$devbox_json" \
+    devbox global rm "${pkgbase}"
+    _status=$?
+    if (( _status != 0 )); then
+        echo "gbox-rm: ${pkgbase} failed to uninstall — rolling back template" >&2
+        command mv "$backup" "$tmpl"
+        ulimit -n "$_prev_nofile"
+        return "$_status"
+    fi
+    rm -f "$backup"
+
+    chezmoi apply "$devbox_json" \
         && eval "$(devbox global shellenv --preserve-path-stack -r)" \
         && hash -r
     _status=$?
     ulimit -n "$_prev_nofile"
     if (( _status != 0 )); then
-        echo "gbox-rm: aborted — chezmoi apply of devbox.json was skipped" >&2
+        echo "gbox-rm: ${pkgbase} uninstalled but devbox.json apply/shell refresh failed — run 'chezmoi apply' manually" >&2
     fi
     return "$_status"
 }
