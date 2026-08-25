@@ -68,11 +68,11 @@ brew-add() {
 
     local backup
     backup=$(mktemp) || return 1
-    cp "$tmpl" "$backup" || { rm -f "$backup"; return 1; }
+    command cp "$tmpl" "$backup" || { command rm -f "$backup"; return 1; }
 
     # Insert in sorted position within the block following the anchor comment
     local tmp
-    tmp=$(mktemp) || { rm -f "$backup"; return 1; }
+    tmp=$(mktemp) || { command rm -f "$backup"; return 1; }
     awk -v marker="$marker" -v kind="$kind" -v name="$pkg" '
         BEGIN { entry = kind " \"" name "\""; state = 0 }
         state == 0 && $0 == marker { print; state = 1; next }
@@ -85,7 +85,7 @@ brew-add() {
         state == 1 { if (!done) { print entry; done = 1 } state = 2 }
         { print }
         END { if (!done) print entry }
-    ' "$tmpl" > "$tmp" && command mv "$tmp" "$tmpl" || { rm -f "$tmp" "$backup"; return 1; }
+    ' "$tmpl" > "$tmp" && command mv "$tmp" "$tmpl" || { command rm -f "$tmp" "$backup"; return 1; }
 
     local brewfile="${HOMEBREW_BUNDLE_FILE}"
     local _status
@@ -105,7 +105,7 @@ brew-add() {
         chezmoi apply "$brewfile"
         return "$_status"
     fi
-    rm -f "$backup"
+    command rm -f "$backup"
     hash -r
 }
 
@@ -143,12 +143,12 @@ brew-rm() {
 
     local backup
     backup=$(mktemp) || return 1
-    cp "$tmpl" "$backup" || { rm -f "$backup"; return 1; }
+    command cp "$tmpl" "$backup" || { command rm -f "$backup"; return 1; }
 
     local tmp
-    tmp=$(mktemp) || { rm -f "$backup"; return 1; }
+    tmp=$(mktemp) || { command rm -f "$backup"; return 1; }
     grep -vE "$pattern" "$tmpl" > "$tmp" \
-        && command mv "$tmp" "$tmpl" || { rm -f "$tmp" "$backup"; return 1; }
+        && command mv "$tmp" "$tmpl" || { command rm -f "$tmp" "$backup"; return 1; }
 
     local _status
     # shellcheck disable=SC2086
@@ -159,7 +159,7 @@ brew-rm() {
         command mv "$backup" "$tmpl"
         return "$_status"
     fi
-    rm -f "$backup"
+    command rm -f "$backup"
 
     chezmoi apply "${HOMEBREW_BUNDLE_FILE}"
     _status=$?

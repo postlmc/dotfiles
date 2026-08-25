@@ -55,15 +55,15 @@ gbox-add() {
 
     local backup
     backup=$(mktemp) || return 1
-    cp "$tmpl" "$backup" || { rm -f "$backup"; return 1; }
+    command cp "$tmpl" "$backup" || { command rm -f "$backup"; return 1; }
 
     # Insert before the first standalone -}} line (closes the $pkgs := list block)
     local tmp
-    tmp=$(mktemp) || { rm -f "$backup"; return 1; }
+    tmp=$(mktemp) || { command rm -f "$backup"; return 1; }
     awk -v pkg="    \"${pkg}\"" '
         !inserted && /^-\}\}/ { print pkg; inserted=1 }
         { print }
-    ' "$tmpl" > "$tmp" && command mv "$tmp" "$tmpl" || { rm -f "$tmp" "$backup"; return 1; }
+    ' "$tmpl" > "$tmp" && command mv "$tmp" "$tmpl" || { command rm -f "$tmp" "$backup"; return 1; }
 
     local devbox_json="${HOME}/.local/share/devbox/global/default/devbox.json"
     local _prev_nofile _status
@@ -80,7 +80,7 @@ gbox-add() {
         ulimit -n "$_prev_nofile"
         return "$_status"
     fi
-    rm -f "$backup"
+    command rm -f "$backup"
 
     eval "$(devbox global shellenv --preserve-path-stack -r)" && hash -r
     _status=$?
@@ -122,12 +122,12 @@ gbox-rm() {
 
     local backup
     backup=$(mktemp) || return 1
-    cp "$tmpl" "$backup" || { rm -f "$backup"; return 1; }
+    command cp "$tmpl" "$backup" || { command rm -f "$backup"; return 1; }
 
     local tmp
-    tmp=$(mktemp) || { rm -f "$backup"; return 1; }
+    tmp=$(mktemp) || { command rm -f "$backup"; return 1; }
     grep -vE "$pattern" "$tmpl" > "$tmp" \
-        && command mv "$tmp" "$tmpl" || { rm -f "$tmp" "$backup"; return 1; }
+        && command mv "$tmp" "$tmpl" || { command rm -f "$tmp" "$backup"; return 1; }
 
     local devbox_json="${HOME}/.local/share/devbox/global/default/devbox.json"
     local _prev_nofile _status
@@ -141,7 +141,7 @@ gbox-rm() {
         ulimit -n "$_prev_nofile"
         return "$_status"
     fi
-    rm -f "$backup"
+    command rm -f "$backup"
 
     chezmoi apply "$devbox_json" \
         && eval "$(devbox global shellenv --preserve-path-stack -r)" \
