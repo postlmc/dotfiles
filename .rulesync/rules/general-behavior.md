@@ -2,11 +2,6 @@
 root: false
 targets:
   - '*'
-globs:
-  - '**/*'
-claudecode:
-  paths:
-    - '**/*'
 ---
 # General behavior
 

@@ -100,3 +100,9 @@ no Cursor command surface to mirror.
 
 `rulesync` isn't in nixpkgs, so it isn't a devbox package — it runs via `npx rulesync@<pinned version>`, pinned in the
 run_onchange script itself. Update the pin deliberately (never `@latest`); rulesync ships breaking changes roughly monthly.
+
+Rule frontmatter controls *when* Claude Code loads a rule, and rulesync decides that frontmatter for you. A generated rule with a
+`paths:` key is path-scoped: it loads only when Claude opens a matching file with the Read tool, not at session start, and Bash
+reads (`cat`, `sed`, `grep`) never trigger it. rulesync derives the key as `claudecode.paths ?? globs`, so a rule has to omit
+**both** to load unconditionally. That is why `.rulesync/rules/general-behavior.md` carries neither; don't add `globs` back to it.
+Setting `claudecode.paths: []` is not a substitute, because rulesync emits a literal `paths: []` that matches nothing.
