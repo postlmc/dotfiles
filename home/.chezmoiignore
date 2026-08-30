@@ -2,4 +2,5 @@
 {{- if not (stat $ageKeyPath) }}
 # age identity key not present — skip encrypted files rather than failing
 .config/local/**
+.claude/rules/environment.md
 {{- end }}

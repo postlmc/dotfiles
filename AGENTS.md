@@ -106,3 +106,9 @@ Rule frontmatter controls *when* Claude Code loads a rule, and rulesync decides 
 reads (`cat`, `sed`, `grep`) never trigger it. rulesync derives the key as `claudecode.paths ?? globs`, so a rule has to omit
 **both** to load unconditionally. That is why `.rulesync/rules/general-behavior.md` carries neither; don't add `globs` back to it.
 Setting `claudecode.paths: []` is not a substitute, because rulesync emits a literal `paths: []` that matches nothing.
+
+One rule deliberately bypasses rulesync: `home/dot_claude/rules/encrypted_environment.md.age`. Its content is personal and this
+repo is public, so it is age-encrypted and applied straight to `~/.claude/rules/environment.md` by chezmoi instead of being
+generated from `.rulesync/`. `rulesync generate` leaves files it doesn't own untouched, so the generated and encrypted rules
+coexist in that directory. `home/.chezmoiignore` skips it when `~/.config/chezmoi/key.txt` is absent, so `chezmoi apply` still
+works on hosts without the personal age key. This rule reaches Claude Code only; there is no Copilot copy.
