@@ -106,7 +106,7 @@
 {{- $pkgs = append $pkgs "pluto@latest" -}}
 {{- end -}}
 {{- if dig "tools" "terraform" false . -}}
-{{- $pkgs = append $pkgs "terraform@latest" -}}
+{{- $pkgs = append $pkgs "terraform@1.12.2" -}}
 {{- $pkgs = append $pkgs "cf-terraforming@latest" -}}
 {{- $pkgs = append $pkgs "vault@latest" -}}
 {{- $pkgs = append $pkgs "hcledit@latest" -}}
