@@ -8,6 +8,27 @@
   segment orders scripts relative to file application
 - `.rulesync/` (repo root, outside `home/`) is source material for [rulesync](https://github.com/dyoshikawa/rulesync), not a
   dotfile itself — see "Agent rules and instructions" below
+- There is no `CLAUDE.md` stub at the repo root — Claude Code reads this file directly when one is absent. Don't recreate it.
+
+## Multi-agent workflow
+
+This repo is maintained by two Claude Code instances running in parallel: one on the Linux host, one on the MacBook. Each owns
+its platform's side of things.
+
+Shared files — this one, `README.md`, `mklinks.sh`, `dot_zshrc`/`dot_bashrc`, and the OS-conditional blocks inside
+`Brewfile.tmpl` and `modify_devbox.json.tmpl` — get edited by either instance, but only the block or line that actually needs to
+change; add a branch rather than restructure a shared one.
+
+Work happens on short-lived branches prefixed by owner, never directly on `main`:
+
+- `linux/<topic>` or `macos/<topic>`, cut from the latest `main`.
+- Rebase onto `origin/main` (never merge) right before landing, to pick up anything the other instance pushed meanwhile.
+- Fast-forward into `main`, push immediately, delete the branch. No long-lived per-platform branches — those accumulate drift
+  and turn every sync into one large merge instead of many small ones.
+- `main` has no branch protection on GitHub; treat that as a reason for more care around rebases and pushes, not less.
+
+`HANDOFF*.md` (gitignored globally, not just in this repo) is the informal channel for one instance to leave the other a note
+without committing it.
 
 ## Modular shell configuration
 
