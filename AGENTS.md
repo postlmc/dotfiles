@@ -26,6 +26,8 @@ Work happens on short-lived branches prefixed by owner, never directly on `main`
 - Fast-forward into `main`, push immediately, delete the branch. No long-lived per-platform branches — those accumulate drift
   and turn every sync into one large merge instead of many small ones.
 - `main` has no branch protection on GitHub; treat that as a reason for more care around rebases and pushes, not less.
+- If a rebase or merge ever produces a real conflict (not a clean fast-forward), stop and surface it to Scott rather than
+  resolving it solo.
 
 `HANDOFF*.md` (gitignored globally, not just in this repo) is the informal channel for one instance to leave the other a note
 without committing it.
