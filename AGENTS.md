@@ -32,6 +32,10 @@ Work happens on short-lived branches prefixed by owner, never directly on `main`
 `HANDOFF*.md` (gitignored globally, not just in this repo) is the informal channel for one instance to leave the other a note
 without committing it.
 
+When messaging the other instance over Remote Control, check `ListAgents` first to confirm it's actually listed. It's a live
+bridge, not a mailbox — a message to a name that isn't currently connected has nowhere to land and nothing waits for it to
+reconnect.
+
 ## Modular shell configuration
 
 `available/` and `enabled/` implement modular shell config:
