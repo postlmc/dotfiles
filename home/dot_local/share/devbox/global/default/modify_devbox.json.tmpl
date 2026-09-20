@@ -86,6 +86,11 @@
     "secretspec@latest"
     "qrencode@latest"
     "texlive.combined.scheme-full@latest"
+    "nushell@latest"
+    "opencode@latest"
+    "ruff@latest"
+    "scrub@latest"
+    "stress-ng@latest"
 -}}
 {{- if dig "development" "rust" false . -}}
 {{- $pkgs = append $pkgs "rustup@latest" -}}
