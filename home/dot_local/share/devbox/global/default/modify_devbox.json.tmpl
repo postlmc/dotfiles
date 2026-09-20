@@ -119,12 +119,6 @@
 {{- if dig "tools" "monitoring" false . -}}
 {{- $pkgs = append $pkgs "gum@latest" -}}
 {{- end -}}
-{{- if eq .chezmoi.os "linux" -}}
-{{- /* cmux ships a signed .app bundle; macOS App Management blocks nix from chmodding it during
-       garbage collection (see the 79f7ec6 removal). That's a macOS-only failure mode, so it's
-       safe to bring back here, scoped to Linux only rather than reintroducing it for both. */ -}}
-{{- $pkgs = append $pkgs "cmux@latest" -}}
-{{- end -}}
 #!/bin/bash
 input=$(cat)
 [ -z "$input" ] && input='{}'
