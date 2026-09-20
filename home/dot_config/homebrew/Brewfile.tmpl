@@ -60,10 +60,13 @@ cask "copilot-cli"
 {{- end }}
 
 {{- if dig "development" "docker" false . }}
-# Container tools
+{{- if eq .chezmoi.os "darwin" }}
+# Container tools — macOS has no native container engine, so both the CLI (podman needs a
+# VM-backed "podman machine" here) and the GUI come from Homebrew. Linux gets podman from the
+# OS image instead (systemd units, SELinux policy, registries.conf already wired up there) and
+# podman-compose from nixpkgs — Homebrew's copies would just shadow better-integrated ones.
 brew "podman"
 brew "podman-compose"
-{{- if eq .chezmoi.os "darwin" }}
 cask "podman-desktop"
 {{- end }}
 {{- end }}
