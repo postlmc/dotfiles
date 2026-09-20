@@ -15,8 +15,9 @@
 This repo is maintained by two Claude Code instances running in parallel: one on the Linux host, one on the MacBook. Each owns
 its platform's side of things.
 
-Shared files — this one, `README.md`, `mklinks.sh`, `dot_zshrc`/`dot_bashrc`, and the OS-conditional blocks inside
-`Brewfile.tmpl` and `modify_devbox.json.tmpl` — get edited by either instance, but only the block or line that actually needs to
+Shared files — this one, `README.md`, `mklinks.sh`, `dot_zshrc`/`dot_bashrc`, `available/ssh-agent.sh`, and the OS-conditional
+blocks inside `Brewfile.tmpl` and `modify_devbox.json.tmpl` — get edited by either instance, but only the block or line that
+actually needs to
 change; add a branch rather than restructure a shared one.
 
 Work happens on short-lived branches prefixed by owner, never directly on `main`:
