@@ -2,6 +2,14 @@
 
 command -v ssh-agent >/dev/null 2>&1 || return
 
+# Prefer 1Password's SSH agent when it's running — same key custody as macOS, no local
+# passphrase to manage or forget. Takes priority over an inherited/systemd agent socket.
+OP_SSH_SOCK="${HOME}/.1password/agent.sock"
+if [ -S "${OP_SSH_SOCK}" ]; then
+    export SSH_AUTH_SOCK="${OP_SSH_SOCK}"
+    return
+fi
+
 # An agent is already available (e.g. forwarded) — don't spawn another or clobber its socket
 [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "${SSH_AUTH_SOCK}" ] && return
 
