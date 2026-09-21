@@ -25,6 +25,9 @@ mkdir -p "${FONT_TARGET_DIR}"
 _devbox_fonts_linked=0
 while IFS= read -r -d '' font; do
     link="${FONT_TARGET_DIR}/$(basename "${font}")"
+    # Never clobber a real (non-symlink) file already at this path — something else (a cask,
+    # a manual install) owns it, and overwriting it has broken real font rendering before.
+    [ -e "${link}" ] && [ ! -L "${link}" ] && continue
     [ -L "${link}" ] && [ "$(readlink "${link}")" = "${font}" ] && continue
     ln -sf "${font}" "${link}"
     _devbox_fonts_linked=1
