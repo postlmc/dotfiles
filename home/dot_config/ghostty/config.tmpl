@@ -6,7 +6,6 @@ font-family = FiraCode Nerd Font
 {{- else }}
 font-family = FiraCode Nerd Font Light
 {{- end }}
-font-size = 14.5
 font-feature = +liga,+dlig,+calt
 
 # To preview, use: ghostty +list-themes
@@ -41,6 +40,7 @@ shell-integration-features = cursor,sudo,title,path
 {{- if eq .chezmoi.os "darwin" }}
 
 # MacOS-specific settings
+font-size = 14.5
 macos-titlebar-style = native
 macos-icon = glass
 macos-icon-frame = chrome
@@ -56,9 +56,9 @@ keybind = cmd+v=paste_from_clipboard
 # Linux-specific settings
 # No linux-icon key exists (checked `ghostty +show-config --default` on 1.3.1-4.fc44 — only
 # macos-* icon settings are real; icon theming here comes from the .desktop file's Icon= field).
-# 14.5 above is sized for macOS; on this host's actual display it rendered comically large.
-# Confirmed via ctrl+minus in a live window: four presses (1pt each) from 14.5 landed close,
-# tuned down another .5pt from there afterward.
+# macOS's 14.5 rendered comically large on this host's actual display. Confirmed via ctrl+minus
+# in a live window: four presses (1pt each) from 14.5 landed close, tuned down another .5pt
+# from there afterward.
 font-size = 10.0
 
 keybind = ctrl+plus=increase_font_size:1
