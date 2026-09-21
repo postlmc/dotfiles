@@ -119,6 +119,13 @@
 {{- if dig "tools" "monitoring" false . -}}
 {{- $pkgs = append $pkgs "gum@latest" -}}
 {{- end -}}
+{{- if eq .chezmoi.os "linux" -}}
+{{- /* strace is ptrace()-based; nixpkgs meta.platforms lists Linux architectures only, no
+       darwin variant exists (macOS's equivalent is dtrace, a different tool/package). Nix
+       refuses to evaluate the derivation on darwin, so this must stay gated rather than
+       unconditional like the rest of the pkg-audit migration. */ -}}
+{{- $pkgs = append $pkgs "strace@latest" -}}
+{{- end -}}
 #!/bin/bash
 input=$(cat)
 [ -z "$input" ] && input='{}'
