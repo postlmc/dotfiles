@@ -57,8 +57,9 @@ keybind = cmd+v=paste_from_clipboard
 # No linux-icon key exists (checked `ghostty +show-config --default` on 1.3.1-4.fc44 — only
 # macos-* icon settings are real; icon theming here comes from the .desktop file's Icon= field).
 # 14.5 above is sized for macOS; on this host's actual display it rendered comically large.
-# Confirmed via ctrl+minus in a live window: four presses (1pt each) from 14.5 landed close.
-font-size = 10.5
+# Confirmed via ctrl+minus in a live window: four presses (1pt each) from 14.5 landed close,
+# tuned down another .5pt from there afterward.
+font-size = 10.0
 
 keybind = ctrl+plus=increase_font_size:1
 keybind = ctrl+minus=decrease_font_size:1
