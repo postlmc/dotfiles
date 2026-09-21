@@ -14,7 +14,6 @@ command -v ssh >/dev/null 2>&1 && ln -sf ../available/ssh.sh 11-ssh
 # Load Homebrew on both macOS and Linux (for Aurora)
 command -v brew >/dev/null 2>&1 && ln -sf ../available/homebrew.sh 20-homebrew
 command -v devbox >/dev/null 2>&1 && ln -sf ../available/devbox.sh 21-devbox
-command -v devbox >/dev/null 2>&1 && ln -sf ../available/fonts.sh 24-fonts
 
 # Network tools
 { command -v tailscale >/dev/null 2>&1 || [[ -f "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]]; } && \
@@ -38,6 +37,10 @@ linux)
 
     # SSH agent management (macOS hosts use 1Password SSH agent instead)
     command -v ssh-agent >/dev/null 2>&1 && ln -sf ../available/ssh-agent.sh 12-ssh-agent
+
+    # Font activation (macOS's font system didn't accept devbox-delivered fonts, see
+    # DECISIONS.md; macOS keeps the Brewfile.tmpl cask instead)
+    command -v devbox >/dev/null 2>&1 && ln -sf ../available/fonts.sh 24-fonts
     ;;
 esac
 
