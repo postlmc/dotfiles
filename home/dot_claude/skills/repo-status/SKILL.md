@@ -51,15 +51,19 @@ so extracting work items is a judgment call, not a parse:
     - 🔵 waiting on input -- needs a decision or an action from whoever owns the repo before it can move
   If the note doesn't say, ⚪️ (not started) is the reasonable default rather than leaving it blank.
 - **Issue**: a tracking-system reference (Jira, GitHub Issues, Linear, whatever the note itself names), only
-  when the note actually mentions one. Leave it blank otherwise -- don't invent a ticket number, and don't go
-  looking one up in an external tracker. This column exists so one is visible when a note happens to cite one,
-  not to drive a lookup.
+  when the note actually mentions one. Leave it blank otherwise -- report only what the file says, never query
+  an external tracker to find or verify one.
 - **Effort**: a rough size, spelled out in full -- Small, Medium, or Large -- based on what the note describes,
   not a time estimate. These notes rarely contain enough detail for anything more precise, and a fake-precise
   estimate is worse than an honest rough one.
-- **Note**: one sentence, enough for someone with no other context to know what the item is.
-- **Dependencies**: only when the note says or clearly implies one item blocks another. Don't invent
-  dependencies that aren't there just to fill the column -- most items are independent.
+- **Note**: one sentence describing the item, enough for someone with no other context to know what it is. Fold
+  any dependency in here too rather than giving it its own column -- "depends on <other item>" when the note
+  says or clearly implies one item blocks another, or "blocked on <issue>" when a *different* issue than the
+  one in this row's own Issue column is what's holding it up. An item can never be blocked on its own Issue --
+  that's circular, the ticket tracking the work can't also be the thing the work is waiting on -- so if the
+  only issue reference the note gives is the item's own tracking ticket, that's just the Issue column, not a
+  dependency to restate in the Note. Don't invent a dependency that isn't there just to have something to say
+  -- most items are independent.
 
 If no TODO*/HANDOFF* files exist, say so plainly rather than presenting an empty table as if something went
 wrong.
@@ -82,11 +86,11 @@ to explain a genuinely surprising finding (a failed fetch, for instance).
 | Sync with origin           | ahead/behind counts, or a note that the fetch failed and this may be stale |
 
 **Table 2 -- Open Work Items**, one row per item found in TODO/HANDOFF files, **ordered so a dependency
-appears before whatever depends on it** -- items with no dependency relationship to anything else can go in
-any order:
+appears before whatever depends on it** (per the Note column, since there's no separate column for it) --
+items with no dependency relationship to anything else can go in any order:
 
-| Item | Status | Issue | Effort | Depends On | Note |
-|------|--------|-------|--------|------------|------|
+| Item | Status | Issue | Effort | Note |
+|------|--------|-------|--------|------|
 
 Follow the table with a single legend line decoding the Status emoji, since nothing else in the printed output
 explains them: `⚪️ not started · 🟡 in progress · 🟢 done, uncommitted · 🔴 blocked · 🔵 waiting on input`.
