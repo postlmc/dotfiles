@@ -48,7 +48,7 @@ so extracting work items is a judgment call, not a parse:
     - 🟡 in progress
     - 🟢 done, but not yet committed or merged
     - 🔴 blocked -- stuck on something external, still wanted
-    - ⛔️ won't do -- deliberately abandoned, not just stalled
+    - 🔵 waiting on input -- needs a decision or an action from whoever owns the repo before it can move
   If the note doesn't say, ⚪️ (not started) is the reasonable default rather than leaving it blank.
 - **Issue**: a tracking-system reference (Jira, GitHub Issues, Linear, whatever the note itself names), only
   when the note actually mentions one. Leave it blank otherwise -- don't invent a ticket number, and don't go
@@ -89,6 +89,6 @@ any order:
 |------|--------|-------|--------|------------|------|
 
 Follow the table with a single legend line decoding the Status emoji, since nothing else in the printed output
-explains them: `⚪️ not started · 🟡 in progress · 🟢 done, uncommitted · 🔴 blocked · ⛔️ won't do`.
+explains them: `⚪️ not started · 🟡 in progress · 🟢 done, uncommitted · 🔴 blocked · 🔵 waiting on input`.
 
 If Table 2 has no rows, print it with a "no open work items found" note instead of an empty table.
