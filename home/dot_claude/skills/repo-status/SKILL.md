@@ -1,6 +1,6 @@
 ---
 name: repo-status
-description: Check a git repo for leftover work and hygiene issues -- untracked files, uncommitted changes, stashes, dangling commits, and branches that should have been deleted after merging -- then review any TODO*.md and HANDOFF*.md files for open work items. Prints two tables: repo status, and open work items ordered by dependency. Use this at the start of a session to answer "what's outstanding here?", "anything left over from last time?", or "is there anything I should clean up before starting?" -- also trigger on requests to check for stale branches, leftover stashes, or dangling commits specifically, even without the phrase "repo status".
+description: Check a git repo for leftover work and hygiene issues -- untracked files, uncommitted changes, stashes, dangling commits, and branches that should have been deleted after merging -- then review any TODO*.md and HANDOFF*.md files for open work items. Prints two tables, one showing repo status and one showing open work items ordered by dependency. Use this at the start of a session to answer "what's outstanding here?", "anything left over from last time?", or "is there anything I should clean up before starting?" -- also trigger on requests to check for stale branches, leftover stashes, or dangling commits specifically, even without the phrase "repo status".
 ---
 
 # Repo Status
@@ -62,21 +62,21 @@ to explain a genuinely surprising finding (a failed fetch, for instance).
 
 **Table 1 -- Repo Status**, one row per category from the script's output:
 
-| Category | Finding |
-|---|---|
-| Untracked files | count, or "none" |
-| Uncommitted changes | count, or "clean" |
-| Stashes | count and a one-line summary of each, or "none" |
-| Dangling commits | the count line from the script, plus any recent ones it itemized |
-| Local branches (non-main) | list with age, or "none" |
-| Remote branches (non-main) | list with age, or "none" |
-| Sync with origin | ahead/behind counts, or a note that the fetch failed and this may be stale |
+| Category                   | Finding                                                                    |
+|----------------------------|----------------------------------------------------------------------------|
+| Untracked files            | count, or "none"                                                           |
+| Uncommitted changes        | count, or "clean"                                                          |
+| Stashes                    | count and a one-line summary of each, or "none"                            |
+| Dangling commits           | the count line from the script, plus any recent ones it itemized           |
+| Local branches (non-main)  | list with age, or "none"                                                   |
+| Remote branches (non-main) | list with age, or "none"                                                   |
+| Sync with origin           | ahead/behind counts, or a note that the fetch failed and this may be stale |
 
 **Table 2 -- Open Work Items**, one row per item found in TODO/HANDOFF files, **ordered so a dependency
 appears before whatever depends on it** -- items with no dependency relationship to anything else can go in
 any order:
 
 | Item | Status | Effort | Depends On | Description |
-|---|---|---|---|---|
+|------|--------|--------|------------|-------------|
 
 If Table 2 has no rows, print it with a "no open work items found" note instead of an empty table.

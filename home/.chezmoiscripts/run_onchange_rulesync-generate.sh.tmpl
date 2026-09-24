@@ -1,6 +1,23 @@
 #!/bin/bash
-# rulesync source hash (forces a re-run whenever a file under .rulesync/ changes):
+# rulesync source hash (forces a re-run whenever a file under .rulesync/ changes).
+# Skills can carry non-markdown resources (scripts, etc.) alongside SKILL.md, so
+# both extensions are hashed -- rules and commands are markdown-only today, but
+# this stays correct if that ever changes too.
 {{- range $p := (glob (joinPath .chezmoi.sourceDir ".." ".rulesync" "**" "*.md")) }}
+# {{ $p }}: {{ include $p | sha256sum }}
+{{- end }}
+{{- range $p := (glob (joinPath .chezmoi.sourceDir ".." ".rulesync" "**" "*.sh")) }}
+# {{ $p }}: {{ include $p | sha256sum }}
+{{- end }}
+# chezmoi's glob doesn't traverse symlinked directories (confirmed: a plain stat
+# resolves .rulesync/skills/*/SKILL.md through the symlink fine, but glob finds
+# nothing inside it, recursive or not) -- .rulesync/skills/*/ are symlinks back
+# to home/dot_claude/skills/, so that real path is hashed directly instead, or
+# edits to a skill would never bump this hash and never trigger a re-run.
+{{- range $p := (glob (joinPath .chezmoi.sourceDir "dot_claude" "skills" "**" "*.md")) }}
+# {{ $p }}: {{ include $p | sha256sum }}
+{{- end }}
+{{- range $p := (glob (joinPath .chezmoi.sourceDir "dot_claude" "skills" "**" "*.sh")) }}
 # {{ $p }}: {{ include $p | sha256sum }}
 {{- end }}
 
@@ -14,7 +31,16 @@ repo="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
 # Cursor rules and Copilot commands don't support global scope in rulesync
 # (checked against v16.5.0's source), so Copilot is asked for rules only.
 # Folding it into the claudecode run instead makes rulesync print a skip
-# notice for copilot/commands on every apply. Cursor stays fully hand-rolled
-# and isn't targeted here at all.
+# notice for copilot/commands on every apply. Cursor rules stay fully
+# hand-rolled -- rulesync isn't asked for Cursor rules at all.
 npx --yes rulesync@16.5.0 generate -g --input-root "$repo" --targets claudecode --features rules,commands
 npx --yes rulesync@16.5.0 generate -g --input-root "$repo" --targets copilot --features rules
+
+# Skills are a separate feature from rules/commands and have their own
+# global-scope support matrix (checked against v16.5.0's source): Claude
+# Code already gets them for free as chezmoi-managed files under
+# home/dot_claude/skills/, but Copilot and Cursor both need rulesync to
+# generate their copies. .rulesync/skills/*/SKILL.md are symlinks back to
+# the same home/dot_claude/skills/ sources -- rulesync follows symlinks
+# when discovering input, so this is one source, not a duplicate.
+npx --yes rulesync@16.5.0 generate -g --input-root "$repo" --targets copilot,cursor --features skills

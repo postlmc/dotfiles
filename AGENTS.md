@@ -126,6 +126,18 @@ Commands work the same way for the one real command, `git-commit`: `.rulesync/co
 (`commands-processor.ts`: `copilot: { supportsGlobal: false }`, and there's no `copilotcli` command target at all). There's
 no Cursor command surface to mirror.
 
+**Skills are different from rules and commands**: their global-scope support matrix (checked against v16.5.0's source)
+covers Copilot *and* Cursor, unlike either of the above. Claude Code needs no rulesync involvement at all — a skill is
+just a chezmoi-managed directory under `home/dot_claude/skills/*/`, deployed like any other dotfile. For Copilot and
+Cursor, `.rulesync/skills/*/` are symlinks back to those same `home/dot_claude/skills/*/` directories rather than
+duplicated content — rulesync follows symlinks when discovering input, so this is one source generating three targets.
+
+Watch for one gotcha if you ever touch the hash-tracking comment block at the top of the run_onchange script: chezmoi's
+`glob` function does not traverse symlinked directories, recursive or not, even though a direct `stat` through the same
+symlink resolves fine. Globbing `.rulesync/skills/**` finds the symlink itself but nothing inside it. The script hashes
+`home/dot_claude/skills/**` directly instead, for exactly this reason — glob the real path, not the symlink, or a skill
+edit silently stops triggering regeneration.
+
 `rulesync` isn't in nixpkgs, so it isn't a devbox package — it runs via `npx rulesync@<pinned version>`, pinned in the
 run_onchange script itself. Update the pin deliberately (never `@latest`); rulesync ships breaking changes roughly monthly.
 
