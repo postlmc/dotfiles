@@ -88,4 +88,7 @@ any order:
 | Item | Status | Issue | Effort | Depends On | Note |
 |------|--------|-------|--------|------------|------|
 
+Follow the table with a single legend line decoding the Status emoji, since nothing else in the printed output
+explains them: `⚪️ not started · 🟡 in progress · 🟢 done, uncommitted · 🔴 blocked · ⛔️ won't do`.
+
 If Table 2 has no rows, print it with a "no open work items found" note instead of an empty table.
