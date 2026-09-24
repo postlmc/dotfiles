@@ -43,12 +43,21 @@ Read whatever turns up. These files have no fixed schema -- they're free-form no
 so extracting work items is a judgment call, not a parse:
 
 - **Name**: a short label for the item, however the note phrases it.
-- **Status**: infer from context (not started / in progress / blocked / needs review / done but uncommitted).
-  If the note doesn't say, "not started" is the reasonable default rather than leaving it blank.
-- **Level of effort**: a rough size (S/M/L) based on what the note describes, not a time estimate -- these
-  notes rarely contain enough detail for anything more precise, and a fake-precise estimate is worse than an
-  honest rough one.
-- **Description**: one sentence, enough for someone with no other context to know what the item is.
+- **Status**: infer from context and render as one emoji, this legend and no other:
+    - ⚪️ not started
+    - 🟡 in progress
+    - 🟢 done, but not yet committed or merged
+    - 🔴 blocked -- stuck on something external, still wanted
+    - ⛔️ won't do -- deliberately abandoned, not just stalled
+  If the note doesn't say, ⚪️ (not started) is the reasonable default rather than leaving it blank.
+- **Issue**: a tracking-system reference (Jira, GitHub Issues, Linear, whatever the note itself names), only
+  when the note actually mentions one. Leave it blank otherwise -- don't invent a ticket number, and don't go
+  looking one up in an external tracker. This column exists so one is visible when a note happens to cite one,
+  not to drive a lookup.
+- **Effort**: a rough size, spelled out in full -- Small, Medium, or Large -- based on what the note describes,
+  not a time estimate. These notes rarely contain enough detail for anything more precise, and a fake-precise
+  estimate is worse than an honest rough one.
+- **Note**: one sentence, enough for someone with no other context to know what the item is.
 - **Dependencies**: only when the note says or clearly implies one item blocks another. Don't invent
   dependencies that aren't there just to fill the column -- most items are independent.
 
@@ -76,7 +85,7 @@ to explain a genuinely surprising finding (a failed fetch, for instance).
 appears before whatever depends on it** -- items with no dependency relationship to anything else can go in
 any order:
 
-| Item | Status | Effort | Depends On | Description |
-|------|--------|--------|------------|-------------|
+| Item | Status | Issue | Effort | Depends On | Note |
+|------|--------|-------|--------|------------|------|
 
 If Table 2 has no rows, print it with a "no open work items found" note instead of an empty table.
