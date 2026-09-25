@@ -31,14 +31,20 @@ box-up() {
 alias nix-gc='nix-collect-garbage'
 alias nix-gc-all='nix-collect-garbage -d'
 
-# Package management — wrappers keep the chezmoi modify script in sync.
-# Plain add/rm would mutate the live file but get normalized on next chezmoi apply.
-# These update the modify script source first, then apply + install. If the
-# install/uninstall step fails (e.g. a package name that doesn't resolve in
-# nixpkgs), the template edit is rolled back so the template and live
+# Package management — these two manage the shared baseline (the chezmoi modify script's
+# $pkgs list), deployed to every host. They update the modify script source first, then
+# apply + install. If the install/uninstall step fails (e.g. a package name that doesn't
+# resolve in nixpkgs), the template edit is rolled back so the template and live
 # devbox.json never end up out of sync with what devbox actually has installed.
 # Only handles unconditional packages (main $pkgs list). Edit the modify script
 # directly for conditional packages (kubernetes, python, etc.).
+#
+# For a host-local package that should NOT reach every other host, skip these entirely
+# and use `devbox global add`/`devbox global rm` directly. The modify script tracks what
+# the baseline looked like on each apply (a sidecar file next to devbox.json) and merges
+# rather than replaces "packages", so a plain add/rm survives future chezmoi applies —
+# only entries that were part of a *previous* baseline get removed when the baseline
+# changes; anything added outside these wrappers is left alone indefinitely.
 gbox-add() {
     local pkg="${1:-}"
     [[ -z "$pkg" ]] && { echo "Usage: gbox-add <package>[@version]" >&2; return 1; }

@@ -136,9 +136,31 @@
 input=$(cat)
 [ -z "$input" ] && input='{}'
 
+# "packages" used to be a straight replace every apply, which meant `devbox global add`/
+# `devbox global remove` run directly (not through gbox-add/gbox-rm) never stuck -- the
+# next chezmoi apply always rewrote the array back to exactly this template's list. Fixed
+# by tracking what the baseline looked like last time this ran (a sidecar file, since
+# devbox.json's own schema shouldn't have to carry chezmoi's bookkeeping) and merging: a
+# package present in the live file but absent from last run's baseline is a host-local
+# addition and survives; a package present in last run's baseline but absent from this
+# run's is a baseline removal (gbox-rm) and propagates. A corrupt or missing sidecar just
+# means everything currently live gets treated as host-local for one run -- self-heals,
+# never loses anything.
+new_baseline='{{ $pkgs | toJson }}'
+sidecar="{{ .chezmoi.homeDir }}/.local/share/devbox/global/default/.chezmoi-baseline.json"
+old_baseline='[]'
+if [ -f "$sidecar" ] && jq -e . "$sidecar" >/dev/null 2>&1; then
+    old_baseline=$(cat "$sidecar")
+fi
+
+host_local=$(printf '%s' "$input" | jq --argjson old "$old_baseline" '(.packages // []) - $old')
+final_pkgs=$(jq -n --argjson base "$new_baseline" --argjson extra "$host_local" '$base + ($extra - $base)')
+
+printf '%s' "$new_baseline" > "$sidecar"
+
 printf '%s' "$input" | jq \
   --arg home "{{ .chezmoi.homeDir }}" \
-  --argjson pkgs '{{ $pkgs | toJson }}' \
+  --argjson pkgs "$final_pkgs" \
   '. + {
     "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
     "packages": $pkgs,

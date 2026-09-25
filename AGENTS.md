@@ -3,39 +3,44 @@
 ## Repository structure
 
 - `.chezmoiroot` points to `home/` — all managed dotfiles live under `home/`
-- File naming: `dot_` prefix → `.` in target; `.tmpl` suffix → processed as Go template; `run_once_` → script runs once ever;
-  `run_onchange_` → script re-runs when its rendered content (including hashed includes) changes; an optional `before_`/`after_`
-  segment orders scripts relative to file application
-- `.rulesync/` (repo root, outside `home/`) is source material for [rulesync](https://github.com/dyoshikawa/rulesync), not a
-  dotfile itself — see "Agent rules and instructions" below
-- There is no `CLAUDE.md` stub at the repo root — Claude Code reads this file directly when one is absent. Don't recreate it.
+- File naming: `dot_` prefix → `.` in target; `.tmpl` suffix → processed as Go template; `run_once_`
+  → script runs once ever; `run_onchange_` → script re-runs when its rendered content (including
+  hashed includes) changes; an optional `before_`/`after_` segment orders scripts relative to file
+  application
+- `.rulesync/` (repo root, outside `home/`) is source material for
+  [rulesync](https://github.com/dyoshikawa/rulesync), not a dotfile itself — see "Agent rules and
+  instructions" below
+- There is no `CLAUDE.md` stub at the repo root — Claude Code reads this file directly when one is
+  absent. Don't recreate it.
 
 ## Multi-agent workflow
 
-This repo is maintained by two Claude Code instances running in parallel: one on the Linux host, one on the MacBook. Each owns
-its platform's side of things.
+This repo is maintained by two Claude Code instances running in parallel: one on the Linux host, one
+on the MacBook. Each owns its platform's side of things.
 
-Shared files — this one, `README.md`, `mklinks.sh`, `dot_zshrc`/`dot_bashrc`, `available/ssh-agent.sh`, `DECISIONS.md`, and the
-OS-conditional
-blocks inside `Brewfile.tmpl` and `modify_devbox.json.tmpl` — get edited by either instance, but only the block or line that
-actually needs to change; add a branch rather than restructure a shared one.
+Shared files — this one, `README.md`, `mklinks.sh`, `dot_zshrc`/`dot_bashrc`,
+`available/ssh-agent.sh`, `DECISIONS.md`, and the OS-conditional blocks inside `Brewfile.tmpl` and
+`modify_devbox.json.tmpl` — get edited by either instance, but only the block or line that actually
+needs to change; add a branch rather than restructure a shared one.
 
 Work happens on short-lived branches prefixed by owner, never directly on `main`:
 
 - `linux/<topic>` or `macos/<topic>`, cut from the latest `main`.
-- Rebase onto `origin/main` (never merge) right before landing, to pick up anything the other instance pushed meanwhile.
-- Fast-forward into `main`, push immediately, delete the branch. No long-lived per-platform branches — those accumulate drift
-  and turn every sync into one large merge instead of many small ones.
-- `main` has no branch protection on GitHub; treat that as a reason for more care around rebases and pushes, not less.
-- If a rebase or merge ever produces a real conflict (not a clean fast-forward), stop and surface it to Scott rather than
-  resolving it solo.
+- Rebase onto `origin/main` (never merge) right before landing, to pick up anything the other
+  instance pushed meanwhile.
+- Fast-forward into `main`, push immediately, delete the branch. No long-lived per-platform branches
+  — those accumulate drift and turn every sync into one large merge instead of many small ones.
+- `main` has no branch protection on GitHub; treat that as a reason for more care around rebases and
+  pushes, not less.
+- If a rebase or merge ever produces a real conflict (not a clean fast-forward), stop and surface it
+  to Scott rather than resolving it solo.
 
-`HANDOFF*.md` (gitignored globally, not just in this repo) is the informal channel for one instance to leave the other a note
-without committing it.
+`HANDOFF*.md` (gitignored globally, not just in this repo) is the informal channel for one instance
+to leave the other a note without committing it.
 
-When messaging the other instance over Remote Control, check `ListAgents` first to confirm it's actually listed. It's a live
-bridge, not a mailbox — a message to a name that isn't currently connected has nowhere to land and nothing waits for it to
-reconnect.
+When messaging the other instance over Remote Control, check `ListAgents` first to confirm it's
+actually listed. It's a live bridge, not a mailbox — a message to a name that isn't currently
+connected has nowhere to land and nothing waits for it to reconnect.
 
 ## Modular shell configuration
 
@@ -44,8 +49,8 @@ reconnect.
 - `available/`: Shell config modules (aliases, functions, env vars) grouped by tool
 - `enabled/`: Symlinks into `available/` with numeric prefixes controlling load order
 
-Shell init files (`dot_zshrc`, `dot_bashrc`) source all `enabled/??-*` files. `enabled/mklinks.sh` auto-creates symlinks based on
-installed tools. Never commit symlinks from `enabled/` to git.
+Shell init files (`dot_zshrc`, `dot_bashrc`) source all `enabled/??-*` files. `enabled/mklinks.sh`
+auto-creates symlinks based on installed tools. Never commit symlinks from `enabled/` to git.
 
 Load order:
 
@@ -60,8 +65,10 @@ Load order:
 
 ## Key conventions
 
-- `ACTIVE_AGENT` env var: when set, shell configs skip history, plugins, and interactive features — set this in agent/LLM contexts
-- Templates reference `.chezmoi.hostname` (case-preserved), `.chezmoi.os`, and custom data from `~/.config/chezmoi/chezmoi.toml`
+- `ACTIVE_AGENT` env var: when set, shell configs skip history, plugins, and interactive features —
+  set this in agent/LLM contexts
+- Templates reference `.chezmoi.hostname` (case-preserved), `.chezmoi.os`, and custom data from
+  `~/.config/chezmoi/chezmoi.toml`
 - Host-specific configs live in `~/.config/local/` (gitignored, not managed by chezmoi)
 - `prepend_path` / `append_path` (defined in `00-bootstrap`) handle idempotent PATH modifications
 - `dot_zshenv` sets XDG base directory variables on macOS (Linux gets these from PAM/systemd)
@@ -71,84 +78,113 @@ Load order:
 `home/dot_config/direnv/direnvrc` defines reusable layouts for `.envrc` files:
 
 - `layout devbox` — activates a project devbox environment and restores Homebrew to PATH afterward
-- `layout dotenv` — loads `.env.<name>` selected by `.env.choice`, falls back to `.env`; reloads on change
+- `layout dotenv` — loads `.env.<name>` selected by `.env.choice`, falls back to `.env`; reloads on
+  change
 - `layout uv` — creates/activates a Python venv via uv
 
 Project `.envrc` files should use these layouts rather than raw `eval "$(devbox ...)"` calls.
 
 ## Package management: devbox vs Homebrew
 
-devbox global (`home/dot_local/share/devbox/global/default/modify_devbox.json.tmpl`) is the primary package manager;
-Homebrew is minimized. A package stays on Homebrew only when at least one of these holds:
+devbox global (`home/dot_local/share/devbox/global/default/modify_devbox.json.tmpl`) is the primary
+package manager; Homebrew is minimized. A package stays on Homebrew only when at least one of these
+holds:
 
 1. It's a Mac GUI app (cask) — devbox/nix doesn't manage these.
 2. It isn't available in nixpkgs at all.
-3. It has some other complication that blocks a clean migration — e.g. no cached binary on `cache.nixos.org`, forcing an
-   expensive from-source build (seen with `azure-functions-core-tools`, which pulls in the full dotnet SDK).
-4. A vendor ships it as supporting tooling for another Homebrew-managed package — e.g. `kubelogin`, which Microsoft
-   expects alongside the Azure CLI.
+3. It has some other complication that blocks a clean migration — e.g. no cached binary on
+   `cache.nixos.org`, forcing an expensive from-source build (seen with
+   `azure-functions-core-tools`, which pulls in the full dotnet SDK).
+4. A vendor ships it as supporting tooling for another Homebrew-managed package — e.g. `kubelogin`,
+   which Microsoft expects alongside the Azure CLI.
 
-Use `gbox-add`/`gbox-rm` (defined in `available/devbox.sh`) to add or remove global devbox packages, and `brew-add`/`brew-rm`
-(`available/homebrew.sh`, `--cask` for casks) for Homebrew. Both pairs edit the chezmoi template first, then apply and
-install, rolling the template back if the package manager fails — so the source and the live install never diverge. They only
-handle the unconditional sections; edit the template directly for packages behind a conditional (azure, kubernetes, etc.).
+Use `gbox-add`/`gbox-rm` (defined in `available/devbox.sh`) to add or remove global devbox packages,
+and `brew-add`/`brew-rm` (`available/homebrew.sh`, `--cask` for casks) for Homebrew. Both pairs edit
+the chezmoi template first, then apply and install, rolling the template back if the package manager
+fails — so the source and the live install never diverge. They only handle the unconditional
+sections; edit the template directly for packages behind a conditional (azure, kubernetes, etc.).
 
-Homebrew drift needs active pruning: `brew bundle` only ever *adds*, so deleting a Brewfile line never uninstalls anything.
-`brew-prune` shows what is installed but undeclared (`--force` to actually remove it), `brew-check` verifies the Brewfile is
-satisfied, and `brew-sync` installs what is missing. Run `bin/brew-devbox-overlap` periodically to find Homebrew formulas
-whose binaries are now also provided by devbox global; anything that overlaps and isn't covered by the exceptions above
+These wrappers manage the **shared baseline only** — the list every host gets on `chezmoi apply`.
+For a package that should live on just one host, skip the wrappers and use the package manager
+directly instead: `brew install <pkg>` for Homebrew, or `devbox global add`/`devbox global rm` for
+devbox. Homebrew has always tolerated this — `brew bundle` only ever adds, so an undeclared install
+just sits there (though `brew-prune --force` would still remove it; there's no exceptions-file
+mechanism for Homebrew yet, so treat that command with care if you're relying on host-local
+installs). devbox didn't, until the modify script started merging instead of replacing `packages` —
+see the comment above `gbox-add` in `available/devbox.sh` for how that merge works and why a plain
+`devbox global add`/`rm` is durable now instead of getting silently reverted on the next apply.
+
+Homebrew drift needs active pruning: `brew bundle` only ever *adds*, so deleting a Brewfile line
+never uninstalls anything. `brew-prune` shows what is installed but undeclared (`--force` to
+actually remove it), `brew-check` verifies the Brewfile is satisfied, and `brew-sync` installs what
+is missing. Run `bin/brew-devbox-overlap` periodically to find Homebrew formulas whose binaries are
+now also provided by devbox global; anything that overlaps and isn't covered by the exceptions above
 should migrate off Homebrew.
 
-The two templates must never declare the same package. To check, render both and compare base names — this is the failure
-mode that keeps recurring, because `chezmoi apply` faithfully reinstalls both copies and Homebrew's `bin` shadows devbox's.
+The two templates must never declare the same package. To check, render both and compare base names
+— this is the failure mode that keeps recurring, because `chezmoi apply` faithfully reinstalls both
+copies and Homebrew's `bin` shadows devbox's.
 
-VS Code extensions are deliberately **not** in the Brewfile. `brew bundle` supports a `vscode` verb, but it only shells out to
-`code --install-extension`, and it resolves the first of `code`, `codium`, `cursor`, `code-insiders` on `PATH` — so it silently
-installs into whichever editor answers first. It also reports success when an extension fails to install; only `brew bundle
-check` catches that. Above all, extensions get installed from the editor GUI, which no template can intercept, so the manifest
-drifts permanently. VS Code Settings Sync already handles them bidirectionally, GUI installs included. Do not add them back.
+VS Code extensions are deliberately **not** in the Brewfile. `brew bundle` supports a `vscode` verb,
+but it only shells out to `code --install-extension`, and it resolves the first of `code`, `codium`,
+`cursor`, `code-insiders` on `PATH` — so it silently installs into whichever editor answers first.
+It also reports success when an extension fails to install; only `brew bundle check` catches that.
+Above all, extensions get installed from the editor GUI, which no template can intercept, so the
+manifest drifts permanently. VS Code Settings Sync already handles them bidirectionally, GUI
+installs included. Do not add them back.
 
 ## Agent rules and instructions
 
-Rules are managed by [rulesync](https://github.com/dyoshikawa/rulesync) from a single source, `.rulesync/rules/*.md`, for
-**Claude Code and Copilot only**. `home/.chezmoiscripts/run_onchange_rulesync-generate.sh.tmpl` runs `rulesync generate`
-on every `chezmoi apply` where `.rulesync/` changed, writing `~/.claude/rules/*.md` and `~/.copilot/instructions/*.instructions.md`.
-To change a rule, edit `.rulesync/rules/<name>.md` and run `chezmoi apply` — don't hand-edit the generated files, they get
-overwritten.
+Rules are managed by [rulesync](https://github.com/dyoshikawa/rulesync) from a single source,
+`.rulesync/rules/*.md`, for **Claude Code and Copilot only**.
+`home/.chezmoiscripts/run_onchange_rulesync-generate.sh.tmpl` runs `rulesync generate` on every
+`chezmoi apply` where `.rulesync/` changed, writing `~/.claude/rules/*.md` and
+`~/.copilot/instructions/*.instructions.md`. To change a rule, edit `.rulesync/rules/<name>.md` and
+run `chezmoi apply` — don't hand-edit the generated files, they get overwritten.
 
-**Cursor is the exception**: rulesync doesn't support global-scope rules for Cursor (checked against v16.5.0's source —
-`rules-processor.ts` declares `cursor: { supportsGlobal: false }`), so `home/dot_cursor/rules/*.mdc` stays entirely
-hand-maintained, kept in sync by hand with `.rulesync/rules/` content.
+**Cursor is the exception**: rulesync doesn't support global-scope rules for Cursor (checked against
+v16.5.0's source — `rules-processor.ts` declares `cursor: { supportsGlobal: false }`), so
+`home/dot_cursor/rules/*.mdc` stays entirely hand-maintained, kept in sync by hand with
+`.rulesync/rules/` content.
 
-Commands work the same way for the one real command, `git-commit`: `.rulesync/commands/git-commit.md` generates
-`~/.claude/commands/git-commit.md`. Copilot's version is hand-maintained at
-`home/dot_copilot/instructions/git-commit.prompt.md` — rulesync doesn't support global-scope commands for Copilot either
-(`commands-processor.ts`: `copilot: { supportsGlobal: false }`, and there's no `copilotcli` command target at all). There's
-no Cursor command surface to mirror.
+Commands work the same way for the one real command, `git-commit`:
+`.rulesync/commands/git-commit.md` generates `~/.claude/commands/git-commit.md`. Copilot's version
+is hand-maintained at `home/dot_copilot/instructions/git-commit.prompt.md` — rulesync doesn't
+support global-scope commands for Copilot either (`commands-processor.ts`: `copilot: {
+supportsGlobal: false }`, and there's no `copilotcli` command target at all). There's no Cursor
+command surface to mirror.
 
-**Skills are different from rules and commands**: their global-scope support matrix (checked against v16.5.0's source)
-covers Copilot *and* Cursor, unlike either of the above. Claude Code needs no rulesync involvement at all — a skill is
-just a chezmoi-managed directory under `home/dot_claude/skills/*/`, deployed like any other dotfile. For Copilot and
-Cursor, `.rulesync/skills/*/` are symlinks back to those same `home/dot_claude/skills/*/` directories rather than
-duplicated content — rulesync follows symlinks when discovering input, so this is one source generating three targets.
+**Skills are different from rules and commands**: their global-scope support matrix (checked against
+v16.5.0's source) covers Copilot *and* Cursor, unlike either of the above. Claude Code needs no
+rulesync involvement at all — a skill is just a chezmoi-managed directory under
+`home/dot_claude/skills/*/`, deployed like any other dotfile. For Copilot and Cursor,
+`.rulesync/skills/*/` are symlinks back to those same `home/dot_claude/skills/*/` directories rather
+than duplicated content — rulesync follows symlinks when discovering input, so this is one source
+generating three targets.
 
-Watch for one gotcha if you ever touch the hash-tracking comment block at the top of the run_onchange script: chezmoi's
-`glob` function does not traverse symlinked directories, recursive or not, even though a direct `stat` through the same
-symlink resolves fine. Globbing `.rulesync/skills/**` finds the symlink itself but nothing inside it. The script hashes
-`home/dot_claude/skills/**` directly instead, for exactly this reason — glob the real path, not the symlink, or a skill
-edit silently stops triggering regeneration.
+Watch for one gotcha if you ever touch the hash-tracking comment block at the top of the
+run_onchange script: chezmoi's `glob` function does not traverse symlinked directories, recursive or
+not, even though a direct `stat` through the same symlink resolves fine. Globbing
+`.rulesync/skills/**` finds the symlink itself but nothing inside it. The script hashes
+`home/dot_claude/skills/**` directly instead, for exactly this reason — glob the real path, not the
+symlink, or a skill edit silently stops triggering regeneration.
 
-`rulesync` isn't in nixpkgs, so it isn't a devbox package — it runs via `npx rulesync@<pinned version>`, pinned in the
-run_onchange script itself. Update the pin deliberately (never `@latest`); rulesync ships breaking changes roughly monthly.
+`rulesync` isn't in nixpkgs, so it isn't a devbox package — it runs via `npx rulesync@<pinned
+version>`, pinned in the run_onchange script itself. Update the pin deliberately (never `@latest`);
+rulesync ships breaking changes roughly monthly.
 
-Rule frontmatter controls *when* Claude Code loads a rule, and rulesync decides that frontmatter for you. A generated rule with a
-`paths:` key is path-scoped: it loads only when Claude opens a matching file with the Read tool, not at session start, and Bash
-reads (`cat`, `sed`, `grep`) never trigger it. rulesync derives the key as `claudecode.paths ?? globs`, so a rule has to omit
-**both** to load unconditionally. That is why `.rulesync/rules/general-behavior.md` carries neither; don't add `globs` back to it.
-Setting `claudecode.paths: []` is not a substitute, because rulesync emits a literal `paths: []` that matches nothing.
+Rule frontmatter controls *when* Claude Code loads a rule, and rulesync decides that frontmatter for
+you. A generated rule with a `paths:` key is path-scoped: it loads only when Claude opens a matching
+file with the Read tool, not at session start, and Bash reads (`cat`, `sed`, `grep`) never trigger
+it. rulesync derives the key as `claudecode.paths ?? globs`, so a rule has to omit **both** to load
+unconditionally. That is why `.rulesync/rules/general-behavior.md` carries neither; don't add
+`globs` back to it. Setting `claudecode.paths: []` is not a substitute, because rulesync emits a
+literal `paths: []` that matches nothing.
 
-One rule deliberately bypasses rulesync: `home/dot_claude/rules/encrypted_environment.md.age`. Its content is personal and this
-repo is public, so it is age-encrypted and applied straight to `~/.claude/rules/environment.md` by chezmoi instead of being
-generated from `.rulesync/`. `rulesync generate` leaves files it doesn't own untouched, so the generated and encrypted rules
-coexist in that directory. `home/.chezmoiignore` skips it when `~/.config/chezmoi/key.txt` is absent, so `chezmoi apply` still
-works on hosts without the personal age key. This rule reaches Claude Code only; there is no Copilot copy.
+One rule deliberately bypasses rulesync: `home/dot_claude/rules/encrypted_environment.md.age`. Its
+content is personal and this repo is public, so it is age-encrypted and applied straight to
+`~/.claude/rules/environment.md` by chezmoi instead of being generated from `.rulesync/`. `rulesync
+generate` leaves files it doesn't own untouched, so the generated and encrypted rules coexist in
+that directory. `home/.chezmoiignore` skips it when `~/.config/chezmoi/key.txt` is absent, so
+`chezmoi apply` still works on hosts without the personal age key. This rule reaches Claude Code
+only; there is no Copilot copy.
