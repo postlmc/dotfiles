@@ -62,7 +62,10 @@ leaves fenced code blocks untouched.
 
 - Do not include entire source files in documentation. Include only the sections necessary to explain the subject and link to the
   full file.
-- Emoji are not acceptable in Markdown documentation.
+- Do not add emoji unprompted -- to headings, bullets, or anywhere else -- even when the content might seem to invite it. This is
+  about unsolicited decoration, the kind that litters every heading and bullet, not emoji as such. When the user explicitly asks
+  for emoji, or they serve as a meaningful functional indicator rather than decoration (a status column in a table, say), they're
+  fine.
 
 ## Prohibited Workarounds
 
