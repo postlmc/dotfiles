@@ -136,31 +136,34 @@ installs included. Do not add them back.
 ## Agent rules and instructions
 
 Rules are managed by [rulesync](https://github.com/dyoshikawa/rulesync) from a single source,
-`.rulesync/rules/*.md`, for **Claude Code and Copilot only**.
+`.rulesync/rules/*.md`, for **Claude Code, Copilot, and OpenCode**.
 `home/.chezmoiscripts/run_onchange_rulesync-generate.sh.tmpl` runs `rulesync generate` on every
-`chezmoi apply` where `.rulesync/` changed, writing `~/.claude/rules/*.md` and
-`~/.copilot/instructions/*.instructions.md`. To change a rule, edit `.rulesync/rules/<name>.md` and
-run `chezmoi apply` — don't hand-edit the generated files, they get overwritten.
+`chezmoi apply` where `.rulesync/` changed, writing `~/.claude/rules/*.md`,
+`~/.copilot/instructions/*.instructions.md`, and `~/.config/opencode/` (`AGENTS.md` plus
+`memories/*.md`). To change a rule, edit `.rulesync/rules/<name>.md` and run `chezmoi apply` — don't
+hand-edit the generated files, they get overwritten.
 
 **Cursor is the exception**: rulesync doesn't support global-scope rules for Cursor (checked against
 v16.5.0's source — `rules-processor.ts` declares `cursor: { supportsGlobal: false }`), so
 `home/dot_cursor/rules/*.mdc` stays entirely hand-maintained, kept in sync by hand with
-`.rulesync/rules/` content.
+`.rulesync/rules/` content. **OpenCode is the opposite of an exception**: its `opencode` target has
+full global-scope support for rules, commands, and skills alike (same v16.5.0 source check), so
+unlike Copilot and Cursor it needs no feature-splitting — one `generate` call covers all three.
 
 Commands work the same way for the one real command, `git-commit`:
-`.rulesync/commands/git-commit.md` generates `~/.claude/commands/git-commit.md`. Copilot's version
-is hand-maintained at `home/dot_copilot/instructions/git-commit.prompt.md` — rulesync doesn't
-support global-scope commands for Copilot either (`commands-processor.ts`: `copilot: {
-supportsGlobal: false }`, and there's no `copilotcli` command target at all). There's no Cursor
-command surface to mirror.
+`.rulesync/commands/git-commit.md` generates `~/.claude/commands/git-commit.md` and
+`~/.config/opencode/commands/git-commit.md`. Copilot's version is hand-maintained at
+`home/dot_copilot/instructions/git-commit.prompt.md` — rulesync doesn't support global-scope
+commands for Copilot either (`commands-processor.ts`: `copilot: { supportsGlobal: false }`, and
+there's no `copilotcli` command target at all). There's no Cursor command surface to mirror.
 
 **Skills are different from rules and commands**: their global-scope support matrix (checked against
-v16.5.0's source) covers Copilot *and* Cursor, unlike either of the above. Claude Code needs no
-rulesync involvement at all — a skill is just a chezmoi-managed directory under
-`home/dot_claude/skills/*/`, deployed like any other dotfile. For Copilot and Cursor,
+v16.5.0's source) covers Copilot, Cursor, *and* OpenCode, unlike either of the above. Claude Code
+needs no rulesync involvement at all — a skill is just a chezmoi-managed directory under
+`home/dot_claude/skills/*/`, deployed like any other dotfile. For the other three targets,
 `.rulesync/skills/*/` are symlinks back to those same `home/dot_claude/skills/*/` directories rather
 than duplicated content — rulesync follows symlinks when discovering input, so this is one source
-generating three targets.
+generating four targets.
 
 Watch for one gotcha if you ever touch the hash-tracking comment block at the top of the
 run_onchange script: chezmoi's `glob` function does not traverse symlinked directories, recursive or

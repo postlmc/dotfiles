@@ -44,3 +44,8 @@ npx --yes rulesync@16.5.0 generate -g --input-root "$repo" --targets copilot --f
 # the same home/dot_claude/skills/ sources -- rulesync follows symlinks
 # when discovering input, so this is one source, not a duplicate.
 npx --yes rulesync@16.5.0 generate -g --input-root "$repo" --targets copilot,cursor --features skills
+
+# OpenCode has full global-scope support for rules, commands, and skills
+# alike (checked against v16.5.0's source) -- unlike Copilot/Cursor it needs
+# no feature-splitting, so one call covers all three.
+npx --yes rulesync@16.5.0 generate -g --input-root "$repo" --targets opencode --features rules,commands,skills
