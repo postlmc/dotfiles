@@ -14,9 +14,9 @@ claudecode:
 
 ## Core Standards
 
-Write concise, idiomatic code following **PEP 8** and **PEP 257**. Indent with 4 spaces and limit lines to 100 characters. Ensure
-all functions have complete type annotations (using the `typing` module where necessary) and docstrings. Break complex logic into
-manageable functions.
+Write concise, idiomatic code following **PEP 8** and **PEP 257**. Indent with 4 spaces and limit
+lines to 100 characters. Ensure all functions have complete type annotations (using the `typing`
+module where necessary) and docstrings. Break complex logic into manageable functions.
 
 ### Type Annotations and Documentation Example
 
@@ -47,16 +47,17 @@ def process_data(values: List[float], limit: Optional[float] = None) -> List[flo
 
 ## Reliability
 
-Handle edge cases (empty inputs, invalid types, large datasets) with clear exception handling. Write unit tests for critical paths
-and functions, documenting test cases in docstrings.
+Handle edge cases (empty inputs, invalid types, large datasets) with clear exception handling. Write
+unit tests for critical paths and functions, documenting test cases in docstrings.
 
 ## Environment and Tooling
 
-Use the existing `uv`-managed virtual environment for all Python code; prompt to create one if missing. CLI scripts must use `uv
-run` via a shebang and include a PEP-723 docstring for dependencies.
+Use the existing `uv`-managed virtual environment for all Python code; prompt to create one if
+missing. CLI scripts must use `uv run` via a shebang and include a PEP-723 docstring for
+dependencies.
 
-Preferred defaults: `requests` (HTTP), `click` (CLI), `pydantic` (validation), `pydantic-settings` (secrets), `python-dotenv`,
-`pytest` (testing), `pytest-mock` (mocking).
+Preferred defaults: `requests` (HTTP), `click` (CLI), `pydantic` (validation), `pydantic-settings`
+(secrets), `python-dotenv`, `pytest` (testing), `pytest-mock` (mocking).
 
 ### Script Example
 

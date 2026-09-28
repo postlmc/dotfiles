@@ -46,8 +46,9 @@ claudecode:
 
 ## Core Principle
 
-**Write code that speaks for itself. Comment only when necessary to explain WHY, not WHAT.** If this is done correctly, comments are
-not needed most of the time. **Do not use emoji in code, comments, or documentation.**
+**Write code that speaks for itself. Comment only when necessary to explain WHY, not WHAT.** If this
+is done correctly, comments are not needed most of the time. **Do not use emoji in code, comments,
+or documentation.**
 
 ## Commenting Guidelines
 
@@ -113,8 +114,8 @@ Before writing a comment, ask:
 
 ### Public APIs
 
-Public functions and methods require docstrings documenting parameters, return values, and exceptions. See language-specific
-instruction files for format examples.
+Public functions and methods require docstrings documenting parameters, return values, and
+exceptions. See language-specific instruction files for format examples.
 
 ### Configuration and Constants
 

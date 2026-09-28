@@ -8,7 +8,8 @@ I want to measure and reduce zsh startup time in my chezmoi-managed dotfiles at
 `.zshrc` runs these in order, unconditionally for every shell:
 
 1. `path_helper` (macOS, subprocess: `eval $(/usr/libexec/path_helper -s)`)
-2. `devbox global shellenv --init-hook` (subprocess: `eval "$(/usr/local/bin/devbox global shellenv --init-hook)"`)
+2. `devbox global shellenv --init-hook` (subprocess: `eval "$(/usr/local/bin/devbox global shellenv
+   --init-hook)"`)
 3. `brew shellenv` (subprocess: `eval "$(/opt/homebrew/bin/brew shellenv)"`)
 4. `direnv hook zsh` (subprocess: `eval "$(direnv hook zsh)"`)
 5. Source all shell modules from `available/??-*` (file sourcing loop, ~20 files)

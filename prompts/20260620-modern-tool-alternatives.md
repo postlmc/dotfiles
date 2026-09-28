@@ -4,9 +4,10 @@ Work done 2026-06-20, based on the `NEW_TOOLS.md` audit of `available/` and `hom
 
 ## Approach
 
-All replacements use `command -v` guards so the classic tool remains in effect on any system where the modern alternative is not
-installed. Tools already in devbox global (`bat`, `ripgrep`, `xh`) were usable immediately; the rest (`eza`, `fd`, `neovim`, `dog`,
-`duf`) were added to devbox global to guarantee presence everywhere devbox runs.
+All replacements use `command -v` guards so the classic tool remains in effect on any system where
+the modern alternative is not installed. Tools already in devbox global (`bat`, `ripgrep`, `xh`)
+were usable immediately; the rest (`eza`, `fd`, `neovim`, `dog`, `duf`) were added to devbox global
+to guarantee presence everywhere devbox runs.
 
 ## What was implemented
 
@@ -23,4 +24,5 @@ installed. Tools already in devbox global (`bat`, `ripgrep`, `xh`) were usable i
 
 ## What was passed on
 
-`ps` in `ssh-agent.sh` — background process check in a script context; no meaningful benefit from `procs` here.
+`ps` in `ssh-agent.sh` — background process check in a script context; no meaningful benefit from
+`procs` here.

@@ -1,6 +1,7 @@
 # AI Tool Configuration
 
-This document describes how this chezmoi repo manages configuration for AI coding assistants and what a new system setup requires.
+This document describes how this chezmoi repo manages configuration for AI coding assistants and
+what a new system setup requires.
 
 ## Tools
 
@@ -20,7 +21,8 @@ Files deployed to `~/.claude/`:
 | `home/dot_claude/commands/import-from-copilot.md` | `~/.claude/commands/import-from-copilot.md` | Slash command: sync new Copilot files into Claude Code        |
 | `home/dot_claude/commands/import-from-cursor.md`  | `~/.claude/commands/import-from-cursor.md`  | Slash command: sync new Cursor rules into Claude Code         |
 
-Rules use frontmatter (`description`, `paths`) recognized by Claude Code. Commands use frontmatter (`description`, `allowed-tools`).
+Rules use frontmatter (`description`, `paths`) recognized by Claude Code. Commands use frontmatter
+(`description`, `allowed-tools`).
 
 ### GitHub Copilot
 
@@ -37,9 +39,9 @@ Files deployed to `~/.copilot/instructions/`:
 | `home/dot_copilot/instructions/import-from-claude.prompt.md`     | `~/.copilot/instructions/import-from-claude.prompt.md`     | Prompt: sync new Claude Code files into Copilot    |
 | `home/dot_copilot/instructions/import-from-cursor.prompt.md`     | `~/.copilot/instructions/import-from-cursor.prompt.md`     | Prompt: sync new Cursor rules into Copilot         |
 
-VS Code also needs its terminal profile configured so that Copilot agent sessions set `ACTIVE_AGENT=Copilot` — this skips shell
-history, plugins, and interactive features that interfere with agent execution. This is handled automatically by a chezmoi script
-(see below).
+VS Code also needs its terminal profile configured so that Copilot agent sessions set
+`ACTIVE_AGENT=Copilot` — this skips shell history, plugins, and interactive features that interfere
+with agent execution. This is handled automatically by a chezmoi script (see below).
 
 ### Cursor
 
@@ -60,30 +62,33 @@ Files deployed to `~/.cursor/skills/` (user-level skills):
 | `home/dot_cursor/skills/import-from-claude/SKILL.md`  | `~/.cursor/skills/import-from-claude/SKILL.md`  | Skill: sync new Claude Code rules into Cursor    |
 | `home/dot_cursor/skills/import-from-copilot/SKILL.md` | `~/.cursor/skills/import-from-copilot/SKILL.md` | Skill: sync new Copilot instructions into Cursor |
 
-Cursor `.mdc` frontmatter uses `globs` (comma-separated string) and `alwaysApply` instead of the `paths` array used by Claude Code.
+Cursor `.mdc` frontmatter uses `globs` (comma-separated string) and `alwaysApply` instead of the
+`paths` array used by Claude Code.
 
 Other Cursor behaviour:
 
 - **Agents**: Cursor reads `~/.claude/agents/` natively; no `~/.cursor/agents/` needed.
-- **Commands**: Cursor also reads `~/.claude/commands/` natively, so slash commands like `/git-commit` need no Cursor copy — a
-  duplicate skill would show up twice in the command picker.
+- **Commands**: Cursor also reads `~/.claude/commands/` natively, so slash commands like
+  `/git-commit` need no Cursor copy — a duplicate skill would show up twice in the command picker.
 - **Project-level instructions**: `AGENTS.md` in a project root is read natively by Cursor.
-- **User Rules** (global instructions set in the UI): stored in a SQLite database at `~/Library/Application
-  Support/Cursor/User/globalStorage/state.vscdb` under the key `aicontext.personalContext`. Not a plain file; not managed by
-  chezmoi. Set once via **Cursor Settings → Rules** after a new install. Paste the content of `~/.claude/rules/general-behavior.md`
+- **User Rules** (global instructions set in the UI): stored in a SQLite database at
+  `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb` under the key
+  `aicontext.personalContext`. Not a plain file; not managed by chezmoi. Set once via **Cursor
+  Settings → Rules** after a new install. Paste the content of `~/.claude/rules/general-behavior.md`
   as a baseline.
 
 ## Supporting tools
 
-`home/dot_local/bin/executable_align-tables` deploys to `~/.local/bin/align-tables`. It reformats Markdown tables to the MD060
-aligned style the markdown rule requires, padding cells to display width and skipping fenced code blocks. Agents run it after
-editing a table, then lint. It is stdlib-only Python invoked through a uv-run shebang.
+`home/dot_local/bin/executable_align-tables` deploys to `~/.local/bin/align-tables`. It reformats
+Markdown tables to the MD060 aligned style the markdown rule requires, padding cells to display
+width and skipping fenced code blocks. Agents run it after editing a table, then lint. It is
+stdlib-only Python invoked through a uv-run shebang.
 
 ## Cross-tool sync
 
-Rules and instructions are kept in sync manually across all three tools. `AGENTS.md` requires a rule to exist for Claude Code,
-Cursor, and Copilot together unless it is explicitly tool-specific. None of these commands overwrite existing files; all are
-additive only.
+Rules and instructions are kept in sync manually across all three tools. `AGENTS.md` requires a rule
+to exist for Claude Code, Cursor, and Copilot together unless it is explicitly tool-specific. None
+of these commands overwrite existing files; all are additive only.
 
 | Command / Skill        | Tool           | Pulls from                                | Pushes to                                 |
 |------------------------|----------------|-------------------------------------------|-------------------------------------------|
@@ -98,10 +103,11 @@ All commands stage results in chezmoi and run `chezmoi apply` for the affected d
 
 ### Known asymmetry: per-command model selection
 
-The Copilot `git-commit.prompt.md` uses `model: claude-haiku-4-5` in its frontmatter to run commits against a cheaper model.
-Claude Code command frontmatter only supports `description` and `allowed-tools` — there is no `model` key. Cursor reads
-`~/.claude/commands/` using the same format and has the same limitation. Until Claude Code adds per-command model selection,
-the Haiku optimization exists only in the Copilot context.
+The Copilot `git-commit.prompt.md` uses `model: claude-haiku-4-5` in its frontmatter to run commits
+against a cheaper model. Claude Code command frontmatter only supports `description` and
+`allowed-tools` — there is no `model` key. Cursor reads `~/.claude/commands/` using the same format
+and has the same limitation. Until Claude Code adds per-command model selection, the Haiku
+optimization exists only in the Copilot context.
 
 ## Chezmoi scripts
 
@@ -117,7 +123,10 @@ Scripts run automatically during `chezmoi apply` when their trigger condition is
 ## New system setup
 
 1. Install chezmoi and clone this repo as the source directory.
-2. Run `chezmoi apply`. This deploys all managed files and runs the scripts above in dependency order.
-3. Open Cursor → **Settings → Rules** and paste the content of `~/.claude/rules/general-behavior.md` as User Rules.
+2. Run `chezmoi apply`. This deploys all managed files and runs the scripts above in dependency
+   order.
+3. Open Cursor → **Settings → Rules** and paste the content of `~/.claude/rules/general-behavior.md`
+   as User Rules.
 
-No additional steps are required for Claude Code or Copilot; `chezmoi apply` handles both completely.
+No additional steps are required for Claude Code or Copilot; `chezmoi apply` handles both
+completely.

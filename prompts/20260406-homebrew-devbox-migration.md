@@ -1,20 +1,21 @@
 # Devbox-Primary Migration
 
-Move CLI tools from Homebrew to devbox global, eliminating the GNU utils PATH war and the defensive prepend logic that has to be
-kept in sync across multiple files.
+Move CLI tools from Homebrew to devbox global, eliminating the GNU utils PATH war and the defensive
+prepend logic that has to be kept in sync across multiple files.
 
-**Homebrew stays for:** casks, podman, qemu/vde, postgresql/mysql (brew services), dotnet, powershell, google-cloud-sdk,
-iproute2mac, and any hardware-driver stacks (SDR, etc.).
+**Homebrew stays for:** casks, podman, qemu/vde, postgresql/mysql (brew services), dotnet,
+powershell, google-cloud-sdk, iproute2mac, and any hardware-driver stacks (SDR, etc.).
 
-**Aurora caveat:** devbox global changes won't help there until Nix/devbox is re-integrated. The Homebrew shellenv blocks and their
-fallbacks can stay in place — they no-op when brew isn't present — so Aurora is unaffected by this migration.
+**Aurora caveat:** devbox global changes won't help there until Nix/devbox is re-integrated. The
+Homebrew shellenv blocks and their fallbacks can stay in place — they no-op when brew isn't present
+— so Aurora is unaffected by this migration.
 
 ---
 
 ## Phase 1 — Add GNU tools to devbox global
 
-This is the root cause of all the PATH complexity. Moving these to devbox makes them first-class in every devbox shell without any
-init_hook hacks.
+This is the root cause of all the PATH complexity. Moving these to devbox makes them first-class in
+every devbox shell without any init_hook hacks.
 
 Edit `home/dot_local/share/devbox/global/default/devbox.json`. Add to `packages`:
 
@@ -29,8 +30,9 @@ Verify after `devbox global shellenv` that `which sed` resolves to the nix store
 
 ## Phase 2 — Add CLI tools to devbox global
 
-Add the remaining Brewfile tools to `devbox.json`. The current file is not a chezmoi template — to preserve conditional installation
-per machine, rename it to `devbox.json.tmpl` and use the same `{{ if dig ... }}` pattern already used in `Brewfile.tmpl`.
+Add the remaining Brewfile tools to `devbox.json`. The current file is not a chezmoi template — to
+preserve conditional installation per machine, rename it to `devbox.json.tmpl` and use the same `{{
+if dig ... }}` pattern already used in `Brewfile.tmpl`.
 
 Packages to add (nixpkgs names):
 
@@ -75,16 +77,18 @@ Remove from `home/dot_config/homebrew/Brewfile.tmpl` everything moved to devbox:
 
 - The entire `{{- if eq .chezmoi.os "darwin" }}` block (lines 1–11) — GNU utils + curl + openssl
 - `git`, `tmux`, `vim`, `fzf`, `jq`, `yq`, `age`, `starship`, `direnv`, `zellij`
-- Conditional blocks for: `python`/`uv`, `go`, `rustup`, `kubectl`/`kubectx`/`helm`/`k9s`, `azure-cli`, `terraform`, `gum`
+- Conditional blocks for: `python`/`uv`, `go`, `rustup`, `kubectl`/`kubectx`/`helm`/`k9s`,
+  `azure-cli`, `terraform`, `gum`
 
-Leave in place: `podman`, `google-cloud-sdk` cask, and anything in the "stays in Homebrew" list above.
+Leave in place: `podman`, `google-cloud-sdk` cask, and anything in the "stays in Homebrew" list
+above.
 
 ---
 
 ## Phase 4 — Simplify devbox init_hook
 
-Once Phase 1 is done, the init_hook in `devbox.json` no longer needs to prepend Homebrew paths. Replace the entire `init_hook` array
-with a no-op or remove the entries:
+Once Phase 1 is done, the init_hook in `devbox.json` no longer needs to prepend Homebrew paths.
+Replace the entire `init_hook` array with a no-op or remove the entries:
 
 ```json
 "init_hook": []
@@ -114,7 +118,8 @@ fi
 
 ## Phase 6 — Fix remaining HOMEBREW_PREFIX references in shell configs
 
-After the tools move to devbox, several hooks that look up tools via `$HOMEBREW_PREFIX` need to become plain `command -v` checks.
+After the tools move to devbox, several hooks that look up tools via `$HOMEBREW_PREFIX` need to
+become plain `command -v` checks.
 
 ### direnv hook
 
@@ -130,7 +135,8 @@ command -v direnv &>/dev/null && eval "$(direnv hook bash)"
 
 ### starship init
 
-Both `dot_zshrc:135–138` and `dot_bashrc:129–132` gate on `${HOMEBREW_PREFIX}/bin/starship`. Change to:
+Both `dot_zshrc:135–138` and `dot_bashrc:129–132` gate on `${HOMEBREW_PREFIX}/bin/starship`. Change
+to:
 
 ```zsh
 command -v starship &>/dev/null && {
@@ -145,26 +151,28 @@ command -v starship &>/dev/null && {
 [[ -n "${HOMEBREW_PREFIX}" ]] && fpath=(${HOMEBREW_PREFIX}/share/zsh/site-functions $fpath)
 ```
 
-Devbox puts completions in the nix store and wires them through `$FPATH` automatically. Remove this line and verify completions
-still work after the migration.
+Devbox puts completions in the nix store and wires them through `$FPATH` automatically. Remove this
+line and verify completions still work after the migration.
 
 ### azure-cli completion (`dot_zshrc:90–94`, `dot_bashrc:87–91`)
 
-The Homebrew path `${HOMEBREW_PREFIX}/etc/bash_completion.d/az` won't exist once azure-cli is in devbox. The devbox/nix azure-cli
-package ships its own completion. Check where it lands after install (`find $(devbox global path) -name 'az' -path '*/completion*'`)
-and update the source path, or switch to `az --completion` if that's supported.
+The Homebrew path `${HOMEBREW_PREFIX}/etc/bash_completion.d/az` won't exist once azure-cli is in
+devbox. The devbox/nix azure-cli package ships its own completion. Check where it lands after
+install (`find $(devbox global path) -name 'az' -path '*/completion*'`) and update the source path,
+or switch to `az --completion` if that's supported.
 
 ### bash completion (`dot_bashrc:76–82`)
 
-The `${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh` path won't apply for devbox tools. Devbox injects completion paths
-automatically. Test and trim this block after migration.
+The `${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh` path won't apply for devbox tools. Devbox
+injects completion paths automatically. Test and trim this block after migration.
 
 ---
 
 ## Phase 7 — Fix EDITOR in available/core.sh
 
-`available/core.sh:122–123` checks `${HOMEBREW_PREFIX}/bin/vim` first. Once vim is in devbox, that path won't exist. The existing
-fallback chain (`command -v vim`, `command -v vi`) already handles this correctly — just remove the Homebrew-specific first branch:
+`available/core.sh:122–123` checks `${HOMEBREW_PREFIX}/bin/vim` first. Once vim is in devbox, that
+path won't exist. The existing fallback chain (`command -v vim`, `command -v vi`) already handles
+this correctly — just remove the Homebrew-specific first branch:
 
 ```sh
 # Before
