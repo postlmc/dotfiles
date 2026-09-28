@@ -10,8 +10,13 @@
 - `.rulesync/` (repo root, outside `home/`) is source material for
   [rulesync](https://github.com/dyoshikawa/rulesync), not a dotfile itself — see "Agent rules and
   instructions" below
-- There is no `CLAUDE.md` stub at the repo root — Claude Code reads this file directly when one is
-  absent. Don't recreate it.
+- There is no `CLAUDE.md` stub at the repo root, deliberately: Claude Code v2.1.277+ reads a
+  project-root `AGENTS.md` directly whenever no `CLAUDE.md`/`.claude/CLAUDE.md`/`CLAUDE.local.md`
+  exists in the working directory or above it ([memory docs](https://code.claude.com/docs/en/memory#when-claude-code-reads-agents-md)).
+  Don't recreate a root `CLAUDE.md` — it would silently take over from this file. This is
+  project-scope only: it has no bearing on the separate global `~/.claude/CLAUDE.md` user
+  instructions file, which rulesync still generates (see "Agent rules and instructions" below) and
+  which Claude Code always loads regardless of `AGENTS.md`.
 
 ## Multi-agent workflow
 
