@@ -11,7 +11,6 @@ Files deployed to `~/.claude/`:
 
 | Source                                            | Target                                      | Purpose                                                       |
 |---------------------------------------------------|---------------------------------------------|---------------------------------------------------------------|
-| `home/dot_claude/CLAUDE.md`                       | `~/.claude/CLAUDE.md`                       | Stub pointing to `rules/` for behavioral guidelines           |
 | `home/dot_claude/rules/general-behavior.md`       | `~/.claude/rules/general-behavior.md`       | Behavioral guidelines and writing voice; applies to all files |
 | `home/dot_claude/rules/better-comments.md`        | `~/.claude/rules/better-comments.md`        | Commenting guidelines; scoped to source code files            |
 | `home/dot_claude/rules/markdown.md`               | `~/.claude/rules/markdown.md`               | Markdown formatting rules; scoped to `**/*.md`                |
