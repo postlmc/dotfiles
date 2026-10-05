@@ -66,3 +66,4 @@ command -v terraform >/dev/null 2>&1 && ln -sf ../available/terraform.sh 71-terr
 
 # AI tools
 command -v claude >/dev/null 2>&1 && ln -sf ../available/claude.sh 80-claude
+command -v opencode >/dev/null 2>&1 && ln -sf ../available/opencode.sh 81-opencode
