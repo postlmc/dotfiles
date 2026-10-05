@@ -3,7 +3,7 @@
 This document describes how this chezmoi repo configures AI coding assistants and what a new system
 setup requires. [AGENTS.md](../AGENTS.md) holds the maintenance rules; this is the map.
 
-## Where the content comes from
+## Where the Content Comes From
 
 Rules, the `git-commit` command, and skills have one source each:
 
@@ -94,7 +94,7 @@ OpenCode is installed through devbox global on every host.
   load, so install third-party skills there (or with `--agent opencode`) to keep them visible.
 - **Encrypted rule**: the environment rule reaches Claude Code only.
 
-## Agent shells
+## Agent Shells
 
 Each tool sets `ACTIVE_AGENT` so `.zshrc`/`.bashrc` take the minimal branch: no history, plugins,
 completions, prompt, or pager.
@@ -106,7 +106,7 @@ completions, prompt, or pager.
 | OpenCode    | `plugins/active-agent.ts`          |
 | Cursor      | Not set by this repo               |
 
-## Chezmoi scripts
+## Chezmoi Scripts
 
 | Script                                                        | Runs when                       | Effect                                                    |
 |---------------------------------------------------------------|---------------------------------|-----------------------------------------------------------|
@@ -117,14 +117,14 @@ completions, prompt, or pager.
 | `home/run_onchange_configure-macos-defaults.sh`               | The script changes              | Applies macOS system defaults                             |
 | `home/run_once_init-devbox-local.sh.tmpl`                     | First apply only                | Initializes the devbox local environment                  |
 
-## Supporting tools
+## Supporting Tools
 
 `home/dot_local/bin/executable_align-tables` deploys to `~/.local/bin/align-tables`. It reformats
 Markdown tables to the MD060 aligned style the markdown rule requires, padding cells to display
 width and skipping fenced code blocks. Agents run it after editing a table, then lint. It is
 stdlib-only Python invoked through a uv-run shebang.
 
-## New system setup
+## New System Setup
 
 1. Install chezmoi and clone this repo as the source directory.
 2. Run `chezmoi apply`. This deploys all managed files, installs packages, and runs the scripts
