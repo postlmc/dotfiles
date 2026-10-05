@@ -116,8 +116,8 @@ contexts:
 
 - **Shared features**: Both shells source all `enabled/??-*` modules, set up PATH (including GNU
   utilities on macOS), and handle Homebrew integration consistently
-- **Agent detection**: When `ACTIVE_AGENT` is set (by GitHub Copilot, Cursor, or similar tools),
-  both shells skip expensive interactive features:
+- **Agent detection**: When `ACTIVE_AGENT` is set (by Claude Code, GitHub Copilot, and OpenCode;
+  see [docs/AI-Tools.md](docs/AI-Tools.md)), both shells skip expensive interactive features:
     - No completions (bash-completion, kubectl, kubelogin, etc.)
     - No plugins (zsh-autosuggestions, zsh-syntax-highlighting, fzf)
     - No history (`HISTFILE=/dev/null`, `HISTSIZE=0`)
