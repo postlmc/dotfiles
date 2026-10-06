@@ -5,19 +5,17 @@ command -v gcloud >/dev/null 2>&1 || return
 
 alias gcloud-up='gcloud components update --quiet'
 
-# Source completion and path files - handle different installation locations
-if [[ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc ]]; then
-    # macOS Homebrew Cask installation
-    source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc
-    source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc
+# The include files live in the SDK root. Resolving it through the gcloud symlink finds any install
+# location (Homebrew on Apple Silicon or Intel, a user install); Debian/Ubuntu packages keep the
+# include files under /usr/share instead.
+_gcloud_sh=bash
+[[ -n "${ZSH_VERSION}" ]] && _gcloud_sh=zsh
+_gcloud_root="$(dirname "$(dirname "$(readlink -f "$(command -v gcloud)")")")"
+[[ -f "${_gcloud_root}/path.${_gcloud_sh}.inc" ]] || _gcloud_root=/usr/share/google-cloud-sdk
 
-elif [[ -f /usr/share/google-cloud-sdk/completion.bash.inc ]]; then
-    # Linux package manager installation
-    source /usr/share/google-cloud-sdk/completion.bash.inc
-    source /usr/share/google-cloud-sdk/path.bash.inc
+[[ -f "${_gcloud_root}/path.${_gcloud_sh}.inc" ]] && . "${_gcloud_root}/path.${_gcloud_sh}.inc"
+# Completions need compinit/bashcompinit, which agent shells skip
+[[ -z "${ACTIVE_AGENT}" && -f "${_gcloud_root}/completion.${_gcloud_sh}.inc" ]] &&
+    . "${_gcloud_root}/completion.${_gcloud_sh}.inc"
 
-elif [[ -f "${HOME}/google-cloud-sdk/completion.bash.inc" ]]; then
-    # User installation
-    source "${HOME}/google-cloud-sdk/completion.bash.inc"
-    source "${HOME}/google-cloud-sdk/path.bash.inc"
-fi
+unset _gcloud_sh _gcloud_root

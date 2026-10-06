@@ -85,7 +85,7 @@ brew "azure/kubelogin/kubelogin"
 
 {{- if dig "cloud" "gcloud" false . }}
 # Google Cloud tools
-cask "google-cloud-sdk"
+cask "gcloud-cli"
 {{- end }}
 
 {{- if dig "cloud" "aws" false . }}
