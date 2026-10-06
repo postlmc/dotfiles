@@ -37,7 +37,7 @@ alias nix-gc-all='nix-collect-garbage -d'
 # resolve in nixpkgs), the template edit is rolled back so the template and live
 # devbox.json never end up out of sync with what devbox actually has installed.
 # Only handles unconditional packages (main $pkgs list). Edit the modify script
-# directly for conditional packages (kubernetes, python, etc.).
+# directly for conditional packages (kubernetes, terraform, rust, etc.).
 #
 # For a host-local package that should NOT reach every other host, skip these entirely
 # and use `devbox global add`/`devbox global rm` directly. The modify script tracks what
