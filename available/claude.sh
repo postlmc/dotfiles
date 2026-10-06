@@ -32,11 +32,14 @@ ccq() {
 command -v copilot >/dev/null 2>&1 || return
 
 cpr() {
-    local id
+    local id hex
     # Copilot records every session's cwd in its own store; resume the newest one for this
     # directory. A missed probe (schema change, no history) falls through to a fresh session.
+    # The path goes in as a hex blob literal so it needs no quoting: zsh and bash disagree on how
+    # backslashes in ${var//pattern/replacement} escape a single quote.
+    hex=$(printf '%s' "$PWD" | od -An -tx1 | tr -d ' \n')
     id=$(sqlite3 "${HOME}/.copilot/session-store.db" \
-        "SELECT id FROM sessions WHERE cwd = '${PWD//\'/\'\'}' ORDER BY updated_at DESC LIMIT 1;" \
+        "SELECT id FROM sessions WHERE cwd = CAST(X'${hex}' AS TEXT) ORDER BY updated_at DESC LIMIT 1;" \
         2>/dev/null)
     if [[ "$id" =~ ^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$ ]]; then
         copilot --resume="$id" "$@"
