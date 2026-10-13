@@ -114,11 +114,11 @@ completions, prompt, or pager.
 ## Markdown Formatting
 
 Line filling and table alignment are enforced by tools, not left to the model. Two reasons:
-markdownlint's MD013 passes a line that runs past 100 columns when nothing after column 100 is
-whitespace (its documented non-strict exception) and never flags a line that stops short, and Claude
-Code skips the path-scoped `markdown.md` rule when it creates a new file with Write. `markdown.md`
-still covers what a tool can't decide: title-case headings, no unprompted emoji, not pasting whole
-files.
+markdownlint never flags a line that stops short of 100 (and, before `stern` was set on MD013 in
+`home/dot_markdownlint-cli2.jsonc`, it also passed overlong lines whenever nothing after column 100
+was whitespace), and Claude Code skips the path-scoped `markdown.md` rule when it creates a new file
+with Write. `markdown.md` still covers what a tool can't decide: title-case headings, no unprompted
+emoji, not pasting whole files.
 
 Three scripts in `home/dot_local/bin/` deploy to `~/.local/bin/`:
 

@@ -208,9 +208,9 @@ staged Markdown isn't formatted or lint-clean.
 
 - If a commit is refused, run `md-format <file>`, fix what markdownlint still reports, and re-stage.
   Never bypass the hook with `--no-verify`.
-- A passing `markdownlint-cli2` does not prove a line is filled correctly: MD013's non-strict
-  exception passes a line that overruns when nothing past column 100 is whitespace, and nothing
-  flags a line that stops short. `md-format --check` is the authority on wrapping.
+- A passing `markdownlint-cli2` does not prove a line is filled correctly. MD013 runs in `stern`
+  mode, so it flags a line that runs past 100 where it could have broken, but nothing in
+  markdownlint flags a line that stops short. `md-format --check` is the authority on wrapping.
 - The hooks are wired per tool on purpose. Don't move them into `.rulesync/hooks.jsonc`: in global
   mode rulesync replaces the whole `hooks` block in `~/.claude/settings.json`, which would remove
   the rtk and other hooks there.
