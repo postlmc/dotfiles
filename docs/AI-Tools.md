@@ -133,6 +133,10 @@ the herdr and OpenCode versions and whether `claude` and `copilot` are present:
   OpenCode servers afterward, or an old reporter can overwrite pane state.
 - **Skill**: written from the binary unedited, so it matches the installed release and keeps its
   `HERDR_ENV=1` guard. `npx skills add` is not used.
+- **Config**: `home/dot_config/herdr/config.toml` is a plain file that sets the `dracula` theme and
+  keeps `onboarding = false`. herdr also writes this file (onboarding, theme selection in Settings,
+  `herdr config reset-keys`), so keep wanted changes in the source or the next apply reverts them.
+  Run `herdr server reload-config` to load a change into a running server.
 - **tmux**: no shell file here auto-attaches tmux, so no `HERDR_ENV` guard is needed.
 
 ## Agent Shells
