@@ -197,3 +197,23 @@ content is personal and this repo is public, so it is age-encrypted and applied 
 coexist in that directory. `home/.chezmoiignore` skips it when `~/.config/chezmoi/key.txt` is
 absent, so `chezmoi apply` still works on hosts without the personal age key. This rule reaches
 Claude Code only; there is no Copilot copy.
+
+## Markdown formatting
+
+Line filling and table alignment are done by `md-format`, not by hand. After-edit hooks in Claude
+Code, OpenCode, Cursor, and Copilot run it on every Markdown file an agent edits, and this repo's
+`.git/hooks/pre-commit` (a symlink to `md-precommit`, installed per clone) refuses a commit whose
+staged Markdown isn't formatted or lint-clean.
+[docs/AI-Tools.md](docs/AI-Tools.md#markdown-formatting) maps every piece.
+
+- If a commit is refused, run `md-format <file>`, fix what markdownlint still reports, and re-stage.
+  Never bypass the hook with `--no-verify`.
+- A passing `markdownlint-cli2` does not prove a line is filled correctly: MD013's non-strict
+  exception passes a line that overruns when nothing past column 100 is whitespace, and nothing
+  flags a line that stops short. `md-format --check` is the authority on wrapping.
+- The hooks are wired per tool on purpose. Don't move them into `.rulesync/hooks.jsonc`: in global
+  mode rulesync replaces the whole `hooks` block in `~/.claude/settings.json`, which would remove
+  the rtk and other hooks there.
+- `md-format-hook` reads each tool's own payload and answers in the form that tool reads (exit 2
+  with stderr for Claude Code and VS Code, `additionalContext` JSON for Copilot CLI). Check the
+  vendor's hook docs before changing either side.

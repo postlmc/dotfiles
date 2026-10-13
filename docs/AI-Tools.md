@@ -21,28 +21,31 @@ The rulesync script reruns on any `chezmoi apply` where a file under `.rulesync/
 
 ## Claude Code
 
-| Target                             | Source                                               | Notes                                                      |
-|------------------------------------|------------------------------------------------------|------------------------------------------------------------|
-| `~/.claude/CLAUDE.md`              | `.rulesync/rules/AGENTS.md`                          | Generated root rule                                        |
-| `~/.claude/rules/*.md`             | `.rulesync/rules/*.md`                               | Generated                                                  |
-| `~/.claude/rules/environment.md`   | `home/dot_claude/rules/encrypted_environment.md.age` | Age-encrypted; deployed only where the personal key exists |
-| `~/.claude/commands/git-commit.md` | `.rulesync/commands/git-commit.md`                   | Generated                                                  |
-| `~/.claude/skills/*/`              | `home/dot_claude/skills/*/`                          | Plain chezmoi files                                        |
-| `~/.claude/settings.json`          | `home/dot_claude/modify_private_settings.json`       | Merges `ACTIVE_AGENT`, status line, vim mode, rtk hook     |
-| `~/.claude/statusline-command.sh`  | `home/dot_claude/executable_statusline-command.sh`   | Status line script                                         |
+| Target                             | Source                                               | Notes                                                                  |
+|------------------------------------|------------------------------------------------------|------------------------------------------------------------------------|
+| `~/.claude/CLAUDE.md`              | `.rulesync/rules/AGENTS.md`                          | Generated root rule                                                    |
+| `~/.claude/rules/*.md`             | `.rulesync/rules/*.md`                               | Generated                                                              |
+| `~/.claude/rules/environment.md`   | `home/dot_claude/rules/encrypted_environment.md.age` | Age-encrypted; deployed only where the personal key exists             |
+| `~/.claude/commands/git-commit.md` | `.rulesync/commands/git-commit.md`                   | Generated                                                              |
+| `~/.claude/skills/*/`              | `home/dot_claude/skills/*/`                          | Plain chezmoi files                                                    |
+| `~/.claude/settings.json`          | `home/dot_claude/modify_private_settings.json`       | Merges `ACTIVE_AGENT`, status line, vim mode, rtk hook, md-format hook |
+| `~/.claude/statusline-command.sh`  | `home/dot_claude/executable_statusline-command.sh`   | Status line script                                                     |
 
 The settings script only edits the keys it owns. The rtk `PreToolUse` hook is added when `rtk` is on
-`PATH` and removed when it is not.
+`PATH` and removed when it is not. The md-format `PostToolUse` hook (see
+[Markdown Formatting](#markdown-formatting)) is always present. Both are rebuilt idempotently, so
+other hooks in the file survive every apply.
 
 ## GitHub Copilot
 
-| Target                                         | Source                                                        | Notes                       |
-|------------------------------------------------|---------------------------------------------------------------|-----------------------------|
-| `~/.copilot/copilot-instructions.md`           | `.rulesync/rules/AGENTS.md`                                   | Generated root rule         |
-| `~/.copilot/instructions/*.instructions.md`    | `.rulesync/rules/*.md`                                        | Generated                   |
-| `~/.copilot/instructions/git-commit.prompt.md` | `home/dot_copilot/instructions/git-commit.prompt.md`          | Hand-maintained (see below) |
-| `~/.copilot/skills/*/`                         | `home/dot_claude/skills/*/`                                   | Generated                   |
-| VS Code terminal profile                       | `home/run_onchange_configure-vscode-copilot-terminal.sh.tmpl` | Sets `ACTIVE_AGENT=Copilot` |
+| Target                                         | Source                                                        | Notes                                      |
+|------------------------------------------------|---------------------------------------------------------------|--------------------------------------------|
+| `~/.copilot/copilot-instructions.md`           | `.rulesync/rules/AGENTS.md`                                   | Generated root rule                        |
+| `~/.copilot/instructions/*.instructions.md`    | `.rulesync/rules/*.md`                                        | Generated                                  |
+| `~/.copilot/instructions/git-commit.prompt.md` | `home/dot_copilot/instructions/git-commit.prompt.md`          | Hand-maintained (see below)                |
+| `~/.copilot/skills/*/`                         | `home/dot_claude/skills/*/`                                   | Generated                                  |
+| VS Code terminal profile                       | `home/run_onchange_configure-vscode-copilot-terminal.sh.tmpl` | Sets `ACTIVE_AGENT=Copilot`                |
+| `~/.copilot/hooks/md-format.json`              | `home/dot_copilot/hooks/md-format.json.tmpl`                  | md-format hook for Copilot CLI and VS Code |
 
 rulesync has no global-scope command support for Copilot, so its `git-commit` prompt is maintained
 by hand. It sets `model: claude-haiku-4-5` to run commits on a cheaper model; Claude Code and
@@ -50,10 +53,11 @@ OpenCode command files have no per-command model setting.
 
 ## Cursor
 
-| Target                  | Source                        | Notes                       |
-|-------------------------|-------------------------------|-----------------------------|
-| `~/.cursor/rules/*.mdc` | `home/dot_cursor/rules/*.mdc` | Hand-maintained (see below) |
-| `~/.cursor/skills/*/`   | `home/dot_claude/skills/*/`   | Generated                   |
+| Target                  | Source                            | Notes                            |
+|-------------------------|-----------------------------------|----------------------------------|
+| `~/.cursor/rules/*.mdc` | `home/dot_cursor/rules/*.mdc`     | Hand-maintained (see below)      |
+| `~/.cursor/skills/*/`   | `home/dot_claude/skills/*/`       | Generated                        |
+| `~/.cursor/hooks.json`  | `home/dot_cursor/hooks.json.tmpl` | md-format hook (`afterFileEdit`) |
 
 rulesync has no global-scope rule support for Cursor, so `home/dot_cursor/rules/*.mdc` is kept in
 sync with `.rulesync/rules/` by hand. Cursor `.mdc` frontmatter uses `globs` and `alwaysApply`.
@@ -71,16 +75,17 @@ Rules** by pasting `~/.claude/rules/general-behavior.md`.
 
 ## OpenCode
 
-| Target                                       | Source                                             | Notes                                              |
-|----------------------------------------------|----------------------------------------------------|----------------------------------------------------|
-| `~/.config/opencode/AGENTS.md`               | `.rulesync/rules/AGENTS.md`                        | Generated root rule, with an index of the rules    |
-| `~/.config/opencode/memories/*.md`           | `.rulesync/rules/*.md`                             | Generated                                          |
-| `~/.config/opencode/opencode.jsonc`          | `.rulesync/rules/*.md`                             | rulesync writes `instructions`; other keys survive |
-| `~/.config/opencode/commands/git-commit.md`  | `.rulesync/commands/git-commit.md`                 | Generated                                          |
-| `~/.config/opencode/skills/*/`               | `home/dot_claude/skills/*/`                        | Generated                                          |
-| `~/.config/opencode/plugins/active-agent.ts` | `home/dot_config/opencode/plugins/active-agent.ts` | Sets `ACTIVE_AGENT`, `PAGER`, `GIT_PAGER`          |
-| `~/.config/opencode/plugins/rtk.ts`          | `home/dot_config/opencode/plugins/rtk.ts.tmpl`     | Deployed only when `rtk` is on `PATH`              |
-| `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1`      | `available/opencode.sh`                            | Shell module, enabled when `opencode` is installed |
+| Target                                       | Source                                             | Notes                                                    |
+|----------------------------------------------|----------------------------------------------------|----------------------------------------------------------|
+| `~/.config/opencode/AGENTS.md`               | `.rulesync/rules/AGENTS.md`                        | Generated root rule, with an index of the rules          |
+| `~/.config/opencode/memories/*.md`           | `.rulesync/rules/*.md`                             | Generated                                                |
+| `~/.config/opencode/opencode.jsonc`          | `.rulesync/rules/*.md`                             | rulesync writes `instructions`; other keys survive       |
+| `~/.config/opencode/commands/git-commit.md`  | `.rulesync/commands/git-commit.md`                 | Generated                                                |
+| `~/.config/opencode/skills/*/`               | `home/dot_claude/skills/*/`                        | Generated                                                |
+| `~/.config/opencode/plugins/active-agent.ts` | `home/dot_config/opencode/plugins/active-agent.ts` | Sets `ACTIVE_AGENT`, `PAGER`, `GIT_PAGER`                |
+| `~/.config/opencode/plugins/rtk.ts`          | `home/dot_config/opencode/plugins/rtk.ts.tmpl`     | Deployed only when `rtk` is on `PATH`                    |
+| `~/.config/opencode/plugins/md-format.ts`    | `home/dot_config/opencode/plugins/md-format.ts`    | md-format hook; appends lint problems to the tool result |
+| `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1`      | `available/opencode.sh`                            | Shell module, enabled when `opencode` is installed       |
 
 OpenCode is installed through devbox global on every host.
 
@@ -106,6 +111,42 @@ completions, prompt, or pager.
 | OpenCode    | `plugins/active-agent.ts`          |
 | Cursor      | Not set by this repo               |
 
+## Markdown Formatting
+
+Line filling and table alignment are enforced by tools, not left to the model. Two reasons:
+markdownlint's MD013 passes a line that runs past 100 columns when nothing after column 100 is
+whitespace (its documented non-strict exception) and never flags a line that stops short, and Claude
+Code skips the path-scoped `markdown.md` rule when it creates a new file with Write. `markdown.md`
+still covers what a tool can't decide: title-case headings, no unprompted emoji, not pasting whole
+files.
+
+Three scripts in `home/dot_local/bin/` deploy to `~/.local/bin/`:
+
+- **`md-format [--check] FILE...`** reflows prose to 100 columns, then runs `align-tables`. It
+  leaves frontmatter, code, tables, headings, blockquotes, and reference-link definitions alone,
+  keeps hard line breaks, and keeps links and code spans whole when they fit on one line. It refuses
+  to write if anything other than whitespace would change. `--check` writes nothing and exits 1 if a
+  file would change.
+- **`md-format-hook`** is what every tool calls after an edit. It finds the edited Markdown files in
+  the tool's hook payload (including `apply_patch` text), runs `md-format`, then lints with
+  `markdownlint-cli2 --config "${HOME}/.markdownlint-cli2.jsonc"`, and returns remaining problems to
+  the model. It skips files not modified in the last 60 seconds and anything under
+  `~/.claude/projects/`.
+- **`md-precommit`** is a git pre-commit hook that refuses a commit whose staged Markdown isn't
+  formatted or lint-clean. Git hooks aren't versioned, so install it per repo:
+  `ln -s ~/.local/bin/md-precommit .git/hooks/pre-commit`.
+
+| Tool        | Hook                                                                                | Lint problems reach the model through          |
+|-------------|-------------------------------------------------------------------------------------|------------------------------------------------|
+| Claude Code | `PostToolUse`, matcher `Write\|Edit\|MultiEdit`                                     | Exit 2 and stderr                              |
+| OpenCode    | `plugins/md-format.ts`                                                              | Text appended to the edit tool's result        |
+| Cursor      | `afterFileEdit` in `~/.cursor/hooks.json`                                           | Nothing; Cursor's after-edit hook cannot reply |
+| Copilot CLI | `PostToolUse`, matcher `edit\|create\|apply_patch`                                  | `additionalContext` JSON on stdout             |
+| VS Code     | The same `~/.copilot/hooks` file; matchers are ignored, so it runs after every tool | Exit 2 and stderr                              |
+
+The hooks are not delivered through rulesync's hooks feature: in global mode it replaces the entire
+`hooks` block in `~/.claude/settings.json`, which would remove the rtk and other hooks there.
+
 ## Chezmoi Scripts
 
 | Script                                                        | Runs when                       | Effect                                                    |
@@ -121,8 +162,8 @@ completions, prompt, or pager.
 
 `home/dot_local/bin/executable_align-tables` deploys to `~/.local/bin/align-tables`. It reformats
 Markdown tables to the MD060 aligned style the markdown rule requires, padding cells to display
-width and skipping fenced code blocks. Agents run it after editing a table, then lint. It is
-stdlib-only Python invoked through a uv-run shebang.
+width, skipping fenced code blocks, and treating `\|` in a cell as a literal pipe. `md-format` runs
+it automatically. It is stdlib-only Python invoked through a uv-run shebang.
 
 ## New System Setup
 
@@ -132,3 +173,6 @@ stdlib-only Python invoked through a uv-run shebang.
 3. Cursor: paste `~/.claude/rules/general-behavior.md` into **Cursor Settings → Rules**.
 4. OpenCode: run `opencode auth login` and choose a provider, then set a default `model` in
    `~/.config/opencode/opencode.jsonc` if wanted. Restart OpenCode to load the plugins.
+5. Restart Claude Code, Cursor, and VS Code so they load the md-format hooks.
+6. In each repo that should refuse unformatted Markdown at commit time, run
+   `ln -s ~/.local/bin/md-precommit .git/hooks/pre-commit`.
