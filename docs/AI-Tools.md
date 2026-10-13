@@ -44,9 +44,9 @@ The settings script only edits the keys it owns. The rtk `PreToolUse` hook is ad
 | `~/.copilot/skills/*/`                         | `home/dot_claude/skills/*/`                                   | Generated                   |
 | VS Code terminal profile                       | `home/run_onchange_configure-vscode-copilot-terminal.sh.tmpl` | Sets `ACTIVE_AGENT=Copilot` |
 
-rulesync has no global-scope command support for Copilot, so its `git-commit` prompt is maintained by
-hand. It sets `model: claude-haiku-4-5` to run commits on a cheaper model; Claude Code and OpenCode
-command files have no per-command model setting.
+rulesync has no global-scope command support for Copilot, so its `git-commit` prompt is maintained
+by hand. It sets `model: claude-haiku-4-5` to run commits on a cheaper model; Claude Code and
+OpenCode command files have no per-command model setting.
 
 ## Cursor
 

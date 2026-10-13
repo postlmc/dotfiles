@@ -21,7 +21,8 @@ claudecode:
 - File structure: `main.tf`, `variables.tf`, `outputs.tf`, `providers.tf`
 - Lock provider versions
 - Tag all resources
-- Limit `count`/`for_each` usage. Handle edge cases with null conditionals. Use `depends_on` sparingly.
+- Limit `count`/`for_each` usage. Handle edge cases with null conditionals. Use `depends_on`
+  sparingly.
 
 ## State Management
 

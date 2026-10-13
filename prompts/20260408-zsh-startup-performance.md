@@ -8,8 +8,8 @@ I want to measure and reduce zsh startup time in my chezmoi-managed dotfiles at
 `.zshrc` runs these in order, unconditionally for every shell:
 
 1. `path_helper` (macOS, subprocess: `eval $(/usr/libexec/path_helper -s)`)
-2. `devbox global shellenv --init-hook` (subprocess: `eval "$(/usr/local/bin/devbox global shellenv
-   --init-hook)"`)
+2. `devbox global shellenv --init-hook` (subprocess:
+   `eval "$(/usr/local/bin/devbox global shellenv --init-hook)"`)
 3. `brew shellenv` (subprocess: `eval "$(/opt/homebrew/bin/brew shellenv)"`)
 4. `direnv hook zsh` (subprocess: `eval "$(direnv hook zsh)"`)
 5. Source all shell modules from `available/??-*` (file sourcing loop, ~20 files)
@@ -17,13 +17,13 @@ I want to measure and reduce zsh startup time in my chezmoi-managed dotfiles at
 
 Then, for interactive shells only (`ACTIVE_AGENT` is unset):
 
-7. `compinit` (scans fpath)
-8. Tool completions (kubectl, kubelogin, op — each cached to `~/.cache/zsh/`)
-9. Plugins: zsh-autosuggestions, zsh-syntax-highlighting, zsh-hist
-10. `fzf --zsh` (subprocess: `eval "$(fzf --zsh)"`)
-11. `starship init zsh` (subprocess: `eval "$(starship init zsh)"`)
+1. `compinit` (scans fpath)
+2. Tool completions (kubectl, kubelogin, op — each cached to `~/.cache/zsh/`)
+3. Plugins: zsh-autosuggestions, zsh-syntax-highlighting, zsh-hist
+4. `fzf --zsh` (subprocess: `eval "$(fzf --zsh)"`)
+5. `starship init zsh` (subprocess: `eval "$(starship init zsh)"`)
 
-Agent shells (when `ACTIVE_AGENT` is set) skip steps 7-11 entirely.
+Agent shells (when `ACTIVE_AGENT` is set) skip all of the interactive steps.
 
 ## What I want to understand
 

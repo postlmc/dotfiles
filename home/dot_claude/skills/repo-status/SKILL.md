@@ -33,8 +33,8 @@ labeled sections. The script does the data-gathering; formatting the human-facin
   full-repo audit -- commits sitting on some other local branch you're not standing on aren't what
   this check is for.
 - **Sync status never reports a false "in sync."** A failed `rev-list` (the upstream ref doesn't
-  actually resolve, say) is reported as "could not compute," never silently coerced to `ahead=0
-  behind=0` -- that would read as confirmed-synced when the truth is "couldn't tell."
+  actually resolve, say) is reported as "could not compute," never silently coerced to
+  `ahead=0 behind=0` -- that would read as confirmed-synced when the truth is "couldn't tell."
 - **"Stale branch" means gone from the remote, or already merged -- not just "not the default
   branch."** A branch is only listed if its upstream shows `[gone]` (the standard signal after a PR
   merges and the remote branch gets deleted) or it's already merged into the default branch locally
@@ -128,11 +128,11 @@ your job is generating the right key per item and calling it correctly:
    reference (normalized -- uppercase, no internal spaces), otherwise `text:<normalized-name>` where
    normalized-name is the item's Name lowercased, whitespace-collapsed, and truncated to roughly 60
    characters.
-3. Feed the keys to the script, one per line, in row order: `printf '%s\n' "${keys[@]}" |
-   scripts/resolve-item-numbers.py`. It
-   prints `<key><tab><number>` per line, in the same order, and updates the state file for next
-   time. A key repeated more than once in the same list reuses the number from its first occurrence,
-   so it's safe to feed the same key twice if that ever happens.
+3. Feed the keys to the script, one per line, in row order:
+   `printf '%s\n' "${keys[@]}" | scripts/resolve-item-numbers.py`. It prints `<key><tab><number>`
+   per line, in the same order, and updates the state file for next time. A key repeated more than
+   once in the same list reuses the number from its first occurrence, so it's safe to feed the same
+   key twice if that ever happens.
 4. Use the returned numbers as the `#` column.
 
 This makes numbers durable across runs for an item whose identity doesn't change, at a real cost
@@ -143,9 +143,9 @@ reused, so nothing else claims it either). Appending detail to a note without ch
 wording keeps the key, and the number, stable.
 
 Numbers are also deliberately **per-host, not synced anywhere** -- state lives at
-`.git/repo-status-state.json`, which never travels with a clone, so a second machine (or a `git
-worktree`) keeps its own independent counter. That's an accepted tradeoff for what this tool is (a
-personal aid for picking work back up), not an oversight.
+`.git/repo-status-state.json`, which never travels with a clone, so a second machine (or a
+`git worktree`) keeps its own independent counter. That's an accepted tradeoff for what this tool is
+(a personal aid for picking work back up), not an oversight.
 
 ## Step 4: Print both tables
 
@@ -175,7 +175,7 @@ and ordered so a dependency appears before whatever depends on it (cyclic items 
 |:-:|------|:------:|-------|--------|-------|
 
 Follow the table with a single legend line decoding the Status emoji, since nothing else in the
-printed output explains them: `⚪️ not started · 🟡 in progress · 🟢 done, uncommitted · 🔴 blocked ·
-🔵 waiting on input`.
+printed output explains them:
+`⚪️ not started · 🟡 in progress · 🟢 done, uncommitted · 🔴 blocked · 🔵 waiting on input`.
 
 If Table 2 has no rows, print it with a "no open work items found" note instead of an empty table.

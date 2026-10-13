@@ -27,9 +27,9 @@ Stale compdump incurred a one-time +46ms penalty when triggered.
 
 ## What was implemented
 
-**`typeset -U fpath` before `compinit`** — Prevents duplicate fpath entries (added by `brew
-shellenv` and `devbox shellenv`) from causing compinit to see a different hash each session and
-rebuild its dump file. This eliminated the +46ms stale-dump penalty becoming a recurring cost.
+**`typeset -U fpath` before `compinit`** — Prevents duplicate fpath entries (added by
+`brew shellenv` and `devbox shellenv`) from causing compinit to see a different hash each session
+and rebuild its dump file. This eliminated the +46ms stale-dump penalty becoming a recurring cost.
 
 **`compinit -C` always** — Skips the compaudit security scan (~9ms) on every startup. The `-C` flag
 is safe here because `typeset -U fpath` already ensures the dump never goes stale due to duplicate

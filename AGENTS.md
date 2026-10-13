@@ -12,11 +12,12 @@
   instructions" below
 - There is no `CLAUDE.md` stub at the repo root, deliberately: Claude Code v2.1.277+ reads a
   project-root `AGENTS.md` directly whenever no `CLAUDE.md`/`.claude/CLAUDE.md`/`CLAUDE.local.md`
-  exists in the working directory or above it ([memory docs](https://code.claude.com/docs/en/memory#when-claude-code-reads-agents-md)).
-  Don't recreate a root `CLAUDE.md` — it would silently take over from this file. This is
-  project-scope only: it has no bearing on the separate global `~/.claude/CLAUDE.md` user
-  instructions file, which rulesync still generates (see "Agent rules and instructions" below) and
-  which Claude Code always loads regardless of `AGENTS.md`.
+  exists in the working directory or above it
+  ([memory docs](https://code.claude.com/docs/en/memory#when-claude-code-reads-agents-md)). Don't
+  recreate a root `CLAUDE.md` — it would silently take over from this file. This is project-scope
+  only: it has no bearing on the separate global `~/.claude/CLAUDE.md` user instructions file, which
+  rulesync still generates (see "Agent rules and instructions" below) and which Claude Code always
+  loads regardless of `AGENTS.md`.
 
 ## Multi-agent workflow
 
@@ -177,9 +178,9 @@ not, even though a direct `stat` through the same symlink resolves fine. Globbin
 `home/dot_claude/skills/**` directly instead, for exactly this reason — glob the real path, not the
 symlink, or a skill edit silently stops triggering regeneration.
 
-`rulesync` isn't in nixpkgs, so it isn't a devbox package — it runs via `npx rulesync@<pinned
-version>`, pinned in the run_onchange script itself. Update the pin deliberately (never `@latest`);
-rulesync ships breaking changes roughly monthly.
+`rulesync` isn't in nixpkgs, so it isn't a devbox package — it runs via
+`npx rulesync@<pinned version>`, pinned in the run_onchange script itself. Update the pin
+deliberately (never `@latest`); rulesync ships breaking changes roughly monthly.
 
 Rule frontmatter controls *when* Claude Code loads a rule, and rulesync decides that frontmatter for
 you. A generated rule with a `paths:` key is path-scoped: it loads only when Claude opens a matching
@@ -191,8 +192,8 @@ literal `paths: []` that matches nothing.
 
 One rule deliberately bypasses rulesync: `home/dot_claude/rules/encrypted_environment.md.age`. Its
 content is personal and this repo is public, so it is age-encrypted and applied straight to
-`~/.claude/rules/environment.md` by chezmoi instead of being generated from `.rulesync/`. `rulesync
-generate` leaves files it doesn't own untouched, so the generated and encrypted rules coexist in
-that directory. `home/.chezmoiignore` skips it when `~/.config/chezmoi/key.txt` is absent, so
-`chezmoi apply` still works on hosts without the personal age key. This rule reaches Claude Code
-only; there is no Copilot copy.
+`~/.claude/rules/environment.md` by chezmoi instead of being generated from `.rulesync/`.
+`rulesync generate` leaves files it doesn't own untouched, so the generated and encrypted rules
+coexist in that directory. `home/.chezmoiignore` skips it when `~/.config/chezmoi/key.txt` is
+absent, so `chezmoi apply` still works on hosts without the personal age key. This rule reaches
+Claude Code only; there is no Copilot copy.

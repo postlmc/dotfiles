@@ -116,8 +116,8 @@ contexts:
 
 - **Shared features**: Both shells source all `enabled/??-*` modules, set up PATH (including GNU
   utilities on macOS), and handle Homebrew integration consistently
-- **Agent detection**: When `ACTIVE_AGENT` is set (by Claude Code, GitHub Copilot, and OpenCode;
-  see [docs/AI-Tools.md](docs/AI-Tools.md)), both shells skip expensive interactive features:
+- **Agent detection**: When `ACTIVE_AGENT` is set (by Claude Code, GitHub Copilot, and OpenCode; see
+  [docs/AI-Tools.md](docs/AI-Tools.md)), both shells skip expensive interactive features:
     - No completions (bash-completion, kubectl, kubelogin, etc.)
     - No plugins (zsh-autosuggestions, zsh-syntax-highlighting, fzf)
     - No history (`HISTFILE=/dev/null`, `HISTSIZE=0`)
@@ -148,9 +148,9 @@ the same dirs so they stay ahead of `path_helper`/devbox/brew reshuffles in inte
 `prepend_path` dedupes, so the two placements never double up.
 
 devbox global and Homebrew are deliberately **not** ported into `dot_zshenv`. They reach agents by
-inheritance in every launch context that matters, and the alternatives are worse: running `devbox
-global shellenv` costs ~120ms on *every* tool call, and its PATH contribution is a moving set of
-virtenv dirs that changes with the global package set, so a hand-copied static path would rot
+inheritance in every launch context that matters, and the alternatives are worse: running
+`devbox global shellenv` costs ~120ms on *every* tool call, and its PATH contribution is a moving
+set of virtenv dirs that changes with the global package set, so a hand-copied static path would rot
 silently. Coverage by launch context:
 
 | Tool           | Clean launch (from a terminal) | Project launch (direnv/devbox) | Context-less launch (Spotlight, LaunchAgent) |

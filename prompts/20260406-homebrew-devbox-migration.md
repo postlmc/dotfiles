@@ -31,8 +31,8 @@ Verify after `devbox global shellenv` that `which sed` resolves to the nix store
 ## Phase 2 — Add CLI tools to devbox global
 
 Add the remaining Brewfile tools to `devbox.json`. The current file is not a chezmoi template — to
-preserve conditional installation per machine, rename it to `devbox.json.tmpl` and use the same `{{
-if dig ... }}` pattern already used in `Brewfile.tmpl`.
+preserve conditional installation per machine, rename it to `devbox.json.tmpl` and use the same
+`{{ if dig ... }}` pattern already used in `Brewfile.tmpl`.
 
 Packages to add (nixpkgs names):
 

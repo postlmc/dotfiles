@@ -17,9 +17,10 @@ within each section. This review doubled as my first test of Anthropic's Fable 5
    or `&&`. It expands to one `docker rm` call with `docker`, `rmi`, and the rest passed as
    container names. The alias has never worked as written, and its comment warns that it "deletes
    volumes," which it cannot.  
-   **Resolved** in commit `7ee92e3`: rewritten as a function running `container`/`image`/`volume
-   prune -f` against whichever of docker or podman resolves to an executable, since `command -v
-   docker` returns alias text under the module's `docker=podman` alias.
+   **Resolved** in commit `7ee92e3`: rewritten as a function running
+   `container`/`image`/`volume prune -f` against whichever of docker or podman resolves to an
+   executable, since `command -v docker` returns alias text under the module's `docker=podman`
+   alias.
 
 3. **`home/dot_gitconfig.tmpl`: `[diffs]` section should be `[diff]`.** The `renames = true` setting
    is silently ignored.  
@@ -52,14 +53,14 @@ within each section. This review doubled as my first test of Anthropic's Fable 5
    `ACTIVE_AGENT`; `core.sh` keeps only the plain-ls baseline.
 
 7. **`available/misc-darwin.sh` clobbers `tailscale.sh`.** The `28-tailscale` module only aliases
-   the app-bundle binary when `tailscale` is not already in PATH; `29-misc-darwin` then sets `alias
-   tailscale=/Applications/...` unconditionally, overriding a PATH-installed CLI and breaking
+   the app-bundle binary when `tailscale` is not already in PATH; `29-misc-darwin` then sets
+   `alias tailscale=/Applications/...` unconditionally, overriding a PATH-installed CLI and breaking
    entirely if the app bundle is absent. Delete the misc-darwin line.  
    **Resolved** in commit `c77e6fa`.
 
-8. **`home/dot_bash_logout` wipes history that bashrc works hard to keep.** `> ~/.bash_history;
-   history -c` truncates on every login-shell exit, while bashrc configures 1.2M-entry appending
-   history. One of these is wrong; they cannot both be intended.  
+8. **`home/dot_bash_logout` wipes history that bashrc works hard to keep.**
+   `> ~/.bash_history; history -c` truncates on every login-shell exit, while bashrc configures
+   1.2M-entry appending history. One of these is wrong; they cannot both be intended.  
    **Resolved** in commit `530e2a5`: the wipe is removed; the deliberate 1.2M-entry history
    configuration wins. The `clear_console` privacy bit stays.
 
@@ -89,8 +90,9 @@ within each section. This review doubled as my first test of Anthropic's Fable 5
    **Resolved** in commit `469b98c`: `.ccid` stores only the session ID, `c()` validates it as a
    UUID before resuming, and the global gitignore entry exists.
 
-2. **`available/openssl.sh`: `aesenc` uses OpenSSL's legacy key derivation.** Without `-pbkdf2
-   -iter`, it uses the deprecated EVP_BytesToKey with one MD5 round. Add `-pbkdf2 -iter 600000`.  
+2. **`available/openssl.sh`: `aesenc` uses OpenSSL's legacy key derivation.** Without
+   `-pbkdf2 -iter`, it uses the deprecated EVP_BytesToKey with one MD5 round. Add
+   `-pbkdf2 -iter 600000`.  
    **Resolved** in commit `1526914`: `aesenc` uses `-pbkdf2 -iter 600000`, with a comment giving the
    matching decrypt invocation.
 
@@ -100,9 +102,9 @@ within each section. This review doubled as my first test of Anthropic's Fable 5
    `ssh-agent.sh` (`ps -ef | grep ${SSH_AGENT_PID}`) breaks if `SSH_AGENT_PID` is empty and can
    match other users' processes; a `kill -0`-style check is more robust.  
    **Resolved** in commits `97ad1a2` and `bdb0ed4`: `ssh-alias` skips names that already resolve to
-   a command, alias, or function; `ssh-agent.sh` checks the exact PID's command name via `ps -p ...
-   -o comm=` and treats an empty `SSH_AGENT_PID` as not running. `22d5fee` additionally returns
-   before spawning when a live agent socket is already present.
+   a command, alias, or function; `ssh-agent.sh` checks the exact PID's command name via
+   `ps -p ... -o comm=` and treats an empty `SSH_AGENT_PID` as not running. `22d5fee` additionally
+   returns before spawning when a live agent socket is already present.
 
 ## Documentation Mismatches
 
@@ -167,17 +169,17 @@ within each section. This review doubled as my first test of Anthropic's Fable 5
    **Resolved** in commits `a93ac05` (GOROOT), `19e9503` (HOST), and `f34283b` (`gitb` excludes
    `main` as well).
 
-5. **`available/kubernetes.sh`: `export KUBECONFIG=$(kcfg)` leaves a trailing `:`** (from `tr '\n'
-   ':'`), which kubectl treats as an extra empty entry meaning the default location. It also runs
-   `kcfg`, a directory scan, in every shell startup, including agent shells.  
+5. **`available/kubernetes.sh`: `export KUBECONFIG=$(kcfg)` leaves a trailing `:`** (from
+   `tr '\n' ':'`), which kubectl treats as an extra empty entry meaning the default location. It
+   also runs `kcfg`, a directory scan, in every shell startup, including agent shells.  
    **Resolved** in commit `507caa6`: the trailing colon is stripped and `KUBECONFIG` is only
    exported when `kcfg` produces output, so an empty value can no longer mask `~/.kube/config`. The
    startup scan stays — agent shells legitimately need `KUBECONFIG` and the cost is one directory
    listing.
 
-6. **`core.sh` assumes a GNU userland for its fallbacks.** The non-eza branch uses `ls
-   --color=auto`, and the `rm`/`chown`/`chmod` `--preserve-root` flags are GNU-only. That is fine
-   while devbox coreutils lead PATH, but the same file's `lso` fallback uses BSD `ls -alG`. If
+6. **`core.sh` assumes a GNU userland for its fallbacks.** The non-eza branch uses
+   `ls --color=auto`, and the `rm`/`chown`/`chmod` `--preserve-root` flags are GNU-only. That is
+   fine while devbox coreutils lead PATH, but the same file's `lso` fallback uses BSD `ls -alG`. If
    devbox is ever absent on macOS, the "fallback" aliases are the ones that break.  
    **Accepted**: devbox global coreutils leading PATH is the deliberate baseline on every machine,
    so the GNU assumption is by design. Not worth per-flag feature detection for a bootstrap-window
