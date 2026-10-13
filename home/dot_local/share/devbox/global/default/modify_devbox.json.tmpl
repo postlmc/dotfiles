@@ -87,11 +87,17 @@
     "qrencode@latest"
     "texlive.combined.scheme-full@latest"
     "nushell@latest"
-    "opencode@latest"
     "ruff@latest"
     "scrub@latest"
     "stress-ng@latest"
 -}}
+{{- /* herdr's OpenCode integration needs OpenCode 1.18.29 or newer, and devbox's package index
+       stopped at opencode 1.18.21 and herdr 0.8.2. Both pin a nixpkgs-unstable commit instead,
+       checked to be on cache.nixos.org for aarch64/x86_64 darwin and linux. Move the pin
+       deliberately; a new herdr also re-runs run_onchange_after_herdr-setup.sh. */ -}}
+{{- $agentPin := "github:NixOS/nixpkgs/8edc0c72e3a38faf5434e40d1f19431125fe4b30" -}}
+{{- $pkgs = append $pkgs (printf "%s#opencode" $agentPin) -}}
+{{- $pkgs = append $pkgs (printf "%s#herdr" $agentPin) -}}
 {{- if eq .chezmoi.os "linux" -}}
 {{- /* The devbox-built Fira Code Nerd Font didn't register with macOS's font system even as a
        plain non-symlinked file with a completely independent set of bytes — root cause

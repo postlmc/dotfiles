@@ -87,7 +87,9 @@ Rules** by pasting `~/.claude/rules/general-behavior.md`.
 | `~/.config/opencode/plugins/md-format.ts`    | `home/dot_config/opencode/plugins/md-format.ts`    | md-format hook; appends lint problems to the tool result |
 | `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1`      | `available/opencode.sh`                            | Shell module, enabled when `opencode` is installed       |
 
-OpenCode is installed through devbox global on every host.
+OpenCode is installed through devbox global on every host, pinned to a nixpkgs-unstable commit
+because herdr needs 1.18.29 or newer and devbox's package index stopped at 1.18.21. See
+[herdr](#herdr).
 
 - **Instructions list**: rulesync replaces the whole `instructions` array in `opencode.jsonc` on
   every run, so add instruction files through `.rulesync/rules/`, not by editing that array.
@@ -98,6 +100,40 @@ OpenCode is installed through devbox global on every host.
   that need Claude-only tools. The shell module turns that off. Skills in `~/.agents/skills/` still
   load, so install third-party skills there (or with `--agent opencode`) to keep them visible.
 - **Encrypted rule**: the environment rule reaches Claude Code only.
+
+## herdr
+
+[herdr](https://herdr.dev/docs/) is a terminal multiplexer for coding agents. It comes from devbox
+global on every host, pinned to the same nixpkgs-unstable commit as OpenCode.
+`home/.chezmoiscripts/run_onchange_after_herdr-setup.sh.tmpl` does the rest, and its hash inputs are
+the herdr and OpenCode versions and whether `claude` and `copilot` are present:
+
+| Target                                                             | Written by                           | Condition                   |
+|--------------------------------------------------------------------|--------------------------------------|-----------------------------|
+| `~/.claude/hooks/herdr-agent-state.sh`                             | `herdr integration install claude`   | `claude` on `PATH`          |
+| `SessionStart` entries in `~/.claude/settings.json`                | `herdr integration install claude`   | `claude` on `PATH`          |
+| `~/.config/opencode/plugins/herdr-agent-state.js`                  | `herdr integration install opencode` | `opencode` 1.18.29 or newer |
+| `~/.config/opencode/herdr-tui-session.js`, `herdr-opencode/tui.js` | `herdr integration install opencode` | `opencode` 1.18.29 or newer |
+| `plugin` in `tui.jsonc`, `plugins` in `cli.json`                   | `herdr integration install opencode` | `opencode` 1.18.29 or newer |
+| `~/.copilot/hooks/herdr-agent-state.sh`                            | `herdr integration install copilot`  | `copilot` on `PATH`         |
+| `SessionStart` entry in `~/.copilot/settings.json`                 | `herdr integration install copilot`  | `copilot` on `PATH`         |
+| `~/.copilot/skills/herdr/SKILL.md`                                 | `herdr --skill`                      | `copilot` on `PATH`         |
+| `~/.claude/skills/herdr/SKILL.md`                                  | `herdr --skill`                      | `claude` on `PATH`          |
+| `~/.config/opencode/skills/herdr/SKILL.md`                         | `herdr --skill`                      | `opencode` on `PATH`        |
+
+- **Nothing here is in the chezmoi source.** herdr owns these files, and none of them collide with
+  managed ones. Copilot's `settings.json` is unmanaged, and its hook script sits beside the managed
+  `hooks/md-format.json`. The settings script passes the `SessionStart` entries through, the plugins
+  directory isn't `exact_`, and rulesync doesn't delete skills it didn't generate.
+- **First install takes two applies.** The apply that adds herdr to devbox.json runs the script
+  before devbox installs herdr, so it renders as "absent" and skips. Run `devbox global install`,
+  then `chezmoi apply` again.
+- **Upgrades**: moving the nixpkgs pin changes the herdr version, which re-runs the script and
+  reinstalls the integrations, as herdr's docs require. Restart OpenCode TUIs and any shared
+  OpenCode servers afterward, or an old reporter can overwrite pane state.
+- **Skill**: written from the binary unedited, so it matches the installed release and keeps its
+  `HERDR_ENV=1` guard. `npx skills add` is not used.
+- **tmux**: no shell file here auto-attaches tmux, so no `HERDR_ENV` guard is needed.
 
 ## Agent Shells
 
@@ -149,14 +185,15 @@ The hooks are not delivered through rulesync's hooks feature: in global mode it 
 
 ## Chezmoi Scripts
 
-| Script                                                        | Runs when                       | Effect                                                    |
-|---------------------------------------------------------------|---------------------------------|-----------------------------------------------------------|
-| `home/.chezmoiscripts/run_onchange_rulesync-generate.sh.tmpl` | `.rulesync/` or a skill changes | Generates rules, commands, and skills for all targets     |
-| `home/.chezmoiscripts/run_onchange_mklinks.sh.tmpl`           | `enabled/mklinks.sh` changes    | Rebuilds `enabled/` symlinks for the shell module loader  |
-| `home/run_onchange_after_install-packages.sh.tmpl`            | Brewfile changes                | Installs Homebrew packages from the Brewfile              |
-| `home/run_onchange_configure-vscode-copilot-terminal.sh.tmpl` | The script changes              | Writes the Copilot terminal profile into VS Code settings |
-| `home/run_onchange_configure-macos-defaults.sh`               | The script changes              | Applies macOS system defaults                             |
-| `home/run_once_init-devbox-local.sh.tmpl`                     | First apply only                | Initializes the devbox local environment                  |
+| Script                                                        | Runs when                                       | Effect                                                    |
+|---------------------------------------------------------------|-------------------------------------------------|-----------------------------------------------------------|
+| `home/.chezmoiscripts/run_onchange_rulesync-generate.sh.tmpl` | `.rulesync/` or a skill changes                 | Generates rules, commands, and skills for all targets     |
+| `home/.chezmoiscripts/run_onchange_after_herdr-setup.sh.tmpl` | herdr, OpenCode, `claude`, or `copilot` changes | Installs herdr's agent integrations and skill             |
+| `home/.chezmoiscripts/run_onchange_mklinks.sh.tmpl`           | `enabled/mklinks.sh` changes                    | Rebuilds `enabled/` symlinks for the shell module loader  |
+| `home/run_onchange_after_install-packages.sh.tmpl`            | Brewfile changes                                | Installs Homebrew packages from the Brewfile              |
+| `home/run_onchange_configure-vscode-copilot-terminal.sh.tmpl` | The script changes                              | Writes the Copilot terminal profile into VS Code settings |
+| `home/run_onchange_configure-macos-defaults.sh`               | The script changes                              | Applies macOS system defaults                             |
+| `home/run_once_init-devbox-local.sh.tmpl`                     | First apply only                                | Initializes the devbox local environment                  |
 
 ## Supporting Tools
 

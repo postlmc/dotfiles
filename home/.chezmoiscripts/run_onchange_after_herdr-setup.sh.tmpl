@@ -1,0 +1,70 @@
+#!/bin/bash
+# Installs herdr's agent integrations and its agent skill. Both come from the herdr binary, so the
+# versions below are the hash inputs: a herdr upgrade re-runs this (herdr's docs say to reinstall
+# integrations after upgrading), and so does an agent appearing, disappearing, or (for OpenCode,
+# which has a minimum version) changing version. Before herdr is installed this renders as
+# "absent" and exits 0; the first apply after `devbox global install` renders differently and runs.
+#
+# herdr: {{ if lookPath "herdr" }}{{ output "herdr" "--version" | trim }}{{ else }}absent{{ end }}
+# opencode: {{ if lookPath "opencode" }}{{ output "opencode" "--version" | trim }}{{ else }}absent{{ end }}
+# claude: {{ if lookPath "claude" }}present{{ else }}absent{{ end }}
+# copilot: {{ if lookPath "copilot" }}present{{ else }}absent{{ end }}
+#
+# `herdr integration install` edits agent config in place. None of it fights chezmoi:
+#   - opencode writes plugins/herdr-*.js and herdr-opencode/tui.js and registers them in tui.jsonc and
+#     cli.json. chezmoi manages other files in plugins/, but the directory isn't exact_, and it
+#     manages neither config file.
+#   - claude writes hooks/herdr-agent-state.sh (unmanaged) and adds SessionStart entries to
+#     settings.json. modify_private_settings.json rebuilds only its own hooks and passes the rest
+#     through, so the entries survive every apply. This script is after_ so it edits settings.json
+#     after chezmoi has.
+#   - copilot writes hooks/herdr-agent-state.sh beside the managed hooks/md-format.json and adds a
+#     SessionStart entry to ~/.copilot/settings.json, which chezmoi doesn't manage.
+# Restart OpenCode TUIs and any shared OpenCode servers after this runs, or an old reporter can
+# overwrite pane state.
+
+set -u
+
+command -v herdr >/dev/null 2>&1 || { echo "herdr-setup: herdr not on PATH, skipping"; exit 0; }
+
+status=0
+
+# Writes the skill bundled with this herdr binary, unedited, so it keeps its HERDR_ENV=1 guard.
+install_skill() {
+    local dest="$1/herdr/SKILL.md" tmp
+    mkdir -p "$1/herdr" || return 1
+    tmp=$(mktemp "$1/herdr/.SKILL.md.XXXXXX") || return 1
+    if herdr --skill > "$tmp" && [ -s "$tmp" ]; then
+        if cmp -s "$tmp" "$dest"; then rm -f "$tmp"; else mv "$tmp" "$dest"; fi
+    else
+        rm -f "$tmp"
+        return 1
+    fi
+}
+
+claude_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+if command -v claude >/dev/null 2>&1 && [ -d "$claude_dir" ]; then
+    herdr integration install claude || status=1
+    install_skill "$claude_dir/skills" || status=1
+fi
+
+if command -v copilot >/dev/null 2>&1 && [ -d "$HOME/.copilot" ]; then
+    herdr integration install copilot || status=1
+    install_skill "$HOME/.copilot/skills" || status=1
+fi
+
+# The OpenCode integration needs 1.18.29 or newer. OpenCode reads its own skills directory only:
+# available/opencode.sh sets OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1, so ~/.claude/skills is off.
+opencode_dir="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
+if command -v opencode >/dev/null 2>&1 && [ -d "$opencode_dir" ]; then
+    oc_version=$(opencode --version 2>/dev/null | head -n1)
+    if [ "$(printf '%s\n' 1.18.29 "$oc_version" | sort -V | head -n1)" = 1.18.29 ]; then
+        herdr integration install opencode || status=1
+        echo "herdr-setup: restart OpenCode TUIs and any shared OpenCode servers"
+    else
+        echo "herdr-setup: opencode $oc_version is older than 1.18.29, skipping its integration" >&2
+    fi
+    install_skill "$opencode_dir/skills" || status=1
+fi
+
+exit "$status"
