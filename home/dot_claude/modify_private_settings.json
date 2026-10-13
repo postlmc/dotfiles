@@ -8,7 +8,8 @@ input=$(cat)
 rtk_present=0
 command -v rtk >/dev/null 2>&1 && rtk_present=1
 
-# ACTIVE_AGENT trips the minimal agent-shell branch in .zshrc/.bashrc for CC command execution
+# ACTIVE_AGENT trips the minimal agent-shell branch in .zshrc/.bashrc for CC command execution.
+# md-format-hook reflows and lints every Markdown file Claude writes; rebuilt idempotently like rtk.
 printf '%s' "$input" | jq --arg home "$HOME" --argjson rtk "$rtk_present" '
   . * {
     "env": { "ACTIVE_AGENT": "claude-code" },
@@ -20,5 +21,8 @@ printf '%s' "$input" | jq --arg home "$HOME" --argjson rtk "$rtk_present" '
     then .hooks.PreToolUse += [ { "matcher": "Bash", "hooks": [ { "type": "command", "command": "rtk hook claude" } ] } ]
     else . end
   | if (.hooks.PreToolUse | length) == 0 then del(.hooks.PreToolUse) else . end
+  | ($home + "/.local/bin/md-format-hook") as $mdhook
+  | .hooks.PostToolUse = ((.hooks.PostToolUse // []) | map(select(.hooks[0].command != $mdhook)))
+  | .hooks.PostToolUse += [ { "matcher": "Write|Edit|MultiEdit", "hooks": [ { "type": "command", "command": $mdhook } ] } ]
   | if .hooks == {} then del(.hooks) else . end
 '

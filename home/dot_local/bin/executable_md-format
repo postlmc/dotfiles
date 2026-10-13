@@ -1,0 +1,236 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = []
+# ///
+"""Reflow Markdown prose to 100 columns, then align tables with align-tables.
+
+Usage: md-format [--check] FILE...
+
+Reflows plain paragraphs and list items, filling each line as close to 100 columns as possible.
+Leaves untouched: YAML frontmatter, fenced code, tables, headings, horizontal rules, reference-link
+definitions, blockquotes, and anything indented 4+ spaces outside a list item (indented code).
+Hard line breaks (two trailing spaces) are kept as break points.
+
+Before writing, the reflowed text is compared with the original with all whitespace collapsed. If
+anything other than whitespace changed, the file is left alone and the run fails.
+
+--check writes nothing and exits 1 if any file would change.
+"""
+
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+WIDTH = 100
+
+LIST_RE = re.compile(r"^(\s*)([-*+]|\d+\.)\s+(.*)$")
+FENCE_RE = re.compile(r"^\s*(```|~~~)")
+HR_RE = re.compile(r"^\s*([-*_])\s*(\1\s*){2,}$")
+HEADING_RE = re.compile(r"^\s*#{1,6}(\s|$)")
+REFLINK_RE = re.compile(r"^\s*\[[^\]]+\]:\s")
+TABLE_RE = re.compile(r"^\s*\|")
+
+
+def indent_of(line: str) -> int:
+    return len(line) - len(line.lstrip(" "))
+
+
+def is_atomic(line: str) -> bool:
+    return bool(
+        LIST_RE.match(line)
+        or FENCE_RE.match(line)
+        or HEADING_RE.match(line)
+        or TABLE_RE.match(line)
+        or HR_RE.match(line)
+        or REFLINK_RE.match(line)
+        or line.lstrip().startswith(">")
+    )
+
+
+# Links and code spans wrap as single units: splitting one across lines is valid Markdown but harder
+# to read than letting the whole unit move to the next line. A unit too long for a line of its own
+# breaks at its spaces like ordinary text, since keeping it whole would only produce a longer line.
+UNBREAKABLE_RE = re.compile(r"`[^`]*`|!?\[[^\]]*\](?:\([^)]*\)|\[[^\]]*\])")
+NBSP = "\x00"
+
+
+def words_of(text: str, room: int) -> list[str]:
+    def protect(m: re.Match) -> str:
+        unit = m.group(0)
+        return unit.replace(" ", NBSP) if len(unit) <= room else unit
+
+    return [w.replace(NBSP, " ") for w in UNBREAKABLE_RE.sub(protect, text).split()]
+
+
+def wrap(text: str, first: str, rest: str) -> list[str]:
+    lines: list[str] = []
+    cur: list[str] = []
+    for word in words_of(text, WIDTH - len(rest)):
+        prefix = first if not lines else rest
+        if cur and len(prefix) + len(" ".join(cur + [word])) > WIDTH:
+            lines.append(prefix + " ".join(cur))
+            cur = [word]
+        else:
+            cur.append(word)
+    if cur:
+        lines.append((first if not lines else rest) + " ".join(cur))
+    return lines
+
+
+def wrap_with_breaks(raw: list[str], first: str, rest: str) -> list[str]:
+    """Wrap raw lines as one block, keeping hard line breaks as segment boundaries."""
+    segments: list[tuple[list[str], bool]] = []
+    cur: list[str] = []
+    for line in raw:
+        hard_break = line.endswith("  ") and line.strip() != ""
+        if line.strip():
+            cur.append(line.strip())
+        if hard_break:
+            segments.append((cur, True))
+            cur = []
+    if cur:
+        segments.append((cur, False))
+
+    out: list[str] = []
+    for words, hard_break in segments:
+        wrapped = wrap(" ".join(words), first if not out else rest, rest)
+        if hard_break and wrapped:
+            wrapped[-1] += "  "
+        out.extend(wrapped)
+    return out
+
+
+def reflow(text: str) -> str:
+    lines = text.split("\n")
+    out: list[str] = []
+    i, n = 0, len(lines)
+
+    if lines and lines[0].strip() == "---":
+        out.append(lines[0])
+        i = 1
+        while i < n and lines[i].strip() != "---":
+            out.append(lines[i])
+            i += 1
+        if i < n:
+            out.append(lines[i])
+            i += 1
+
+    in_fence = False
+    list_cont: int | None = None  # continuation indent of the list item we're inside, if any
+    while i < n:
+        line = lines[i]
+
+        if FENCE_RE.match(line):
+            in_fence = not in_fence
+            out.append(line)
+            i += 1
+            continue
+        if in_fence or line.strip() == "":
+            out.append(line)
+            i += 1
+            continue
+        if is_atomic(line) and not LIST_RE.match(line):
+            out.append(line)
+            list_cont = None if indent_of(line) == 0 else list_cont
+            i += 1
+            continue
+
+        m = LIST_RE.match(line)
+        if m:
+            marker_indent, marker, rest_text = m.groups()
+            cont = " " * (len(marker_indent) + len(marker) + 1)
+            list_cont = len(cont)
+            raw = [rest_text]
+            j = i + 1
+            while j < n:
+                nxt = lines[j]
+                if nxt.strip() == "" or is_atomic(nxt) or indent_of(nxt) < len(cont):
+                    break
+                raw.append(nxt)
+                j += 1
+            out.extend(wrap_with_breaks(raw, marker_indent + marker + " ", cont))
+            i = j
+            continue
+
+        ind = indent_of(line)
+        in_list_para = list_cont is not None and ind == list_cont
+        if ind >= 4 and not in_list_para:
+            out.append(line)  # indented code block
+            i += 1
+            continue
+        if ind == 0:
+            list_cont = None
+
+        prefix = " " * ind
+        raw = [line]
+        j = i + 1
+        while j < n:
+            nxt = lines[j]
+            if nxt.strip() == "" or is_atomic(nxt) or indent_of(nxt) != ind:
+                break
+            raw.append(nxt)
+            j += 1
+        out.extend(wrap_with_breaks(raw, prefix, prefix))
+        i = j
+
+    return "\n".join(out)
+
+
+def squash(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def format_file(path: Path, align_tables: str) -> str:
+    """Return the fully formatted text for path, without writing it."""
+    original = path.read_text(encoding="utf-8")
+    reflowed = reflow(original)
+    if squash(reflowed) != squash(original):
+        raise ValueError("reflow changed more than whitespace; refusing to touch the file")
+
+    with tempfile.NamedTemporaryFile("w", suffix=".md", dir=path.parent, delete=False,
+                                     encoding="utf-8") as tmp:
+        tmp.write(reflowed)
+    try:
+        subprocess.run([align_tables, tmp.name], check=True, capture_output=True)
+        return Path(tmp.name).read_text(encoding="utf-8")
+    finally:
+        Path(tmp.name).unlink(missing_ok=True)
+
+
+def main(argv: list[str]) -> int:
+    check = "--check" in argv
+    files = [a for a in argv if a != "--check"]
+    if not files:
+        print(__doc__, file=sys.stderr)
+        return 2
+
+    align_tables = shutil.which("align-tables")
+    if not align_tables:
+        print("md-format: align-tables not found on PATH", file=sys.stderr)
+        return 2
+
+    status = 0
+    for name in files:
+        path = Path(name)
+        try:
+            formatted = format_file(path, align_tables)
+        except (OSError, ValueError, subprocess.CalledProcessError) as err:
+            print(f"md-format: {name}: {err}", file=sys.stderr)
+            status = 2
+            continue
+        if formatted == path.read_text(encoding="utf-8"):
+            continue
+        if check:
+            print(f"md-format: {name} needs formatting", file=sys.stderr)
+            status = max(status, 1)
+        else:
+            path.write_text(formatted, encoding="utf-8")
+    return status
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

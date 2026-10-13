@@ -1,0 +1,58 @@
+#!/bin/bash
+# Formats and lints Markdown files an AI tool just edited. Reads the tool's hook JSON on stdin.
+# Problems go back to the model in the form each tool reads: Copilot CLI ignores exit codes on
+# postToolUse but reads additionalContext from stdout; Claude Code and VS Code read stderr on exit 2.
+
+# GUI apps (Cursor launched from the Dock) don't get the login shell's PATH
+export PATH="${HOME}/.local/bin:${HOME}/.local/share/devbox/global/default/.devbox/nix/profile/default/bin:/opt/homebrew/bin:/usr/local/bin:${PATH}"
+
+command -v jq >/dev/null 2>&1 || exit 0
+command -v md-format >/dev/null 2>&1 || exit 0
+
+input=$(cat)
+
+# Each tool names the edited file under a different key, Copilot CLI may nest its arguments in a
+# JSON string, and apply_patch-style tools carry their targets inside the patch text, so collect
+# every path-like field rather than one tool's schema.
+paths=$(printf '%s' "$input" | jq -r '
+    def collect: (.. | objects | (.file_path?, .filePath?, .path?) | strings),
+                 (.. | objects | .files? | arrays | .[] | strings),
+                 (.. | strings | select(contains("*** Begin Patch")) | split("\n")[]
+                  | capture("^\\*\\*\\* (?:Add File|Update File|Move to): (?<p>.+)$")?.p);
+    [collect, (.. | objects | .toolArgs? | strings | fromjson? | collect)]
+    | unique | .[] | select(test("\\.(md|markdown)$"; "i"))' 2>/dev/null)
+cwd=$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)
+copilot_cli=$(printf '%s' "$input" | jq -r 'has("toolName")' 2>/dev/null)
+
+mtime() { stat -c %Y "$1" 2>/dev/null || stat -f %m "$1" 2>/dev/null; }
+
+problems=""
+while IFS= read -r path; do
+    [[ -z "$path" ]] && continue
+    [[ "$path" == /* ]] || path="${cwd:-$PWD}/${path}"
+    [[ -f "$path" ]] || continue
+    # Claude Code's own state (memory index and files) has its own fixed format: one line per index
+    # entry, frontmatter instead of a title heading
+    [[ "$path" == "${HOME}/.claude/projects/"* ]] && continue
+    # VS Code hooks can't be limited to edit tools, so a file only read would land here too; a file
+    # nobody touched in the last minute wasn't just edited
+    (($(date +%s) - $(mtime "$path") > 60)) && continue
+
+    if ! out=$(md-format "$path" 2>&1); then
+        problems+="${out}"$'\n'
+        continue
+    fi
+    if command -v markdownlint-cli2 >/dev/null 2>&1 &&
+        ! out=$(markdownlint-cli2 --config "${HOME}/.markdownlint-cli2.jsonc" "$path" 2>&1); then
+        problems+="markdownlint still reports problems in ${path} after md-format. Fix them:"$'\n'
+        problems+="$(printf '%s\n' "$out" | grep -E ':[0-9]+(:[0-9]+)? ')"$'\n'
+    fi
+done <<<"$paths"
+
+[[ -z "$problems" ]] && exit 0
+if [[ "$copilot_cli" == "true" ]]; then
+    jq -n --arg ctx "$problems" '{additionalContext: $ctx}'
+    exit 0
+fi
+printf '%s' "$problems" >&2
+exit 2
