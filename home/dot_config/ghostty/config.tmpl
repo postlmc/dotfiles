@@ -45,6 +45,17 @@ macos-titlebar-style = native
 macos-icon = glass
 macos-icon-frame = chrome
 
+# Quick terminal as hotkey reference overlay
+quick-terminal-position = center
+# Centered on a landscape monitor, the first value is the width and the second the height. That's
+# from QuickTerminalSize.swift in v1.3.1; the docs say the opposite. 700px fits the widest hotkeys
+# row. Ghostty reuses the quick terminal's last frame over this setting once it has one, even across
+# restarts.
+quick-terminal-size = 700px,60%
+quick-terminal-animation-duration = 0.1
+quick-terminal-autohide = true
+keybind = ctrl+shift+slash=toggle_quick_terminal
+
 keybind = cmd+plus=increase_font_size:1
 keybind = cmd+minus=decrease_font_size:1
 keybind = cmd+0=reset_font_size

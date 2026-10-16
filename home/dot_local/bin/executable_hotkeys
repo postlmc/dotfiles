@@ -1,0 +1,169 @@
+#!/usr/bin/env zsh
+# hotkeys — show the hotkeys for whatever is in front of you, in an fzf list.
+# Opened by ctrl+shift+/ in Ghostty's quick terminal (see .zshrc); esc or enter closes it.
+#
+# Context comes from herdr when a herdr client is attached in some terminal: `herdr agent list`
+# marks the focused pane, so only that pane's agent is shown (or the shell keys, when the focused
+# pane has no agent). The server alone doesn't count, since it keeps running detached after every
+# client is gone. The quick terminal isn't a herdr pane, so it can't use HERDR_ENV. Without a client
+# there is no way to ask Ghostty which surface has focus, so every agent running anywhere is shown.
+# Limit: with herdr attached in one Ghostty tab, the herdr view wins even while another tab has
+# focus.
+#
+# Defaults were checked against: `ghostty +list-keybinds` (1.3.1), herdr 0.9.3's built-in config,
+# OpenCode's keybinds docs at v1.18.35, Claude Code's interactive-mode docs, and GitHub's Copilot
+# CLI docs. Rebinding anything in those tools means updating the table here.
+
+in_herdr=0
+show=()  # agent sections to show: claude, opencode, copilot
+
+# An attached client is a `herdr` process on a terminal, run bare or with --session/--remote or
+# `session attach`. The server runs with no terminal (tty "??"), and one-off CLI calls such as
+# `herdr agent list` have a subcommand.
+herdr_client() {
+    ps -axo tty=,args= | awk '$1 != "??" {
+        n = split($2, p, "/")
+        if (p[n] != "herdr") next
+        if ($3 == "" || $3 ~ /^--(session|remote)/ || ($3 == "session" && $4 == "attach")) found = 1
+    } END { exit !found }'
+}
+
+if command -v herdr &>/dev/null && command -v jq &>/dev/null && herdr_client; then
+    in_herdr=1
+    focused=$(herdr agent list 2>/dev/null \
+        | jq -r '.result.agents[]? | select(.focused) | .agent' 2>/dev/null | head -n1)
+    [[ -n "$focused" ]] && show=("$focused")
+else
+    # Match on the executable's own name: `copilot-runtime` (VS Code) and paths that merely
+    # contain "claude" don't count. The nix opencode wrapper execs `.opencode-wrapped`.
+    procs=(${(f)"$(ps -axo comm= | awk -F/ '{print $NF}' | sort -u)"})
+    (( ${procs[(Ie)claude]} )) && show+=(claude)
+    (( ${procs[(Ie)opencode]} || ${procs[(Ie).opencode-wrapped]} )) && show+=(opencode)
+    (( ${procs[(Ie)copilot]} )) && show+=(copilot)
+fi
+
+# Rows are "Tool<TAB>Key<TAB>Action".
+entries=("Tool	Key	Action")
+
+entries+=(
+    "Ghostty	cmd+t	New tab"
+    "Ghostty	cmd+w	Close split (or tab, if last)"
+    "Ghostty	cmd+opt+w	Close tab"
+    "Ghostty	cmd+shift+[ / ]	Previous / next tab"
+    "Ghostty	cmd+d	Split right"
+    "Ghostty	cmd+shift+d	Split down"
+    "Ghostty	cmd+opt+arrow	Move between splits"
+    "Ghostty	cmd++ / cmd+-	Font size up / down"
+    "Ghostty	cmd+0	Reset font size"
+    "Ghostty	cmd+k	Clear screen"
+    "Ghostty	cmd+f	Search scrollback"
+    "Ghostty	cmd+shift+p	Command palette"
+    "Ghostty	ctrl+shift+/	Toggle this list"
+)
+
+if (( in_herdr )); then
+    entries+=(
+        "Herdr	ctrl+b c	New tab"
+        "Herdr	ctrl+b shift+x	Close tab"
+        "Herdr	ctrl+b shift+t	Rename tab"
+        "Herdr	ctrl+b n / p	Next / previous tab"
+        "Herdr	ctrl+b 1-9	Go to tab N"
+        "Herdr	ctrl+b v	Split pane right"
+        "Herdr	ctrl+b -	Split pane down"
+        "Herdr	ctrl+b x	Close pane"
+        "Herdr	ctrl+b shift+p	Rename pane"
+        "Herdr	ctrl+b h/j/k/l	Focus pane left / down / up / right"
+        "Herdr	ctrl+b z	Zoom pane"
+        "Herdr	ctrl+b r	Resize mode"
+        "Herdr	ctrl+b e	Edit scrollback"
+        "Herdr	ctrl+b b	Toggle sidebar"
+        "Herdr	ctrl+b shift+n	New workspace"
+        "Herdr	ctrl+b q	Detach"
+    )
+fi
+
+if (( ${show[(Ie)opencode]} )); then
+    entries+=(
+        "OpenCode	ctrl+p	Command palette"
+        "OpenCode	ctrl+alt+k	Which-key panel"
+        "OpenCode	tab / shift+tab	Cycle agent (build / plan)"
+        "OpenCode	escape	Interrupt session"
+        "OpenCode	ctrl+x n	New session"
+        "OpenCode	ctrl+x l	Session list"
+        "OpenCode	ctrl+r	Rename session"
+        "OpenCode	ctrl+x g	Session timeline"
+        "OpenCode	ctrl+x c	Compact session"
+        "OpenCode	ctrl+x m	Model picker"
+        "OpenCode	ctrl+x a	Agent list"
+        "OpenCode	ctrl+x b	Toggle sidebar"
+        "OpenCode	ctrl+x u / r	Undo / redo last change"
+        "OpenCode	ctrl+x y	Copy messages"
+        "OpenCode	ctrl+x h	Toggle conceal"
+        "OpenCode	@<file>	Attach file to prompt"
+        "OpenCode	/init	Create AGENTS.md"
+        "OpenCode	/share	Share session link"
+    )
+fi
+
+if (( ${show[(Ie)claude]} )); then
+    entries+=(
+        "Claude	esc	Interrupt, or close a dialog"
+        "Claude	esc esc	Clear draft, or rewind (empty prompt)"
+        "Claude	ctrl+c	Interrupt, or clear input (twice: exit)"
+        "Claude	shift+tab	Cycle mode: manual / accept edits / plan"
+        "Claude	ctrl+r	Search prompt history"
+        "Claude	ctrl+o	Transcript viewer"
+        "Claude	ctrl+g	Edit prompt in \$EDITOR"
+        "Claude	ctrl+b	Background running task"
+        "Claude	ctrl+t	Toggle task checklist"
+        "Claude	ctrl+v	Paste image"
+        "Claude	ctrl+l	Redraw screen"
+        "Claude	!<cmd>	Shell mode"
+        "Claude	@<file>	Mention a file"
+        "Claude	/compact	Compact context"
+        "Claude	/clear	Clear conversation"
+        "Claude	/model	Switch model"
+    )
+fi
+
+if (( ${show[(Ie)copilot]} )); then
+    entries+=(
+        "Copilot	shift+tab	Toggle plan mode"
+        "Copilot	esc esc	Stop while thinking"
+        "Copilot	esc	Reject a permission request"
+        "Copilot	ctrl+t	Show / hide reasoning"
+        "Copilot	tab	Complete a file path"
+        "Copilot	@<file>	Add a file to the prompt"
+        "Copilot	!<cmd>	Run a shell command"
+        "Copilot	?	List commands"
+        "Copilot	/compact	Compact context"
+        "Copilot	/context	Show context usage"
+        "Copilot	/resume	Resume a session"
+    )
+fi
+
+# The shell keys matter when no agent is in front of you.
+if (( ${#show} == 0 )); then
+    entries+=(
+        "Shell	ctrl+r	History search (fzf)"
+        "Shell	ctrl+t	Insert file path (fzf)"
+        "Shell	ctrl+a / ctrl+e	Line start / end"
+        "Shell	ctrl+w	Delete word back"
+        "Shell	ctrl+u	Delete line"
+        "Shell	ctrl+l	Clear screen"
+        "Shell	ctrl+z	Suspend process"
+    )
+fi
+
+# column aligns the header row with the rest; fzf shows it as a fixed header.
+printf '%s\n' "${entries[@]}" | column -t -s $'\t' | fzf \
+    --header-lines=1 \
+    --header-lines-border=bottom \
+    --no-sort \
+    --reverse \
+    --info=hidden \
+    --no-mouse \
+    --prompt "  hotkeys  " \
+    --color "prompt:italic,hl:bold,hl+:bold" \
+    --pointer " " \
+    --bind "esc:abort,enter:abort"

@@ -19,6 +19,13 @@ elif [[ "$OSTYPE" == linux* ]]; then
         eval "$(/var/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
+# Ghostty's quick terminal (ctrl+shift+/) is only a hotkey list: show it once PATH is set and exit,
+# skipping the rest of shell startup.
+if [[ -n "${GHOSTTY_QUICK_TERMINAL:-}" ]]; then
+    "${HOME}/.local/bin/hotkeys"
+    exit 0
+fi
+
 # direnv
 command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
 
