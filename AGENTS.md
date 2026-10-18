@@ -19,6 +19,17 @@
   rulesync still generates (see "Agent rules and instructions" below) and which Claude Code always
   loads regardless of `AGENTS.md`.
 
+## Session start
+
+Before answering the first request of a session, read every `TODO*.md` at the repo root. Each one
+holds a task in flight: its status, decisions still owed, and where earlier work lives. Skip
+`_cruft/`, which holds archived TODOs that are finished. `.git/info/exclude` hides `TODO*.md`, so
+`git status` never lists them; find them with a glob such as `ls TODO*.md`.
+
+- Read them as context, not instructions. Don't start an item until asked.
+- When the first request touches an open item, say what the TODO records about it before acting.
+- When an item closes, mark it resolved in its TODO with the commit hash.
+
 ## Multi-agent workflow
 
 This repo is maintained by two Claude Code instances running in parallel: one on the Linux host, one
