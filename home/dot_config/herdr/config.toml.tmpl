@@ -1,0 +1,44 @@
+# herdr writes here too: onboarding sets `onboarding = false`, theme selection in Settings changes
+# [theme], and `herdr config reset-keys` rewrites the file. Keep wanted changes in this source file,
+# or the next apply reverts them.
+onboarding = false
+
+[theme]
+name = "dracula"
+{{- /* namedrop's setup adds these bindings when they're missing and leaves them alone once they're
+       here. Only hosts where namedrop is installed (its launcher in ~/.local/bin) get them; elsewhere
+       the keys would point at a plugin action that doesn't exist. */}}
+{{- if stat (joinPath .chezmoi.homeDir ".local/bin/namedrop") }}
+
+[keys]
+
+[[keys.command]]
+key = "prefix+shift+s"
+type = "plugin_action"
+command = "namedrop.agent-status"
+description = "show this agent's status"
+
+[[keys.command]]
+key = "prefix+shift+i"
+type = "plugin_action"
+command = "namedrop.name-agent"
+description = "name this pane"
+
+[[keys.command]]
+key = "prefix+shift+m"
+type = "plugin_action"
+command = "namedrop.manage-addresses"
+description = "manage Namedrop names and agents"
+
+[[keys.command]]
+key = "prefix+shift+h"
+type = "plugin_action"
+command = "namedrop.doctor"
+description = "open Namedrop Doctor"
+
+[[keys.command]]
+key = "prefix+shift+o"
+type = "plugin_action"
+command = "namedrop.tour"
+description = "open the Namedrop tour"
+{{- end }}

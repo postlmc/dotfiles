@@ -1,7 +1,0 @@
-# herdr writes here too: onboarding sets `onboarding = false`, theme selection in Settings changes
-# [theme], and `herdr config reset-keys` rewrites the file. Keep wanted changes in this source file,
-# or the next apply reverts them.
-onboarding = false
-
-[theme]
-name = "dracula"
