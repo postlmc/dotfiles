@@ -16,12 +16,27 @@ h() {
     fi
 }
 
+# Namedrop activation is per workspace and keyed to herdr's workspace ID, so a new workspace starts
+# inactive even when an earlier one with the same label was active. Activation leaves
+# ~/.claude/settings.json alone when its permission entries are already there.
+_herdr_namedrop_activate() {
+    local ws="$1"
+    local sock
+
+    [ -x "$HOME/.local/bin/namedrop" ] || return 0
+    sock=$(herdr status 2>/dev/null | awk '$1 == "socket:" { print $2 }')
+    "$HOME/.local/bin/namedrop" activate --json --input-json '{"confirmed":true}' \
+        --herdr-socket "$sock" --herdr-workspace "$ws" >/dev/null ||
+        echo "hn: namedrop activation failed for workspace $ws; run namedrop doctor there" >&2
+}
+
 # hn [label]: a new workspace in the default session, rooted at $PWD and labeled with its name.
 # Without --cwd, herdr would root it at the focused pane's directory, wherever that is. Starts the
-# server first when none is running, and attaches when run outside herdr.
+# server first when none is running, activates namedrop in the workspace when it's installed, and
+# attaches when run outside herdr.
 hn() {
     local label="${1:-$(basename "$PWD")}"
-    local i
+    local i out
 
     if ! herdr workspace list >/dev/null 2>&1; then
         # HERDR_STARTUP_CWD is what herdr's own client passes a server it spawns; it roots the
@@ -33,6 +48,7 @@ hn() {
         done
     fi
 
-    herdr workspace create --cwd "$PWD" --label "$label" --focus >/dev/null || return
+    out=$(herdr workspace create --cwd "$PWD" --label "$label" --focus) || return
+    _herdr_namedrop_activate "$(printf '%s\n' "$out" | sed -n 's/.*"workspace_id":"\([^"]*\)".*/\1/p')"
     [ -n "${HERDR_ENV:-}" ] || h
 }
