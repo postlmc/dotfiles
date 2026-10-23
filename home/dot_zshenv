@@ -6,6 +6,14 @@ if [[ "$OSTYPE" == darwin* ]]; then
     export XDG_STATE_HOME="$HOME/.local/state"
 fi
 
+# CA bundle for Nix tools and Python requests. Nix's nix-daemon.sh (sourced by /etc/zshrc) keeps
+# an existing NIX_SSL_CERT_FILE; otherwise it picks the root profile's nss-cacert, which nothing
+# here updates. Homebrew's bundle stays current with `brew upgrade`.
+if [[ "$OSTYPE" == darwin* && -r /opt/homebrew/etc/ca-certificates/cert.pem ]]; then
+    export NIX_SSL_CERT_FILE=/opt/homebrew/etc/ca-certificates/cert.pem
+    export REQUESTS_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem
+fi
+
 # User bins on PATH for *every* zsh, including non-interactive tool shells that skip .zshrc.
 # .zshrc re-prepends these (line ~47) so they stay ahead of path_helper/devbox/brew reshuffles
 # in interactive shells; prepend_path there dedupes, so the two placements never double up.
