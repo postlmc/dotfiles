@@ -1,0 +1,9 @@
+{{- if and (eq .chezmoi.os "darwin") (stat (joinPath .chezmoi.homeDir ".config/local/ca-bundle-filter")) -}}
+#!/bin/bash
+# Rebuilds the filtered CA bundle when the filter or Homebrew's bundle has changed by apply time.
+# The ca-bundle-filter LaunchAgent covers the rest: it rebuilds at login and whenever a bundle
+# changes. Opt-in per host with ~/.config/local/ca-bundle-filter, like dot_zshenv.
+# filter: {{ include "dot_local/bin/executable_ca-bundle-filter" | sha256sum }}
+# source: {{ if stat "/opt/homebrew/etc/ca-certificates/cert.pem" }}{{ include "/opt/homebrew/etc/ca-certificates/cert.pem" | sha256sum }}{{ end }}
+"{{ .chezmoi.homeDir }}/.local/bin/ca-bundle-filter"
+{{ end -}}

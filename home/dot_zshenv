@@ -6,12 +6,29 @@ if [[ "$OSTYPE" == darwin* ]]; then
     export XDG_STATE_HOME="$HOME/.local/state"
 fi
 
-# CA bundle for Nix tools and Python requests. Nix's nix-daemon.sh (sourced by /etc/zshrc) keeps
-# an existing NIX_SSL_CERT_FILE; otherwise it picks the root profile's nss-cacert, which nothing
-# here updates. Homebrew's bundle stays current with `brew upgrade`.
-if [[ "$OSTYPE" == darwin* && -r /opt/homebrew/etc/ca-certificates/cert.pem ]]; then
-    export NIX_SSL_CERT_FILE=/opt/homebrew/etc/ca-certificates/cert.pem
-    export REQUESTS_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem
+# CA bundle for OpenSSL, curl, Nix tools, Python and pip: Homebrew's bundle minus the roots
+# distrusted after the eMudhra CA compromise, built by ca-bundle-filter. The ca-bundle-filter
+# LaunchAgent exports the same variables to launchd for processes started outside a shell.
+# Opt-in per host with ~/.config/local/ca-bundle-filter: a managed Mac's TLS-inspection or internal
+# roots live only in its Keychain, so a Homebrew-based bundle would break TLS there.
+# Nix's nix-daemon.sh (sourced by /etc/zshrc) keeps an existing NIX_SSL_CERT_FILE; otherwise it
+# picks the root profile's nss-cacert, which nothing here updates. Nix itself ignores that variable
+# on Determinate Nix: /etc/nix/nix.conf sets ssl-cert-file to a Keychain export, and the config
+# beats the environment. NIX_CONFIG is read after nix.conf, so it overrides the client. The daemon
+# keeps the Keychain export, since determinate-nixd regenerates it and rewrites nix.conf.
+# Until the first build, the fallback is Homebrew's unfiltered bundle, which has one denied root to
+# nss-cacert's four.
+if [[ "$OSTYPE" == darwin* && -e "$XDG_CONFIG_HOME/local/ca-bundle-filter" ]]; then
+    if [[ -r "$XDG_DATA_HOME/ca-bundle/cert.pem" ]]; then
+        for _var in SSL_CERT_FILE NIX_SSL_CERT_FILE REQUESTS_CA_BUNDLE CURL_CA_BUNDLE PIP_CERT; do
+            export "$_var=$XDG_DATA_HOME/ca-bundle/cert.pem"
+        done
+        unset _var
+        export NIX_CONFIG="ssl-cert-file = $XDG_DATA_HOME/ca-bundle/cert.pem"
+    elif [[ -r /opt/homebrew/etc/ca-certificates/cert.pem ]]; then
+        export NIX_SSL_CERT_FILE=/opt/homebrew/etc/ca-certificates/cert.pem
+        export REQUESTS_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem
+    fi
 fi
 
 # User bins on PATH for *every* zsh, including non-interactive tool shells that skip .zshrc.

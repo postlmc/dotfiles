@@ -4,3 +4,10 @@
 .config/local/**
 .claude/rules/environment.md*
 {{- end }}
+{{- if not (and (eq .chezmoi.os "darwin") (stat (joinPath .chezmoi.homeDir ".config/local/ca-bundle-filter"))) }}
+Library/LaunchAgents/local.dotfiles.ca-bundle-filter.plist
+{{- end }}
+{{- if ne .chezmoi.os "darwin" }}
+Library
+Library/**
+{{- end }}

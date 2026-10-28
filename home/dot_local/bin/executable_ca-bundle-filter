@@ -1,0 +1,83 @@
+#!/bin/bash
+# Writes a copy of a CA bundle without the roots distrusted after the 2026 eMudhra CA compromise:
+# every emSign root (O=eMudhra) and AAA Certificate Services.
+# Usage: ca-bundle-filter          rebuild the filtered bundle
+#        ca-bundle-filter --check  exit 1 if /etc/ssl/cert.pem trusts a denied root again
+#        ca-bundle-filter --login  rebuild, export the bundle to launchd, then check (LaunchAgent)
+set -euo pipefail
+
+src="${CA_BUNDLE_SOURCE:-/opt/homebrew/etc/ca-certificates/cert.pem}"
+out="${XDG_DATA_HOME:-$HOME/.local/share}/ca-bundle/cert.pem"
+system=/etc/ssl/cert.pem
+vars=(SSL_CERT_FILE NIX_SSL_CERT_FILE REQUESTS_CA_BUNDLE CURL_CA_BUNDLE PIP_CERT)
+# Matches LibreSSL's /O=... subjects and OpenSSL 3's O=..., ... subjects alike.
+deny='(^subject= ?|[/,] ?)(O ?= ?eMudhra|CN ?= ?AAA Certificate Services)'
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# Appends every certificate in PEM bundle $1 that isn't denied to $2, and prints each denied
+# subject.
+filter() {
+    local dir cert subject
+    dir=$(mktemp -d "$tmp/XXXXXX")
+    awk -v d="$dir" '
+        /-----BEGIN CERTIFICATE-----/ { f = sprintf("%s/%04d.pem", d, ++n) }
+        f { print > f }
+        /-----END CERTIFICATE-----/ { close(f); f = "" }
+    ' "$1"
+    for cert in "$dir"/*.pem; do
+        subject=$(openssl x509 -noout -subject -in "$cert")
+        if [[ $subject =~ $deny ]]; then
+            printf '%s\n' "${subject#subject=}"
+        else
+            cat "$cert" >>"$2"
+        fi
+    done
+}
+
+build() {
+    local denied kept
+    [[ -r "$src" ]] || { echo "ca-bundle-filter: $src is not readable" >&2; return 1; }
+    mkdir -p "${out%/*}"
+    : >"$out.new"
+    denied=$(filter "$src" "$out.new")
+    kept=$(grep -c -- '-----BEGIN CERTIFICATE-----' "$out.new" || true)
+    if [[ $kept -eq 0 ]]; then
+        rm -f "$out.new"
+        echo "ca-bundle-filter: no certificates kept from $src; left $out alone" >&2
+        return 1
+    fi
+    mv "$out.new" "$out"
+    echo "ca-bundle-filter: wrote $out with $kept certificates, dropped $(grep -c . <<<"$denied" || true)"
+}
+
+check() {
+    local denied
+    denied=$(filter "$system" /dev/null)
+    [[ -z $denied ]] && return 0
+    printf 'ca-bundle-filter: %s trusts %s\n' "$system" "$denied" >&2
+    return 1
+}
+
+login() {
+    local status=0 var
+    build || status=1
+    if [[ -r "$out" ]]; then
+        for var in "${vars[@]}"; do
+            launchctl setenv "$var" "$out"
+        done
+    fi
+    if ! check; then
+        osascript -e 'display notification "/etc/ssl/cert.pem trusts a distrusted eMudhra or AAA root again. Reinstall the filtered copy." with title "CA bundle"'
+        status=1
+    fi
+    return "$status"
+}
+
+case "${1:-}" in
+    "") build ;;
+    --check) check ;;
+    --login) login ;;
+    *) sed -n '4,6s/^# \{0,1\}//p' "$0" >&2; exit 2 ;;
+esac
