@@ -15,6 +15,11 @@
     <array>
         <string>/etc/ssl/cert.pem</string>
         <string>/opt/homebrew/etc/ca-certificates/cert.pem</string>
+        <string>{{ .chezmoi.homeDir }}/.local/share/devbox/global/default/devbox.lock</string>
+        <string>{{ .chezmoi.homeDir }}/.local/share/devbox/global/default/.devbox/nix/profile</string>
+        <string>/opt/homebrew/Cellar/azure-cli</string>
+        <string>{{ .chezmoi.homeDir }}/.local/share/uv/python</string>
+        <string>/etc/nix/macos-keychain.crt</string>
     </array>
     <key>StandardOutPath</key>
     <string>{{ .chezmoi.homeDir }}/Library/Logs/ca-bundle-filter.log</string>

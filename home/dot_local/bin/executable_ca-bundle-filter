@@ -4,15 +4,19 @@
 # Usage: ca-bundle-filter          rebuild the filtered bundle
 #        ca-bundle-filter --check  exit 1 if /etc/ssl/cert.pem trusts a denied root again
 #        ca-bundle-filter --login  rebuild, export the bundle to launchd, then check (LaunchAgent);
-#                                  notifies once when the source bundle no longer needs filtering
+#                                  notifies once when the source bundle no longer needs filtering and
+#                                  when a fix that arrives by package update has been installed
 set -euo pipefail
 
 src="${CA_BUNDLE_SOURCE:-/opt/homebrew/etc/ca-certificates/cert.pem}"
 out="${XDG_DATA_HOME:-$HOME/.local/share}/ca-bundle/cert.pem"
 system=/etc/ssl/cert.pem
 vars=(SSL_CERT_FILE NIX_SSL_CERT_FILE REQUESTS_CA_BUNDLE CURL_CA_BUNDLE PIP_CERT)
-# Present once the "filter no longer needed" notification has been shown.
-notified="${XDG_STATE_HOME:-$HOME/.local/state}/ca-bundle-filter/retire-notified"
+# One file per notification already shown; removed again when its condition stops holding.
+state="${XDG_STATE_HOME:-$HOME/.local/state}/ca-bundle-filter"
+devbox_bin="${DEVBOX_BIN:-$HOME/.local/share/devbox/global/default/.devbox/nix/profile/default/bin}"
+cellar="${HOMEBREW_CELLAR:-/opt/homebrew/Cellar}"
+nix_crt="${NIX_KEYCHAIN_CRT:-/etc/nix/macos-keychain.crt}"
 dropped=0
 # Matches LibreSSL's /O=... subjects and OpenSSL 3's O=..., ... subjects alike.
 deny='(^subject= ?|[/,] ?)(O ?= ?eMudhra|CN ?= ?AAA Certificate Services)'
@@ -65,6 +69,87 @@ check() {
     return 1
 }
 
+# Shows notification $1 (title $2, text $3) once; rearm $1 allows it to show again.
+announce() {
+    [[ -e $state/$1 ]] && return 0
+    osascript -e "display notification \"$3\" with title \"$2\""
+    mkdir -p "$state" && : >"$state/$1"
+}
+
+rearm() {
+    rm -f "$state/$1"
+}
+
+# Succeeds if version $1 is at least $2.
+version_ge() {
+    [[ $(printf '%s\n%s\n' "$1" "$2" | sort -V | head -n1) == "$2" ]]
+}
+
+# CVE-2026-111497: fixed in Node.js 22.23.4, 24.22.1, 26.12.1 and later majors; Brotli 1.0.10,
+# 1.1.1, 1.2.1 and later series.
+node_fixed() {
+    case ${1%%.*} in
+        22) version_ge "$1" 22.23.4 ;;
+        24) version_ge "$1" 24.22.1 ;;
+        26) version_ge "$1" 26.12.1 ;;
+        *) [[ ${1%%.*} -gt 26 ]] ;;
+    esac
+}
+
+brotli_fixed() {
+    case ${1%.*} in
+        1.0) version_ge "$1" 1.0.10 ;;
+        1.1) version_ge "$1" 1.1.1 ;;
+        1.2) version_ge "$1" 1.2.1 ;;
+        *) version_ge "$1" 1.3.0 ;;
+    esac
+}
+
+devbox_brotli_fixed() {
+    local node brotli
+    node=$("$devbox_bin/node" --version 2>/dev/null) || return 1
+    brotli=$("$devbox_bin/curl" --version 2>/dev/null | grep -o 'brotli/[0-9.]*') || return 1
+    node_fixed "${node#v}" && brotli_fixed "${brotli#brotli/}"
+}
+
+# Azure CLI's and the uv Pythons' bundled certifi lists no longer hold a denied root.
+certifi_clean() {
+    local bundle found=1
+    for bundle in "$cellar"/azure-cli/*/libexec/lib/python*/site-packages/certifi/cacert.pem \
+        "${XDG_DATA_HOME:-$HOME/.local/share}"/uv/python/cpython-3.1[0-9]-macos-aarch64-none/lib/python3.*/site-packages/pip/_vendor/certifi/cacert.pem; do
+        [[ -r $bundle ]] || continue
+        found=0
+        [[ -z $(filter "$bundle" /dev/null) ]] || return 1
+    done
+    return "$found"
+}
+
+nix_daemon_clean() {
+    [[ -r $nix_crt && -z $(filter "$nix_crt" /dev/null) ]]
+}
+
+# Fixes that arrive through a package update: say so once, when the installed copy has it.
+recheck() {
+    if devbox_brotli_fixed; then
+        announce brotli "Recheck: Brotli, complete" \
+            "devbox Node.js and curl now carry the CVE-2026-111497 fix."
+    else
+        rearm brotli
+    fi
+    if certifi_clean; then
+        announce certifi "Recheck: eMudhra certifi, complete" \
+            "Azure CLI and the uv Pythons no longer bundle the distrusted roots."
+    else
+        rearm certifi
+    fi
+    if nix_daemon_clean; then
+        announce nixdaemon "Recheck: eMudhra Nix daemon, complete" \
+            "The Nix daemon's keychain export no longer holds the distrusted roots."
+    else
+        rearm nixdaemon
+    fi
+}
+
 login() {
     local status=0 var
     build || status=1
@@ -78,15 +163,14 @@ login() {
         status=1
     fi
     # Once the source bundle has none of the denied roots, the filter and the variables that
-    # point at its output can be removed. Say so once; re-arm if a denied root comes back.
+    # point at its output can be removed.
     if [[ $status -eq 0 && $dropped -eq 0 ]]; then
-        if [[ ! -e $notified ]]; then
-            osascript -e 'display notification "Homebrew'"'"'s CA bundle no longer contains the eMudhra or AAA roots. The ca-bundle-filter setup can be removed." with title "CA bundle filter: no longer needed"'
-            mkdir -p "${notified%/*}" && : >"$notified"
-        fi
+        announce retire "CA bundle filter: no longer needed" \
+            "Homebrew's CA bundle no longer contains the eMudhra or AAA roots. The ca-bundle-filter setup can be removed."
     elif [[ $dropped -gt 0 ]]; then
-        rm -f "$notified"
+        rearm retire
     fi
+    recheck
     return "$status"
 }
 
