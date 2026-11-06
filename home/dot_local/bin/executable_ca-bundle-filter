@@ -3,13 +3,17 @@
 # every emSign root (O=eMudhra) and AAA Certificate Services.
 # Usage: ca-bundle-filter          rebuild the filtered bundle
 #        ca-bundle-filter --check  exit 1 if /etc/ssl/cert.pem trusts a denied root again
-#        ca-bundle-filter --login  rebuild, export the bundle to launchd, then check (LaunchAgent)
+#        ca-bundle-filter --login  rebuild, export the bundle to launchd, then check (LaunchAgent);
+#                                  notifies once when the source bundle no longer needs filtering
 set -euo pipefail
 
 src="${CA_BUNDLE_SOURCE:-/opt/homebrew/etc/ca-certificates/cert.pem}"
 out="${XDG_DATA_HOME:-$HOME/.local/share}/ca-bundle/cert.pem"
 system=/etc/ssl/cert.pem
 vars=(SSL_CERT_FILE NIX_SSL_CERT_FILE REQUESTS_CA_BUNDLE CURL_CA_BUNDLE PIP_CERT)
+# Present once the "filter no longer needed" notification has been shown.
+notified="${XDG_STATE_HOME:-$HOME/.local/state}/ca-bundle-filter/retire-notified"
+dropped=0
 # Matches LibreSSL's /O=... subjects and OpenSSL 3's O=..., ... subjects alike.
 deny='(^subject= ?|[/,] ?)(O ?= ?eMudhra|CN ?= ?AAA Certificate Services)'
 
@@ -49,7 +53,8 @@ build() {
         return 1
     fi
     mv "$out.new" "$out"
-    echo "ca-bundle-filter: wrote $out with $kept certificates, dropped $(grep -c . <<<"$denied" || true)"
+    dropped=$(grep -c . <<<"$denied" || true)
+    echo "ca-bundle-filter: wrote $out with $kept certificates, dropped $dropped"
 }
 
 check() {
@@ -71,6 +76,16 @@ login() {
     if ! check; then
         osascript -e 'display notification "/etc/ssl/cert.pem trusts a distrusted eMudhra or AAA root again. Reinstall the filtered copy." with title "CA bundle"'
         status=1
+    fi
+    # Once the source bundle has none of the denied roots, the filter and the variables that
+    # point at its output can be removed. Say so once; re-arm if a denied root comes back.
+    if [[ $status -eq 0 && $dropped -eq 0 ]]; then
+        if [[ ! -e $notified ]]; then
+            osascript -e 'display notification "Homebrew'"'"'s CA bundle no longer contains the eMudhra or AAA roots. The ca-bundle-filter setup can be removed." with title "CA bundle filter: no longer needed"'
+            mkdir -p "${notified%/*}" && : >"$notified"
+        fi
+    elif [[ $dropped -gt 0 ]]; then
+        rm -f "$notified"
     fi
     return "$status"
 }

@@ -78,6 +78,27 @@ run `cml-init`: it creates `~/.local/share/chezmoi.local` as the source repo and
 `run_after_` guard that fails any `cml apply` where both instances claim the same path. Point that
 repo at whatever private remote suits the host and track files with `cml add <path>`.
 
+### Per-Host Marker Files
+
+An empty file in `~/.config/local/` switches a feature on for that host only. Create it and run
+`chezmoi apply`; delete it and re-apply to switch the feature off. Nothing else in the source tree
+changes between hosts.
+
+| Marker             | Effect                                                                   |
+|--------------------|--------------------------------------------------------------------------|
+| `low_dpi_displays` | Ghostty config tuned for low-DPI external displays                       |
+| `ca-bundle-filter` | macOS only: filtered CA bundle, `launchctl` variables, and a LaunchAgent |
+
+`ca-bundle-filter` also gates a runtime check in `dot_zshenv`, which is not a template, so a shell
+started before the marker was removed keeps the variables until it is replaced. Open a new shell
+after removing it. The filter drops the eMudhra and AAA Certificate Services roots from Homebrew's
+CA bundle. It is opt-in because a managed Mac keeps its TLS-inspection and internal roots only in
+its Keychain, and a bundle built from Homebrew's list would leave those out.
+
+When Homebrew's bundle no longer contains those roots, the LaunchAgent shows a "CA bundle filter: no
+longer needed" notification once. That is the cue to delete the marker, remove the LaunchAgent, and
+drop the filter from the source tree.
+
 ## Repository Layout
 
 This repository uses `.chezmoiroot` to relocate the source directory structure. The actual dotfiles
