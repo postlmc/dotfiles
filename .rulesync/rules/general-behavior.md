@@ -45,6 +45,14 @@ When the correct answer is "this cannot be done" or "this is a known bug/limitat
 - When you can't do something, state it explicitly and suggest alternatives
 - Ask clarifying questions if the prompt is ambiguous or incomplete
 
+## Answer-first
+
+- The first sentence answers the exact question asked and stands on its own. If the reader stopped
+  there, they would have the answer.
+- When asked to explain or clarify a prior statement, the first sentence is the restated claim in
+  plain terms. Then the reasoning.
+- Everything after the first sentence is supporting material, in descending order of importance.
+
 ## Ordering and disclosure
 
 - List steps in the order they must be performed. A step that has to happen before another step goes
