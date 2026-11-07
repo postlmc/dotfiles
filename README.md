@@ -95,9 +95,9 @@ after removing it. The filter drops the eMudhra and AAA Certificate Services roo
 CA bundle. It is opt-in because a managed Mac keeps its TLS-inspection and internal roots only in
 its Keychain, and a bundle built from Homebrew's list would leave those out.
 
-When Homebrew's bundle no longer contains those roots, the LaunchAgent shows a "CA bundle filter: no
-longer needed" notification once. That is the cue to delete the marker, remove the LaunchAgent, and
-drop the filter from the source tree.
+When Homebrew's bundle no longer contains those roots, apart from emSign Root CA - G1, which may
+stay trusted, the LaunchAgent shows a "CA bundle filter: no longer needed" notification once. That
+is the cue to delete the marker, remove the LaunchAgent, and drop the filter from the source tree.
 
 ## Repository Layout
 

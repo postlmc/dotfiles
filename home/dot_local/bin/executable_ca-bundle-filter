@@ -18,8 +18,14 @@ devbox_bin="${DEVBOX_BIN:-$HOME/.local/share/devbox/global/default/.devbox/nix/p
 cellar="${HOMEBREW_CELLAR:-/opt/homebrew/Cellar}"
 nix_crt="${NIX_KEYCHAIN_CRT:-/etc/nix/macos-keychain.crt}"
 dropped=0
+dropped_other=0
 # Matches LibreSSL's /O=... subjects and OpenSSL 3's O=..., ... subjects alike.
 deny='(^subject= ?|[/,] ?)(O ?= ?eMudhra|CN ?= ?AAA Certificate Services)'
+
+# emSign Root CA - G1 may stay trusted (policy), so the retirement and recheck tests leave it out.
+# The filter itself still drops it.
+g1='CN ?= ?emSign Root CA - G1($|[,/])'
+others() { grep -Ev -- "$g1" || true; }
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
@@ -58,6 +64,7 @@ build() {
     fi
     mv "$out.new" "$out"
     dropped=$(grep -c . <<<"$denied" || true)
+    dropped_other=$(others <<<"$denied" | grep -c . || true)
     echo "ca-bundle-filter: wrote $out with $kept certificates, dropped $dropped"
 }
 
@@ -119,13 +126,13 @@ certifi_clean() {
         "${XDG_DATA_HOME:-$HOME/.local/share}"/uv/python/cpython-3.1[0-9]-macos-aarch64-none/lib/python3.*/site-packages/pip/_vendor/certifi/cacert.pem; do
         [[ -r $bundle ]] || continue
         found=0
-        [[ -z $(filter "$bundle" /dev/null) ]] || return 1
+        [[ -z $(filter "$bundle" /dev/null | others) ]] || return 1
     done
     return "$found"
 }
 
 nix_daemon_clean() {
-    [[ -r $nix_crt && -z $(filter "$nix_crt" /dev/null) ]]
+    [[ -r $nix_crt && -z $(filter "$nix_crt" /dev/null | others) ]]
 }
 
 # Fixes that arrive through a package update: say so once, when the installed copy has it.
@@ -138,13 +145,13 @@ recheck() {
     fi
     if certifi_clean; then
         announce certifi "Recheck: eMudhra certifi, complete" \
-            "Azure CLI and the uv Pythons no longer bundle the distrusted roots."
+            "Azure CLI and the uv Pythons no longer bundle the distrusted roots (emSign Root CA - G1 aside)."
     else
         rearm certifi
     fi
     if nix_daemon_clean; then
         announce nixdaemon "Recheck: eMudhra Nix daemon, complete" \
-            "The Nix daemon's keychain export no longer holds the distrusted roots."
+            "The Nix daemon's keychain export no longer holds the distrusted roots (emSign Root CA - G1 aside)."
     else
         rearm nixdaemon
     fi
@@ -162,12 +169,12 @@ login() {
         osascript -e 'display notification "/etc/ssl/cert.pem trusts a distrusted eMudhra or AAA root again. Reinstall the filtered copy." with title "CA bundle"'
         status=1
     fi
-    # Once the source bundle has none of the denied roots, the filter and the variables that
-    # point at its output can be removed.
-    if [[ $status -eq 0 && $dropped -eq 0 ]]; then
+    # Once the source bundle has none of the denied roots (G1 aside), the filter and the variables
+    # that point at its output can be removed.
+    if [[ $status -eq 0 && $dropped_other -eq 0 ]]; then
         announce retire "CA bundle filter: no longer needed" \
-            "Homebrew's CA bundle no longer contains the eMudhra or AAA roots. The ca-bundle-filter setup can be removed."
-    elif [[ $dropped -gt 0 ]]; then
+            "Homebrew's CA bundle no longer contains the eMudhra or AAA roots, except emSign Root CA - G1, which may stay. The ca-bundle-filter setup can be removed."
+    elif [[ $dropped_other -gt 0 ]]; then
         rearm retire
     fi
     recheck
