@@ -11,3 +11,7 @@ Library/LaunchAgents/local.dotfiles.ca-bundle-filter.plist
 Library
 Library/**
 {{- end }}
+{{- if ne .chezmoi.os "linux" }}
+.config/glow
+.config/glow/**
+{{- end }}
