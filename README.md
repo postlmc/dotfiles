@@ -190,20 +190,22 @@ script directly: `home/dot_local/share/devbox/global/default/modify_devbox.json.
 at `~/.config/local/devbox`, which is outside chezmoi's management and included via the `include`
 directive in `devbox.json`.
 
-### Session Resume
+### AI Harness Launchers
 
-`ccr` and `cpr` reconnect to the most recent Claude Code or Copilot CLI conversation for the current
-directory, starting fresh when there is none. Neither needs hooks or marker files: each tool already
-records where its sessions ran. `ccr` probes Claude Code's per-directory transcript store
-(`~/.claude/projects/<sanitized-path>/`) and invokes `claude -c` only when history exists, since
-`-c` errors in a directory without any. `cpr` asks Copilot's session database
-(`~/.copilot/session-store.db`) for the newest session recorded against the directory and hands it
-to `--resume`. Both degrade gracefully — if either internal storage layout changes, the probe misses
-and you get a fresh session instead of an error.
+Each AI harness gets a two-letter launcher and a throw-away variant ending in `t`:
 
-An earlier hook-based approach wrote a `.ccid` marker file at session end; it was retired in favor
-of the probes once `claude -c` covered the resume-by-directory case natively. The git history keeps
-the details.
+| Harness     | Normal | Throw-away | Module                  |
+|-------------|--------|------------|-------------------------|
+| Claude Code | `cc`   | `cct`      | `available/claude.sh`   |
+| OpenCode    | `oc`   | `oct`      | `available/opencode.sh` |
+| Copilot CLI | `co`   | `cot`      | `available/copilot.sh`  |
+
+The normal launcher passes its arguments straight through. The throw-away variant takes `-m model`
+(OpenCode wants `provider/model`) and starts an interactive session in a fresh `mktemp -d`
+directory. A quoted prompt after the options starts the session with it.
+
+`cc` shadows the C compiler only at an interactive prompt. Builds run `/usr/bin/cc` directly, and
+`command cc` still reaches it.
 
 ### Refreshing zsh Completions
 

@@ -1,20 +1,18 @@
 #!/bin/bash
-# Approach from https://erikzaadi.com/2026/02/15/auto-resume-claude-code-sessions/
 
 command -v claude >/dev/null 2>&1 || return
 
-ccr() {
-    # Transcripts for a directory live under its sanitized path ("/" and "." become "-");
-    # claude -c errors when the directory has no history, so probe before choosing
-    if ls "${HOME}/.claude/projects/${PWD//[\/.]/-}/"*.jsonl >/dev/null 2>&1; then
-        claude -c "$@"
-    else
-        claude "$@"
-    fi
+# cc shadows the C compiler only at an interactive prompt; builds run /usr/bin/cc directly, and
+# `command cc` still reaches it.
+cc() {
+    claude "$@"
 }
 
-ccq() {
-    local model="" OPTIND opt
+# cct [-m model] [args...]: a throw-away session in a fresh directory.
+# Remaining arguments go to claude as-is, so a quoted prompt starts the session with it.
+cct() {
+    local model="" OPTIND opt dir
+    local -a args=()
     while getopts "m:" opt; do
         case $opt in
             m) model=$OPTARG ;;
@@ -22,44 +20,7 @@ ccq() {
         esac
     done
     shift $((OPTIND - 1))
-    if [ -n "$model" ]; then
-        claude -p --no-session-persistence --model "$model" "$@"
-    else
-        claude -p --no-session-persistence "$@"
-    fi
-}
-
-command -v copilot >/dev/null 2>&1 || return
-
-cpr() {
-    local id hex
-    # Copilot records every session's cwd in its own store; resume the newest one for this
-    # directory. A missed probe (schema change, no history) falls through to a fresh session.
-    # The path goes in as a hex blob literal so it needs no quoting: zsh and bash disagree on how
-    # backslashes in ${var//pattern/replacement} escape a single quote.
-    hex=$(printf '%s' "$PWD" | od -An -tx1 | tr -d ' \n')
-    id=$(sqlite3 "${HOME}/.copilot/session-store.db" \
-        "SELECT id FROM sessions WHERE cwd = CAST(X'${hex}' AS TEXT) ORDER BY updated_at DESC LIMIT 1;" \
-        2>/dev/null)
-    if [[ "$id" =~ ^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$ ]]; then
-        copilot --resume="$id" "$@"
-    else
-        copilot "$@"
-    fi
-}
-
-cpq() {
-    local model="" OPTIND opt
-    while getopts "m:" opt; do
-        case $opt in
-            m) model=$OPTARG ;;
-            *) return 1 ;;
-        esac
-    done
-    shift $((OPTIND - 1))
-    if [ -n "$model" ]; then
-        copilot -p "$*" --allow-all-tools --silent --model "$model"
-    else
-        copilot -p "$*" --allow-all-tools --silent
-    fi
+    [ -n "$model" ] && args+=(--model "$model")
+    dir=$(mktemp -d) || return
+    (cd "$dir" && claude "${args[@]}" "$@")
 }
