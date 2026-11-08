@@ -108,7 +108,7 @@
 {{- $pkgs = append $pkgs "rustup@latest" -}}
 {{- end -}}
 {{- if dig "development" "kubernetes" false . -}}
-{{- $pkgs = append $pkgs "kubectl@1.30" -}}
+{{- $pkgs = append $pkgs "kubectl@1.36" -}}
 {{- $pkgs = append $pkgs "kubectx@latest" -}}
 {{- $pkgs = append $pkgs "kubernetes-helm@latest" -}}
 {{- $pkgs = append $pkgs "k9s@latest" -}}
