@@ -40,9 +40,12 @@ Shared files — this one, `README.md`, `mklinks.sh`, `dot_zshrc`/`dot_bashrc`,
 `modify_devbox.json.tmpl` — get edited by either instance, but only the block or line that actually
 needs to change; add a branch rather than restructure a shared one.
 
-Work happens on short-lived branches prefixed by owner, never directly on `main`:
+Work happens on short-lived branches, never directly on `main`:
 
-- `linux/<topic>` or `macos/<topic>`, cut from the latest `main`.
+- `<type>/<topic>`, cut from the latest `main`. `<type>` is the Conventional Commit type the work
+  will carry (`feat`, `fix`, `docs`, `chore`, `style`) and `<topic>` is a short kebab-case name, as
+  in `feat/glow-dracula`. Branch names do not say which instance made them; pick distinct topics,
+  and a collision shows up as a rejected push.
 - Rebase onto `origin/main` (never merge) right before landing, to pick up anything the other
   instance pushed meanwhile.
 - Fast-forward into `main`, push immediately, delete the branch. No long-lived per-platform branches
