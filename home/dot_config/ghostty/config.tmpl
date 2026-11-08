@@ -61,6 +61,9 @@ keybind = cmd+minus=decrease_font_size:1
 keybind = cmd+0=reset_font_size
 keybind = cmd+c=copy_to_clipboard
 keybind = cmd+v=paste_from_clipboard
+# The default `true` copies only to Ghostty's own selection clipboard on macOS, which cmd+v never
+# reads; `clipboard` also copies to the system clipboard, matching herdr's copy on select.
+copy-on-select = clipboard
 
 {{- else if eq .chezmoi.os "linux" }}
 
