@@ -178,11 +178,17 @@ brew-up     # brew update, install what the Brewfile adds, upgrade, clean up
 gbox-ls     # list installed global devbox packages
 ```
 
-To change a shared package, edit the template and run `pkg-up`.
+Where a package goes, first match wins:
 
-**Host-specific devbox packages** go in `~/.config/local/devbox/plugin.json`, a local devbox plugin
-outside chezmoi that `devbox.json` includes. Add the package to its `packages` array and run
-`devbox global install`.
+1. **This host only (devbox):** `~/.config/local/devbox/plugin.json`, a local devbox plugin outside
+   chezmoi that `devbox.json` includes. Add the package to its `packages` array and run
+   `devbox global install`.
+2. **Every host, in nixpkgs:** `home/dot_local/share/devbox/global/default/devbox.json.tmpl`.
+3. **Every host, Mac GUI app, not in nixpkgs, no cached nix binary, or a vendor companion of a
+   Homebrew package:** `home/dot_config/homebrew/Brewfile.tmpl`.
+4. **One project:** that project's own `devbox.json`, via `devbox add`.
+
+After editing either template, run `pkg-up`. Both templates open with this same list.
 
 ### AI Harness Launchers
 
