@@ -168,8 +168,7 @@ speculative complexity worth skipping.
 `home/dot_local/share/devbox/global/default/devbox.json.tmpl` renders
 `~/.local/share/devbox/global/default/devbox.json`, and `home/dot_config/homebrew/Brewfile.tmpl`
 renders `~/.config/homebrew/Brewfile`. Every host gets exactly what they declare; conditional
-packages (kubernetes, terraform, rust, cloud CLIs) follow data flags in
-`~/.config/chezmoi/chezmoi.toml`.
+packages (kubernetes, rust, cloud CLIs) follow data flags in `~/.config/chezmoi/chezmoi.toml`.
 
 ```bash
 pkg-up      # pull the repo, chezmoi apply, then brew-up and gbox-up
