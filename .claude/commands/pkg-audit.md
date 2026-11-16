@@ -53,7 +53,7 @@ Run in parallel:
 
 Read both source files:
 
-- `home/dot_local/share/devbox/global/default/modify_devbox.json.tmpl`
+- `home/dot_local/share/devbox/global/default/devbox.json.tmpl`
 - `home/dot_config/homebrew/Brewfile.tmpl`
 
 Parse which packages are declared. In both files, note which are inside conditional blocks and
@@ -61,17 +61,17 @@ cross-reference with `chezmoi data` to determine if those conditionals are activ
 
 ### Step 3: Find untracked installs
 
-- devbox packages in `devbox global list` but absent from `modify_devbox.json.tmpl` → untracked
-  devbox install
+- devbox packages in `devbox global list` but absent from `devbox.json.tmpl` and from
+  `~/.config/local/devbox/plugin.json` → untracked devbox install (it would not survive the next
+  `chezmoi apply`)
 - Homebrew formulae in `brew list --formula` but absent from `Brewfile.tmpl` → untracked Homebrew
   install
 - Homebrew casks in `brew list --cask` but absent from `Brewfile.tmpl` → untracked cask install
 
-An untracked install is not automatically a mistake. The source files are the shared baseline every
-host gets; a package meant for one host only is installed directly (`devbox global add`,
-`brew install`) and stays out of them on purpose. The devbox modify script merges, so host-local
-devbox installs survive `chezmoi apply`. Ask the user which untracked installs are intentionally
-host-local before recommending they be added or removed.
+The templates are the shared baseline every host gets. A devbox package meant for one host belongs
+in `~/.config/local/devbox/plugin.json`, which is host-local and not in this repo. Homebrew has no
+host-local file, so an untracked Homebrew install may be deliberate. Ask the user which untracked
+installs are meant for this host only before recommending they be added or removed.
 
 Also check that no package is declared in both source files. `chezmoi apply` installs both copies
 and Homebrew's `bin` shadows devbox's. `bin/brew-devbox-overlap` lists Homebrew formulae whose
@@ -108,25 +108,23 @@ Three sections:
 
 For each confirmed fix:
 
-- Shared baseline, unconditional: use the wrappers, which edit the template, apply, install, and
-  roll the template back if the install fails — `gbox-add`/`gbox-rm` for devbox,
-  `brew-add`/`brew-rm` (`--cask` for casks) for Homebrew
-- Shared baseline, behind a conditional: edit
-  `home/dot_local/share/devbox/global/default/modify_devbox.json.tmpl` (add
-  `{{- $pkgs = append $pkgs "name@latest" -}}` inside the conditional) or
-  `home/dot_config/homebrew/Brewfile.tmpl` directly
+- Shared baseline: edit `home/dot_local/share/devbox/global/default/devbox.json.tmpl` (the `$pkgs`
+  list, or `{{- $pkgs = append $pkgs "name@latest" -}}` inside a conditional) or
+  `home/dot_config/homebrew/Brewfile.tmpl`
+- This host only (devbox): add it to the `packages` array in `~/.config/local/devbox/plugin.json`
+  and run `devbox global install`
 - Removing an undeclared Homebrew install: `brew-prune` lists them, `brew-prune --force` removes
   them all — confirm first that none are intentionally host-local
 
-After direct template edits, remind the user to run `chezmoi apply`; `brew-check` confirms the
-Brewfile is satisfied.
+After template edits, remind the user to run `pkg-up`; `brew-check` confirms the Brewfile is
+satisfied.
 
 Never edit live files. All edits go to the chezmoi source in this repo.
 
 ## Notes
 
-- `modify_devbox.json.tmpl`: `append` takes exactly two args — `append $list "single-item"`. Use
-  `@latest` for all packages unless pinned.
+- `devbox.json.tmpl`: `append` takes exactly two args — `append $list "single-item"`. Use `@latest`
+  for all packages unless pinned.
 - `Brewfile.tmpl`: the `azure/functions` tap must be declared before
   `azure/functions/azure-functions-core-tools@4`.
 - A package missing from `devbox global list` may just be behind a false conditional — check

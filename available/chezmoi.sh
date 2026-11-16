@@ -19,3 +19,12 @@ alias cm-push='pushd $(chezmoi source-path) >/dev/null && \
 alias cm-status='pushd $(chezmoi source-path) >/dev/null && \
     git status -sb && \
     popd >/dev/null'
+
+# Updates everything: pulls the dotfiles, applies them, then updates Homebrew and devbox global
+# where each exists.
+pkg-up() {
+    chezmoi git -- pull --ff-only \
+        && chezmoi apply \
+        && { ! command -v brew-up >/dev/null 2>&1 || brew-up; } \
+        && { ! command -v gbox-up >/dev/null 2>&1 || gbox-up; }
+}

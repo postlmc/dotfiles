@@ -163,32 +163,26 @@ Only the context-less column misses devbox and brew, and launching agents that w
 that changes, revisit — but adding brittle static devbox paths to guard a case you do not hit is
 speculative complexity worth skipping.
 
-### Managing Devbox Global Packages
+### Managing Packages
 
-`~/.local/share/devbox/global/default/devbox.json` is managed via a chezmoi modify script rather
-than a regular template. Devbox reformats this file in its own style whenever it runs, which would
-cause format drift on every `chezmoi apply`. The modify script outputs via `jq`, which matches
-devbox's formatting, so the two stay in sync.
-
-Use the `gbox-*` wrappers in `available/devbox.sh` for all package changes. They update the modify
-script source first, then reconcile the live environment (the devbox operation plus `chezmoi apply`)
-so the source and the live file stay in sync:
+`home/dot_local/share/devbox/global/default/devbox.json.tmpl` renders
+`~/.local/share/devbox/global/default/devbox.json`, and `home/dot_config/homebrew/Brewfile.tmpl`
+renders `~/.config/homebrew/Brewfile`. Every host gets exactly what they declare; conditional
+packages (kubernetes, terraform, rust, cloud CLIs) follow data flags in
+`~/.config/chezmoi/chezmoi.toml`.
 
 ```bash
-gbox-add ripgrep          # adds ripgrep@latest — @latest is appended automatically
-gbox-add kubectl@1.30     # adds a pinned version
-gbox-rm ripgrep           # removes, stripping @version automatically
-gbox-up                   # updates all packages and re-normalizes devbox.json format
-gbox-ls                   # lists currently installed global packages
+pkg-up      # pull the repo, chezmoi apply, then brew-up and gbox-up
+gbox-up     # devbox global update, refresh the shell, collect garbage
+brew-up     # brew update, install what the Brewfile adds, upgrade, clean up
+gbox-ls     # list installed global devbox packages
 ```
 
-**Conditional packages** (kubernetes tooling, terraform, rust/rustup) are controlled by
-`~/.config/chezmoi/chezmoi.toml` data flags and must be added or removed by editing the modify
-script directly: `home/dot_local/share/devbox/global/default/modify_devbox.json.tmpl`
+To change a shared package, edit the template and run `pkg-up`.
 
-**Host-specific packages** that shouldn't appear on every machine belong in the local devbox plugin
-at `~/.config/local/devbox`, which is outside chezmoi's management and included via the `include`
-directive in `devbox.json`.
+**Host-specific devbox packages** go in `~/.config/local/devbox/plugin.json`, a local devbox plugin
+outside chezmoi that `devbox.json` includes. Add the package to its `packages` array and run
+`devbox global install`.
 
 ### AI Harness Launchers
 

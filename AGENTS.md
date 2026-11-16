@@ -37,8 +37,8 @@ on the MacBook. Each owns its platform's side of things.
 
 Shared files — this one, `README.md`, `mklinks.sh`, `dot_zshrc`/`dot_bashrc`,
 `available/ssh-agent.sh`, `DECISIONS.md`, and the OS-conditional blocks inside `Brewfile.tmpl` and
-`modify_devbox.json.tmpl` — get edited by either instance, but only the block or line that actually
-needs to change; add a branch rather than restructure a shared one.
+`devbox.json.tmpl` — get edited by either instance, but only the block or line that actually needs
+to change; add a branch rather than restructure a shared one.
 
 Work happens on short-lived branches, never directly on `main`:
 
@@ -106,9 +106,8 @@ Project `.envrc` files should use these layouts rather than raw `eval "$(devbox 
 
 ## Package management: devbox vs Homebrew
 
-devbox global (`home/dot_local/share/devbox/global/default/modify_devbox.json.tmpl`) is the primary
-package manager; Homebrew is minimized. A package stays on Homebrew only when at least one of these
-holds:
+devbox global (`home/dot_local/share/devbox/global/default/devbox.json.tmpl`) is the primary package
+manager; Homebrew is minimized. A package stays on Homebrew only when at least one of these holds:
 
 1. It's a Mac GUI app (cask) — devbox/nix doesn't manage these.
 2. It isn't available in nixpkgs at all.
@@ -118,28 +117,29 @@ holds:
 4. A vendor ships it as supporting tooling for another Homebrew-managed package — e.g. `kubelogin`,
    which Microsoft expects alongside the Azure CLI.
 
-Use `gbox-add`/`gbox-rm` (defined in `available/devbox.sh`) to add or remove global devbox packages,
-and `brew-add`/`brew-rm` (`available/homebrew.sh`, `--cask` for casks) for Homebrew. Both pairs edit
-the chezmoi template first, then apply and install, rolling the template back if the package manager
-fails — so the source and the live install never diverge. They only handle the unconditional
-sections; edit the template directly for packages behind a conditional (azure, kubernetes, etc.).
+Project tools belong in that project's own `devbox.json`, not in either template.
 
-These wrappers manage the **shared baseline only** — the list every host gets on `chezmoi apply`.
-For a package that should live on just one host, skip the wrappers and use the package manager
-directly instead: `brew install <pkg>` for Homebrew, or `devbox global add`/`devbox global rm` for
-devbox. Homebrew has always tolerated this — `brew bundle` only ever adds, so an undeclared install
-just sits there (though `brew-prune --force` would still remove it; there's no exceptions-file
-mechanism for Homebrew yet, so treat that command with care if you're relying on host-local
-installs). devbox didn't, until the modify script started merging instead of replacing `packages` —
-see the comment above `gbox-add` in `available/devbox.sh` for how that merge works and why a plain
-`devbox global add`/`rm` is durable now instead of getting silently reverted on the next apply.
+Both templates are the shared baseline: every host gets exactly what they render. To add or remove a
+shared package, edit the template and run `pkg-up` (or `chezmoi apply` followed by `gbox-up` or
+`brew-up`). `devbox.json.tmpl` is a plain template, so a `devbox global add` or `rm` made outside it
+is reverted on the next apply.
+
+A package for one host only goes in that host's `~/.config/local/devbox/plugin.json`, outside
+chezmoi. `devbox.json` includes that directory as a local plugin, and devbox installs the plugin's
+`packages` along with the global list. `run_once_init-devbox-local.sh.tmpl` creates an empty one on
+first apply. Homebrew has no equivalent: a host-only `brew install` sits outside the Brewfile, and
+`brew-prune --force` would remove it.
+
+`pkg-up` (`available/chezmoi.sh`) is the one update command: it pulls the repo with `--ff-only`,
+applies, then runs `brew-up` and `gbox-up` where each exists. `brew-up` runs `brew bundle install`,
+so a new Brewfile entry gets installed without a separate step.
 
 Homebrew drift needs active pruning: `brew bundle` only ever *adds*, so deleting a Brewfile line
 never uninstalls anything. `brew-prune` shows what is installed but undeclared (`--force` to
-actually remove it), `brew-check` verifies the Brewfile is satisfied, and `brew-sync` installs what
-is missing. Run `bin/brew-devbox-overlap` periodically to find Homebrew formulas whose binaries are
-now also provided by devbox global; anything that overlaps and isn't covered by the exceptions above
-should migrate off Homebrew.
+actually remove it), and `brew-check` verifies the Brewfile is satisfied. Run
+`bin/brew-devbox-overlap` periodically to find Homebrew formulas whose binaries are now also
+provided by devbox global; anything that overlaps and isn't covered by the exceptions above should
+migrate off Homebrew.
 
 The two templates must never declare the same package. To check, render both and compare base names
 — this is the failure mode that keeps recurring, because `chezmoi apply` faithfully reinstalls both
