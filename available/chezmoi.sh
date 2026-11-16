@@ -10,12 +10,6 @@ alias cm-sync='pushd $(chezmoi source-path) >/dev/null && \
     chezmoi apply && \
     popd >/dev/null'
 
-alias cm-push='pushd $(chezmoi source-path) >/dev/null && \
-    git add -A && \
-    git diff --cached --quiet || git commit -m "Update managed dotfiles" && \
-    git push || true && \
-    popd >/dev/null'
-
 alias cm-status='pushd $(chezmoi source-path) >/dev/null && \
     git status -sb && \
     popd >/dev/null'
