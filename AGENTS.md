@@ -132,7 +132,8 @@ first apply. Homebrew has no equivalent: a host-only `brew install` sits outside
 
 `pkg-up` (`available/chezmoi.sh`) is the one update command: it pulls the repo with `--ff-only`,
 applies, then runs `brew-up` and `gbox-up` where each exists. `brew-up` runs `brew bundle install`,
-so a new Brewfile entry gets installed without a separate step.
+so a new Brewfile entry gets installed without a separate step. It refuses to run unless the repo is
+on `main`, so land or switch off a work branch before running it.
 
 Homebrew drift needs active pruning: `brew bundle` only ever *adds*, so deleting a Brewfile line
 never uninstalls anything. `brew-prune` shows what is installed but undeclared (`--force` to
