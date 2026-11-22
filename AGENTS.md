@@ -101,6 +101,10 @@ Load order:
 - `layout devbox` — activates a project devbox environment and restores Homebrew to PATH afterward
 - `layout dotenv` — loads `.env.<name>` selected by `.env.choice`, falls back to `.env`; reloads on
   change
+- `layout secretspec` — exports the secrets declared in `secretspec.toml` from its provider, using
+  the profile named in `.env.choice`; an unknown profile or missing required secret fails the load
+  instead of falling back. It passes no `--reason`, so secretspec's `require_reason` policy still
+  stops agent shells
 - `layout uv` — creates/activates a Python venv via uv
 
 Project `.envrc` files should use these layouts rather than raw `eval "$(devbox ...)"` calls.

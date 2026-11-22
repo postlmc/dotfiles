@@ -43,3 +43,15 @@ layout_dotenv() {
     watch_file .env.choice
     [[ -f "$env_file" ]] && dotenv "$env_file"
 }
+
+# Load the secrets declared in secretspec.toml from its provider, under the profile named in
+# .env.choice (secretspec's default profile without one). An unknown profile or a missing required
+# secret fails the load rather than falling back, so a production choice never runs on default
+# secrets. Combine with layout dotenv for non-secret settings. Use in .envrc as: layout secretspec
+layout_secretspec() {
+    local exports profile=()
+    watch_file secretspec.toml .env.choice
+    [[ -f .env.choice ]] && profile=(--profile "$(< .env.choice)")
+    exports=$(secretspec export --format shell --caller direnv "${profile[@]}" </dev/null) || return 1
+    eval "$exports"
+}
