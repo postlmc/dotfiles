@@ -50,8 +50,9 @@ Work happens on short-lived branches, never directly on `main`:
   instance pushed meanwhile.
 - Fast-forward into `main`, push immediately, delete the branch. No long-lived per-platform branches
   — those accumulate drift and turn every sync into one large merge instead of many small ones.
-- `main` has no branch protection on GitHub; treat that as a reason for more care around rebases and
-  pushes, not less.
+- `main` has a GitHub ruleset (`baseline`) that rejects force-pushes and deletion, so a pushed
+  commit can't be taken back with a reset. Check a change before pushing it. Undoing one means Scott
+  lifts the ruleset; don't add a revert commit instead.
 - If a rebase or merge ever produces a real conflict (not a clean fast-forward), stop and surface it
   to Scott rather than resolving it solo.
 
