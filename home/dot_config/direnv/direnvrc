@@ -24,6 +24,12 @@ layout_uv() {
 # so PATH_add restores it after devbox runs. Use in .envrc as: layout devbox
 layout_devbox() {
     eval "$(devbox shellenv --init-hook --install --no-refresh-alias)"
+    # Since devbox 0.14.0 every project env includes nixpkgs' darwin stdenv, which points
+    # DEVELOPER_DIR and SDKROOT at a nix apple-sdk. xcrun honors DEVELOPER_DIR, so the /usr/bin stubs
+    # (git, etc.) fail: the nix SDK lacks those tools, and the path is often gone entirely because
+    # the env isn't a GC root and devbox's cached env survives nix-collect-garbage. Unsetting both
+    # falls back to the Xcode/CLT SDK. https://github.com/jetify-com/devbox/issues/2566
+    unset DEVELOPER_DIR SDKROOT
     watch_file devbox.json devbox.lock
     [[ -n "${HOMEBREW_PREFIX}" && -d "${HOMEBREW_PREFIX}/bin" && ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]] && \
         PATH_add "${HOMEBREW_PREFIX}/bin"

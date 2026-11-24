@@ -98,7 +98,9 @@ Load order:
 
 `home/dot_config/direnv/direnvrc` defines reusable layouts for `.envrc` files:
 
-- `layout devbox` — activates a project devbox environment and restores Homebrew to PATH afterward
+- `layout devbox` — activates a project devbox environment, restores Homebrew to PATH afterward, and
+  unsets the `DEVELOPER_DIR` and `SDKROOT` that point at nix's apple-sdk
+  ([devbox#2566](https://github.com/jetify-com/devbox/issues/2566))
 - `layout dotenv` — loads `.env.<name>` selected by `.env.choice`, falls back to `.env`; reloads on
   change
 - `layout secretspec` — exports the secrets declared in `secretspec.toml` from its provider, using
