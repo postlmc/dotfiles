@@ -52,7 +52,6 @@ done
 
 # Home PATH additions
 [[ -d "${HOME}/.local/bin" ]] && prepend_path PATH ${HOME}/.local/bin
-[[ -d "${HOME}/bin" ]] && prepend_path PATH ${HOME}/bin
 
 if [[ -z "${ACTIVE_AGENT}" ]]; then
     # Plugins
