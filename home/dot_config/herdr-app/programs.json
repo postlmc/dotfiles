@@ -1,0 +1,8 @@
+{
+  "programs": {
+    "claude": { "run": ["direnv", "exec", ".", "claude"] },
+    "opencode": { "run": ["direnv", "exec", ".", "opencode"] },
+    "cursor": { "run": ["direnv", "exec", ".", "agent"] },
+    "copilot": { "run": ["direnv", "exec", ".", "copilot"] }
+  }
+}
