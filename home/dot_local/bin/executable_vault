@@ -1,0 +1,45 @@
+#!/bin/bash
+# vault: attach the encrypted sparse bundle when it isn't attached, eject it when it is.
+# diskutil asks for the passphrase itself; this script never reads, passes or stores it.
+set -euo pipefail
+
+bundle="${VAULT_BUNDLE:-${HOME}/Vault.sparsebundle}"
+
+# Prints "<image's whole-disk device><TAB><mount point>" when the image at $bundle is attached,
+# nothing otherwise. Matching hdiutil's image-path, not /Volumes/Vault, means another volume named
+# Vault can't pass for this one.
+attached() {
+    local info n i j m path dev mp
+    info=$(hdiutil info -plist)
+    n=$(plutil -extract images raw -o - - <<<"$info" 2>/dev/null) || return 0
+    for ((i = 0; i < n; i++)); do
+        path=$(plutil -extract "images.$i.image-path" raw -o - - <<<"$info")
+        [[ "$path" -ef "$bundle" ]] || continue
+        dev=$(plutil -extract "images.$i.system-entities.0.dev-entry" raw -o - - <<<"$info")
+        m=$(plutil -extract "images.$i.system-entities" raw -o - - <<<"$info")
+        mp=""
+        for ((j = 0; j < m; j++)); do
+            mp=$(plutil -extract "images.$i.system-entities.$j.mount-point" raw -o - - \
+                <<<"$info" 2>/dev/null) && break
+        done
+        printf '%s\t%s\n' "$dev" "$mp"
+        return 0
+    done
+}
+
+main() {
+    local dev mp
+    [[ -d "$bundle" ]] || { echo "vault: no bundle at $bundle" >&2; exit 1; }
+    if IFS=$'\t' read -r dev mp < <(attached) && [[ -n "$dev" ]]; then
+        diskutil eject "$dev" >/dev/null
+        echo "vault: ejected ${mp:-$dev}"
+    else
+        diskutil image attach "$bundle" >/dev/null
+        IFS=$'\t' read -r dev mp < <(attached) || true
+        echo "vault: mounted at ${mp:-nothing (attached as ${dev:-unknown})}"
+    fi
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi
