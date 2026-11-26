@@ -1,0 +1,23 @@
+# Login shells that aren't interactive never read .zshrc, and Herdr.app and herdr-core take the
+# PATH for every program they start from one. Load the PATH steps from .zshrc here so those programs
+# find devbox global tools (rtk) and module paths too. Interactive shells skip this and get
+# everything from .zshrc; keep the steps below in step with its.
+[[ -o interactive ]] && return
+
+whence -w /usr/local/bin/devbox >/dev/null 2>&1 && \
+    eval "$(/usr/local/bin/devbox global shellenv --init-hook)"
+
+if [[ "$OSTYPE" == darwin* ]]; then
+    whence -w /opt/homebrew/bin/brew >/dev/null 2>&1 && \
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ "$OSTYPE" == linux* ]]; then
+    whence -w /var/home/linuxbrew/.linuxbrew/bin/brew >/dev/null 2>&1 && \
+        eval "$(/var/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+
+CHEZMOI_SOURCE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
+for CFG in ${CHEZMOI_SOURCE_DIR}/enabled/??-*; do
+    [[ -f "$CFG" ]] && . ${CFG}
+done
+
+[[ -d "${HOME}/.local/bin" ]] && prepend_path PATH ${HOME}/.local/bin
