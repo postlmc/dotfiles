@@ -1,4 +1,7 @@
 #!/bin/bash
+# /Volumes/Vault is the encrypted sparse bundle (bin/vault). On the MacBook Claude Code is denied
+# its contents; elsewhere the same rules are stripped back out.
+deny_vault={{ if eq .chezmoi.hostname "unrecognized-device" }}1{{ else }}0{{ end }}
 input=$(cat)
 [ -z "$input" ] && input="{}"
 
@@ -10,7 +13,7 @@ command -v rtk >/dev/null 2>&1 && rtk_present=1
 
 # ACTIVE_AGENT trips the minimal agent-shell branch in .zshrc/.bashrc for CC command execution.
 # md-format-hook reflows and lints every Markdown file Claude writes; rebuilt idempotently like rtk.
-printf '%s' "$input" | jq --arg home "$HOME" --argjson rtk "$rtk_present" '
+printf '%s' "$input" | jq --arg home "$HOME" --argjson rtk "$rtk_present" --argjson vault "$deny_vault" '
   . * {
     "env": { "ACTIVE_AGENT": "claude-code" },
     "statusLine": { "type": "command", "command": ($home + "/.claude/statusline-command.sh") },
@@ -25,4 +28,8 @@ printf '%s' "$input" | jq --arg home "$HOME" --argjson rtk "$rtk_present" '
   | .hooks.PostToolUse = ((.hooks.PostToolUse // []) | map(select(.hooks[0].command != $mdhook)))
   | .hooks.PostToolUse += [ { "matcher": "Write|Edit|MultiEdit", "hooks": [ { "type": "command", "command": $mdhook } ] } ]
   | if .hooks == {} then del(.hooks) else . end
+  | ["Read(//Volumes/Vault/**)", "Edit(//Volumes/Vault/**)"] as $vaultrules
+  | .permissions.deny = (((.permissions.deny // []) - $vaultrules) + (if $vault == 1 then $vaultrules else [] end))
+  | if (.permissions.deny | length) == 0 then del(.permissions.deny) else . end
+  | if .permissions == {} then del(.permissions) else . end
 '
